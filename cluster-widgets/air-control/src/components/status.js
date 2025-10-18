@@ -21,6 +21,12 @@ export function createStatusElement() {
         className: 'w-54 h-54',
     });
 
+    var autoModeLabel = span({
+        src: autoModeIcon(isAutoOn ? '#2563eb' : '#9ca3af'),
+        children: ['AUTO'],
+    });
+
+
     var statusElement = div({
         className: 'status-element',
         children: [

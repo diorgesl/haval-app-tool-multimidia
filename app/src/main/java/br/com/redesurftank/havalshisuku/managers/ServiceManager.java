@@ -58,6 +58,7 @@ import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType;
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys;
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType;
 import br.com.redesurftank.havalshisuku.models.SteeringWheelCustomActionType;
+import br.com.redesurftank.havalshisuku.models.MainUiManager;
 import br.com.redesurftank.havalshisuku.utils.FridaUtils;
 import br.com.redesurftank.havalshisuku.utils.ShizukuUtils;
 import rikka.shizuku.Shizuku;
@@ -187,6 +188,10 @@ public class ServiceManager {
     private int clusterCardView = 0;
     private int steeringWheelAcControlTypeIndex = 0;
     private SteeringWheelAcControlType steeringWheelAcControlType = SteeringWheelAcControlType.FAN_SPEED;
+    private int currentScreenId = MainUiManager.SCREEN_ID_MAIN_MENU;
+    private final String[] menuItems = {"Opção 1", "Ar condicionado", "Opção 3", "Opção 4", "Opção 5"};
+    private int currentMenuItemIndex = 0;
+
 
     private ServiceManager() {
         dataChangedListeners = new ArrayList<>();
@@ -368,85 +373,7 @@ public class ServiceManager {
                     }
                     if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AC_CONTROL_VIA_STEERING_WHEEL.getKey(), false)) {
                         if (clusterCardView == 1) {
-                            switch (keyEvent.getKeyCode()) {
-                                case 1028:
-                                    steeringWheelAcControlTypeIndex++;
-                                    steeringWheelAcControlTypeIndex = steeringWheelAcControlTypeIndex % SteeringWheelAcControlType.values().length;
-                                    steeringWheelAcControlType = SteeringWheelAcControlType.values()[steeringWheelAcControlTypeIndex];
-                                    dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
-                                    sharedPreferences.edit().putString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), steeringWheelAcControlType.name()).apply();
-                                    break;
-                                case 1024:
-                                case 1025: {
-                                    switch (steeringWheelAcControlType) {
-                                        case TEMPERATURE: {
-                                            var currentTemperature = getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
-                                            if (currentTemperature != null) {
-                                                float temperature = Float.parseFloat(currentTemperature);
-                                                if (keyEvent.getKeyCode() == 1024) {
-                                                    temperature += 0.5f;
-                                                    if (temperature > 30.0f)
-                                                        temperature = 30.0f;
-                                                } else {
-                                                    temperature -= 0.5f;
-                                                    if (temperature < 16.0f)
-                                                        temperature = 16.0f;
-                                                }
-                                                updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), String.valueOf(temperature));
-                                            }
-                                        }
-                                        break;
-                                        case FAN_SPEED: {
-                                            var currentFanSpeed = getUpdatedData(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
-                                            if (currentFanSpeed != null) {
-                                                int speed = Integer.parseInt(currentFanSpeed);
-                                                if (keyEvent.getKeyCode() == 1024) {
-                                                    speed++;
-                                                    if (speed > 7)
-                                                        speed = 7;
-                                                } else {
-                                                    speed--;
-                                                    if (speed < 1)
-                                                        speed = 1;
-                                                }
-                                                updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(speed));
-                                            }
-                                        }
-                                        break;
-                                        case POWER: {
-                                            var currentPowerMode = getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue());
-                                            if (currentPowerMode != null) {
-                                                boolean powerMode = currentPowerMode.equals("1");
-                                                powerMode = !powerMode;
-                                                updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), powerMode ? "1" : "0");
-                                            }
-                                        }
-                                    }
-                                }
-                                break;
-                                case 1030: {
-                                    if (clusterCardView == 1) {
-                                        var currentCycleMode = getUpdatedData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue());
-                                        if (currentCycleMode != null) {
-                                            boolean cycleMode = currentCycleMode.equals("1");
-                                            cycleMode = !cycleMode;
-                                            updateData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue(), cycleMode ? "1" : "0");
-                                        }
-                                    }
-                                }
-                                break;
-                                case 1039: {
-                                    if (clusterCardView == 1) {
-                                        var currentAcAutoMode = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
-                                        if (currentAcAutoMode != null) {
-                                            boolean acAutoMode = currentAcAutoMode.equals("1");
-                                            acAutoMode = !acAutoMode;
-                                            updateData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), acAutoMode ? "1" : "0");
-                                        }
-                                    }
-                                }
-                                break;
-                            }
+                            MainUiManager.getInstance().handleGeneralKeyEvents(keyEvent);
                         }
                     }
                 }

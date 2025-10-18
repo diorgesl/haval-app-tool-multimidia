@@ -22,11 +22,11 @@ import br.com.redesurftank.havalshisuku.models.CarConstants
 import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType
-import kotlin.collections.contains
+import br.com.redesurftank.havalshisuku.models.MainUiManager
 
 class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjector(outerContext, display) {
     private val preferences: SharedPreferences = App.getDeviceProtectedContext().getSharedPreferences("haval_prefs", Context.MODE_PRIVATE)
-    private var webViewAc: WebView? = null
+    private var webView: WebView? = null
     private val webViewsLoaded = mutableMapOf<WebView, Boolean>()
     private val pendingJsQueues = mutableMapOf<WebView, MutableList<String>>()
     private lateinit var root: FrameLayout;
@@ -42,6 +42,9 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
             }
         }
     }
+
+    private var currentScreen = MainUiManager.SCREEN_ID_MAIN_MENU // Start from the Main Menu screen
+    private var focusedMainMenuItem = MainMenuItem.OPTION_1 // Starts with first option highlighted
 
     private fun shouldShowProjector(): Boolean {
         return preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, false) && preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false)
@@ -82,27 +85,27 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
             ensureUi {
                 when (key) {
                     CarConstants.CAR_HVAC_FAN_SPEED.value -> {
-                        evaluateJsIfReady(webViewAc, "control('fan', $value)")
+                        evaluateJsIfReady(webView, "control('fan', $value)")
                     }
 
                     CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.value -> {
-                        evaluateJsIfReady(webViewAc, "control('temp', $value)")
+                        evaluateJsIfReady(webView, "control('temp', $value)")
                     }
 
                     CarConstants.CAR_HVAC_POWER_MODE.value -> {
-                        evaluateJsIfReady(webViewAc, "control('power', $value)")
+                        evaluateJsIfReady(webView, "control('power', $value)")
                     }
 
                     CarConstants.CAR_HVAC_CYCLE_MODE.value -> {
-                        evaluateJsIfReady(webViewAc, "control('recycle', $value)")
+                        evaluateJsIfReady(webView, "control('recycle', $value)")
                     }
 
                     CarConstants.CAR_HVAC_AUTO_ENABLE.value -> {
-                        evaluateJsIfReady(webViewAc, "control('auto', $value)")
+                        evaluateJsIfReady(webView, "control('auto', $value)")
                     }
 
                     CarConstants.CAR_HVAC_ANION_ENABLE.value -> {
-                        evaluateJsIfReady(webViewAc, "control('aion', $value)")
+                        evaluateJsIfReady(webView, "control('aion', $value)")
                     }
 
                     else -> {}
@@ -116,10 +119,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     ServiceManagerEventType.CLUSTER_CARD_CHANGED -> {
                         val card = args[0] as Int
                         circularView.isVisible = card != 0
-                        webViewAc?.isVisible = false;
+                        webView?.isVisible = false;
                         when (card) {
                             1 -> {
-                                showAcControlView()
+                                showWebView()
                             }
 
                             else -> {
@@ -131,20 +134,34 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL -> {
                         when (args[0] as SteeringWheelAcControlType) {
                             SteeringWheelAcControlType.FAN_SPEED -> {
-                                evaluateJsIfReady(webViewAc, "focus('fan')")
+                                evaluateJsIfReady(webView, "focus('fan')")
                             }
 
+
                             SteeringWheelAcControlType.TEMPERATURE -> {
-                                evaluateJsIfReady(webViewAc, "focus('temp')")
+                                evaluateJsIfReady(webView, "focus('temp')")
                             }
 
                             SteeringWheelAcControlType.POWER -> {
-                                evaluateJsIfReady(webViewAc, "focus('power')")
+                                evaluateJsIfReady(webView, "focus('power')")
                             }
                         }
                     }
+
+                    ServiceManagerEventType.MENU_ITEM_NAVIGATION -> {
+                        val item = args[0] as Int
+                        evaluateJsIfReady(webView, "focus('${MainUiManager.menuItems[item].id}')")
+                    }
+
+                    ServiceManagerEventType.SHOW_SCREEN -> {
+                        val screenId = args[0] as Int
+                        evaluateJsIfReady(webView, "focus('${MainUiManager.getInstance().currentScreen.jsName}')")
+                    }
+
                 }
             }
+
+
         }
 
         root.isVisible = shouldShowProjector() && ServiceManager.getInstance().isMainScreenOn
@@ -152,8 +169,8 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupAcControlView(circularView: FrameLayout) {
-        if (webViewAc == null) {
-            webViewAc = WebView(context).apply {
+        if (webView == null) {
+            webView = WebView(context).apply {
                 layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
@@ -163,7 +180,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         super.onPageFinished(view, url)
                         view?.let {
                             webViewsLoaded[it] = true
-                            updateValuesWebViewAc()
+                            updateValuesWebView()
                             val queue = pendingJsQueues[it] ?: return
                             queue.forEach { js -> it.evaluateJavascript(js, null) }
                             pendingJsQueues.remove(it)
@@ -172,33 +189,33 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                 }
                 loadDataWithBaseURL(null, readRawHtml(context), "text/html", "UTF-8", null)
             }
-            circularView.addView(webViewAc)
-            webViewAc?.isVisible = false;
+            circularView.addView(webView)
+            webView?.isVisible = false;
         }
     }
 
-    private fun showAcControlView() {
-        webViewAc?.isVisible = true
-        webViewAc?.let {
+    private fun showWebView() {
+        webView?.isVisible = true
+        webView?.let {
             if (webViewsLoaded[it] == true) {
-                updateValuesWebViewAc()
+                updateValuesWebView()
             }
         }
     }
 
-    private fun updateValuesWebViewAc() {
+    private fun updateValuesWebView() {
         val currentTemp = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.value)
         val currentFanSpeed = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_FAN_SPEED.value)
         val currentAcState = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_POWER_MODE.value)
         val currentRecycleMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_CYCLE_MODE.value)
         val currentAutoMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_AUTO_ENABLE.value)
 
-        evaluateJsIfReady(webViewAc, "control('temp', $currentTemp)")
-        evaluateJsIfReady(webViewAc, "control('fan', $currentFanSpeed)")
-        evaluateJsIfReady(webViewAc, "control('power', $currentAcState)")
-        evaluateJsIfReady(webViewAc, "control('recycle', $currentRecycleMode)")
-        evaluateJsIfReady(webViewAc, "control('auto', $currentAutoMode)")
-        evaluateJsIfReady(webViewAc, "focus('fan')")
+        evaluateJsIfReady(webView, "control('temp', $currentTemp)")
+        evaluateJsIfReady(webView, "control('fan', $currentFanSpeed)")
+        evaluateJsIfReady(webView, "control('power', $currentAcState)")
+        evaluateJsIfReady(webView, "control('recycle', $currentRecycleMode)")
+        evaluateJsIfReady(webView, "control('auto', $currentAutoMode)")
+        evaluateJsIfReady(webView, "focus('fan')")
     }
 
     private fun evaluateJsIfReady(webView: WebView?, js: String) {
@@ -226,4 +243,70 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
             root.isVisible = true;
         }
     }
+
+    private fun focusMainMenuItem(item: MainMenuItem) {
+        focusedMainMenuItem = item
+        // O JS espera o nome em minúsculo: "option_1", "option_2", etc.
+        evaluateJsIfReady(webView, "focusMainMenuItem('${item.name.lowercase()}')")
+    }
+
+    private fun handleMainMenuKey(control: SteeringWheelAcControlType) {
+        val items = MainMenuItem.values()
+        val currentIndex = items.indexOf(focusedMainMenuItem)
+
+        when (control) {
+            SteeringWheelAcControlType.FAN_SPEED -> { // Mapeado para DOWN
+                val nextIndex = (currentIndex + 1) % items.size
+                focusMainMenuItem(items[nextIndex])
+            }
+            SteeringWheelAcControlType.TEMPERATURE -> { // Mapeado para UP
+                val nextIndex = if (currentIndex - 1 < 0) items.size - 1 else currentIndex - 1
+                focusMainMenuItem(items[nextIndex])
+            }
+            SteeringWheelAcControlType.POWER -> { // Mapeado para OK
+                when (focusedMainMenuItem) {
+                    MainMenuItem.OPTION_2 -> {
+                        // Mudar para a tela do ar condicionado
+                        currentScreen = MainUiManager.SCREEN_ID_AC_CONTROL
+                        evaluateJsIfReady(webView, "showScreen('ac_control')")
+                        // Foca um item padrão do AC e atualiza os valores
+                        showWebView()
+                    }
+                    else -> {
+                        // Ação para outras opções do menu
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleAcControlKey(control: SteeringWheelAcControlType) {
+        // Esta é a lógica que você já tinha, mas agora em sua própria função.
+        when (control) {
+            SteeringWheelAcControlType.FAN_SPEED -> {
+                evaluateJsIfReady(webView, "focus('fan')")
+            }
+            SteeringWheelAcControlType.TEMPERATURE -> {
+                evaluateJsIfReady(webView, "focus('temp')")
+            }
+            SteeringWheelAcControlType.POWER -> {
+                evaluateJsIfReady(webView, "focus('power')")
+                // Aqui você pode adicionar lógica para, por exemplo,
+                // voltar ao menu principal se a tecla POWER for pressionada novamente.
+            }
+        }
+        // Você precisará adicionar a lógica de "entrar em modo de edição" e
+        // "mudar valor com up/down" que discutimos anteriormente.
+        // O seu enum atual não parece distinguir entre "focar" e "mudar valor".
+    }
+
+}
+
+// Define os itens do nosso novo menu principal
+enum class MainMenuItem(val displayName: String) {
+    OPTION_1("Opção 1"),
+    OPTION_2("Opção 2 (Ar Condicionado)"),
+    OPTION_3("Opção 3"),
+    OPTION_4("Opção 4"),
+    OPTION_5("Opção 5");
 }

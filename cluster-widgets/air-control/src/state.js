@@ -61,7 +61,16 @@ StateManager.prototype._notifyListeners = function(key, value) {
 
 // Create the state instance
 var stateManager = new StateManager({
-    focusArea: 'power',
+    // Main Menu state
+    screen: 'main_menu',
+    focusedMenuItem: 'option_3',
+    espStatus: 'ON',
+    drivingMode: 'Sport',
+    steerMode: 'Conforto',
+    regenMode: 'Normal',
+
+    // Ac screen states
+    focusArea: 'fan',
     temp: 25,
     fan: 1,
     power: 0,
