@@ -109,6 +109,27 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('aion', $value)")
                     }
 
+                    CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
+                        evaluateJsIfReady(webView, "control('espStatus', $value ? 1 : 'ON' : 'OFF')")
+                    }
+
+                    CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
+                        evaluateJsIfReady(webView, "control('evMode', $value)")
+                    }
+
+                    CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE.value -> {
+                        evaluateJsIfReady(webView, "control('drivingMode', $value)")
+                    }
+
+                    CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value -> {
+                        evaluateJsIfReady(webView, "control('steerMode', $value)")
+                    }
+
+                    CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value -> {
+                        evaluateJsIfReady(webView, "control('regenMode', $value)")
+                    }
+
+
                     else -> {}
                 }
             }
@@ -150,8 +171,8 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     }
 
                     ServiceManagerEventType.MENU_ITEM_NAVIGATION -> {
-                        val item = args[0] as Int
-                        //evaluateJsIfReady(webView, "focus('${MainUiManager.menuItems[item].id}')")
+                        val item = args[0] as String
+                        evaluateJsIfReady(webView, "focus('$item')")
                     }
 
                     ServiceManagerEventType.UPDATE_SCREEN -> {
