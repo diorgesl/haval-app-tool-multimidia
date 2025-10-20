@@ -102,7 +102,7 @@ public class MainMenu implements Screen {
 
             // Set default initial position as middle of the menu
             this.currentMenuItemIndex = menuItems.size() / 2;
-            serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
+            serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, currentMenuItemIndex);
 
         }
     }
@@ -114,13 +114,13 @@ public class MainMenu implements Screen {
                 if (currentMenuItemIndex < 0) {
                     currentMenuItemIndex = menuItems.size() - 1;
                 }
-                serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
+                serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, currentMenuItemIndex);
                 break;
 
             case DOWN: // Down
                 currentMenuItemIndex++;
                 currentMenuItemIndex = currentMenuItemIndex % menuItems.size();
-                serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
+                serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, currentMenuItemIndex);
                 break;
 
             case ENTER: // Enter
