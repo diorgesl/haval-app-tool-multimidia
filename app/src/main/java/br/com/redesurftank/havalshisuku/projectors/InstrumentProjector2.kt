@@ -23,6 +23,7 @@ import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType
 import br.com.redesurftank.havalshisuku.models.MainUiManager
+import br.com.redesurftank.havalshisuku.models.screens.Screen
 
 class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjector(outerContext, display) {
     private val preferences: SharedPreferences = App.getDeviceProtectedContext().getSharedPreferences("haval_prefs", Context.MODE_PRIVATE)
@@ -153,9 +154,9 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         //evaluateJsIfReady(webView, "focus('${MainUiManager.menuItems[item].id}')")
                     }
 
-                    ServiceManagerEventType.SHOW_SCREEN -> {
-                        val screenId = args[0] as Int
-                        //evaluateJsIfReady(webView, "focus('${MainUiManager.getInstance().currentScreen.jsName}')")
+                    ServiceManagerEventType.UPDATE_SCREEN -> {
+                        val screen = args[0] as Screen
+                        evaluateJsIfReady(webView, "focus('${screen.jsName}')")
                     }
 
                 }

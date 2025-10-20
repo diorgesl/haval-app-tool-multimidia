@@ -56,9 +56,9 @@ import br.com.redesurftank.havalshisuku.models.CarConstants;
 import br.com.redesurftank.havalshisuku.models.CarInfo;
 import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType;
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys;
-import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType;
 import br.com.redesurftank.havalshisuku.models.SteeringWheelCustomActionType;
 import br.com.redesurftank.havalshisuku.models.MainUiManager;
+import br.com.redesurftank.havalshisuku.models.screens.Screen;
 import br.com.redesurftank.havalshisuku.utils.FridaUtils;
 import br.com.redesurftank.havalshisuku.utils.ShizukuUtils;
 import rikka.shizuku.Shizuku;
@@ -186,11 +186,6 @@ public class ServiceManager {
     private boolean isClusterHeartbeatRunning = false;
     private int clusterHeartBeatCount = 0;
     private int clusterCardView = 0;
-    private int steeringWheelAcControlTypeIndex = 0;
-    private SteeringWheelAcControlType steeringWheelAcControlType = SteeringWheelAcControlType.FAN_SPEED;
-    private int currentScreenId = MainUiManager.SCREEN_ID_MAIN_MENU;
-    private final String[] menuItems = {"Opção 1", "Ar condicionado", "Opção 3", "Opção 4", "Opção 5"};
-    private int currentMenuItemIndex = 0;
 
 
     private ServiceManager() {
@@ -301,10 +296,7 @@ public class ServiceManager {
                         clusterCardView = whichCard;
                         dispatchServiceManagerEvent(ServiceManagerEventType.CLUSTER_CARD_CHANGED, clusterCardView);
                         if (whichCard == 1) {
-                            var lastAcConfig = sharedPreferences.getString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), SteeringWheelAcControlType.FAN_SPEED.name());
-                            steeringWheelAcControlType = SteeringWheelAcControlType.valueOf(Objects.requireNonNullElse(lastAcConfig, SteeringWheelAcControlType.FAN_SPEED.name()));
-                            steeringWheelAcControlTypeIndex = Arrays.asList(SteeringWheelAcControlType.values()).indexOf(steeringWheelAcControlType);
-                            dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
+                            MainUiManager.getInstance().updateScreen();
                         }
                         Log.w(TAG, "Cluster card changed: " + whichCard);
                     } else if (msgId == 134) {
@@ -354,6 +346,11 @@ public class ServiceManager {
                     Log.w(TAG, "ClusterService disconnected");
                 }
             };
+
+
+            // Initialize MainUiManager and respective menu management controls
+            MainUiManager.getInstance();
+
             context.bindService(clusterIntent, clusterServiceConnection, Context.BIND_AUTO_CREATE);
             Intent inputIntent = new Intent("com.beantechs.inputservice.service_init");
             inputIntent.setPackage("com.beantechs.inputservice");
@@ -371,9 +368,17 @@ public class ServiceManager {
                                 break;
                         }
                     }
-                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AC_CONTROL_VIA_STEERING_WHEEL.getKey(), false)) {
+                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_CUSTOM_MENU.getKey(), false)) {
                         if (clusterCardView == 1) {
-                            MainUiManager.getInstance().handleGeneralKeyEvents(keyEvent);
+                            Screen.Key key = null;
+                            switch (keyEvent.getKeyCode()) {
+                                case 1024: key = Screen.Key.UP; break;
+                                case 1025: key = Screen.Key.DOWN; break;
+                                case 1028: key = Screen.Key.ENTER; break;
+                                case 1030: key = Screen.Key.BACK; break;
+                                case 1039: key = Screen.Key.BACK_LONG; break;
+                            }
+                            if (key != null) MainUiManager.getInstance().handleGeneralKeyEvents(key);
                         }
                     }
                 }
@@ -1349,5 +1354,9 @@ public class ServiceManager {
         } catch (ClassNotFoundException | NoSuchMethodException e) {
             Log.w(TAG, Log.getStackTraceString(e));
         }
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
     }
 }

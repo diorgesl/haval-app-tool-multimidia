@@ -165,13 +165,20 @@
                       const newStatus = (currentStatus === 'ON') ? 'OFF' : 'ON';
                       console.log(`[AÇÃO] Alterando ESP de '${currentStatus}' para '${newStatus}'`);
                       setState('espStatus', newStatus);
+                  } else if (currentState.focusedMenuItem === 'option_2') {
+                      const modes = ['HEV', 'PHEV', 'EV'];
+                      const currentMode = stateManager.getState().evMode;
+                      const currentIndex = modes.indexOf(currentMode);
+                      const nextIndex = (currentIndex + 1) % modes.length;
+                      const newMode = modes[nextIndex];
+                      console.log(`[AÇÃO] Alterando Modo de '${currentMode}' para '${newMode}'`);
+                      setState('evMode', newMode);
                   } else if (currentState.focusedMenuItem === 'option_4') {
                       const modes = ['Normal', 'Eco', 'Sport'];
                       const currentMode = stateManager.getState().drivingMode;
                       const currentIndex = modes.indexOf(currentMode);
                       const nextIndex = (currentIndex + 1) % modes.length;
                       const newMode = modes[nextIndex];
-
                       console.log(`[AÇÃO] Alterando Modo de '${currentMode}' para '${newMode}'`);
                       setState('drivingMode', newMode);
                   } else if (currentState.focusedMenuItem === 'option_5') {
@@ -180,7 +187,6 @@
                       const currentIndex = modes.indexOf(currentMode);
                       const nextIndex = (currentIndex + 1) % modes.length;
                       const newMode = modes[nextIndex];
-
                       console.log(`[AÇÃO] Alterando Modo de Direcao de '${currentMode}' para '${newMode}'`);
                       setState('steerMode', newMode);
                   } else if (currentState.focusedMenuItem === 'option_6') {
@@ -189,7 +195,6 @@
                       const currentIndex = modes.indexOf(currentMode);
                       const nextIndex = (currentIndex + 1) % modes.length;
                       const newMode = modes[nextIndex];
-
                       console.log(`[AÇÃO] Alterando Modo de Regeneracao '${currentMode}' para '${newMode}'`);
                       setState('regenMode', newMode);
                   }

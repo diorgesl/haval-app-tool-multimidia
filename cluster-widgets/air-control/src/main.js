@@ -60,6 +60,7 @@ subscribe('espStatus', render);
 subscribe('drivingMode', render);
 subscribe('steerMode', render);
 subscribe('regenMode', render);
+subscribe('evMode', render);
 
 
 

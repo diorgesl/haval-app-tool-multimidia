@@ -63,11 +63,13 @@ StateManager.prototype._notifyListeners = function(key, value) {
 var stateManager = new StateManager({
     // Main Menu state
     screen: 'main_menu',
-    focusedMenuItem: 'option_3',
+    focusedMenuItem: 'option_4',
+
     espStatus: 'ON',
     drivingMode: 'Sport',
     steerMode: 'Conforto',
     regenMode: 'Normal',
+    evMode: 'HEV',
 
     // Ac screen states
     focusArea: 'fan',
