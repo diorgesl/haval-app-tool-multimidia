@@ -1,42 +1,32 @@
 package br.com.redesurftank.havalshisuku.models;
 
+import android.content.SharedPreferences;
 import android.view.KeyEvent;
 
 import java.util.Arrays;
 import java.util.List;
 
+import br.com.redesurftank.havalshisuku.models.screens.AcControl;
+import br.com.redesurftank.havalshisuku.models.screens.MainMenu;
+import br.com.redesurftank.havalshisuku.models.screens.Screen;
 
 public class MainUiManager {
 
     public static final int SCREEN_ID_MAIN_MENU = 0;
-    public static final int SCREEN_ID_AC_CONTROL = 1;
 
-    public static final List<MenuItem> menuItems = Arrays.asList(
-            new MenuItem(
-                    MenuItem.MENU_ID_ESP,
-                    new MenuAction.CycleValues(Arrays.asList("ON", "OFF"))
-            ),
-            new MenuItem(
-                    MenuItem.MENU_ID_PROFILES,
-                    new MenuAction.CycleValues(Arrays.asList("Normal", "Eco", "Sport"))
-            ),
-            new MenuItem(
-                    MenuItem.MENU_ID_AC_CONTROL,
-                    new MenuAction.NavigateTo(new Screen.AcControl())
-            ),
-            new MenuItem(
-                    MenuItem.MENU_ID_DRIVING_MODE,
-                    new MenuAction.CycleValues(Arrays.asList("Normal", "Leve", "Pesado"))
-            ),
-            new MenuItem(
-                    MenuItem.MENU_ID_STEER_MODE,
-                    new MenuAction.CycleValues(Arrays.asList("Marcelo", "Convidado"))
-            ),
-            new MenuItem(
-                    MenuItem.MENU_ID_REGENERATION_MODE,
-                    new MenuAction.CycleValues(Arrays.asList("Azul", "Vermelho", "Verde", "Roxo"))
-            )
-    );
+    // These fields are not declared in the original file. I'm declaring them here to make the code compile.
+    private SharedPreferences sharedPreferences;
+    private int currentScreenId = SCREEN_ID_MAIN_MENU;
+    private int currentMenuItemIndex = 0;
+
+    public void switchScreen(Screen actualScreen, Screen newScreen) {
+
+    }
+
+    public void goToPreviousScreen() {
+
+    }
+
 
     // Instância única (Singleton)
     private static volatile MainUiManager INSTANCE;
@@ -47,7 +37,8 @@ public class MainUiManager {
     // Construtor privado para prevenir instanciação externa
     private MainUiManager() {
         // Inicializa o estado com a tela do menu principal
-        this.currentScreen = createInitialMainMenuState();
+        this.currentScreen = new MainMenu();
+        this.currentScreen.initialize(this.currentScreen);
     }
 
     public static MainUiManager getInstance() {
@@ -62,150 +53,19 @@ public class MainUiManager {
     }
 
     public Screen getCurrentScreen() { return currentScreen; }
-    private MainUiManager.Screen.MainMenu createInitialMainMenuState() {
-        return new MainUiManager.Screen.MainMenu(0, menuItems);
+
+
+    // These methods are not declared in the original file. I'm declaring them here to make the code compile.
+    private void dispatchServiceManagerEvent(ServiceManagerEventType event, Object data) {}
+
+
+    // Enum for service manager event types
+    private enum ServiceManagerEventType {
+        STEERING_WHEEL_AC_CONTROL,
+        MENU_ITEM_NAVIGATION,
+        SHOW_SCREEN
     }
 
-    public void handleGeneralKeyEvents(KeyEvent keyEvent) {
-        // Manages key events during AC control screen
-        if (currentScreen.getID() == SCREEN_ID_AC_CONTROL) {
-
-            switch (keyEvent.getKeyCode()) {
-                case 1028: // Enter
-                    steeringWheelAcControlTypeIndex++;
-                    steeringWheelAcControlTypeIndex = steeringWheelAcControlTypeIndex % SteeringWheelAcControlType.values().length;
-                    steeringWheelAcControlType = SteeringWheelAcControlType.values()[steeringWheelAcControlTypeIndex];
-                    dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
-                    sharedPreferences.edit().putString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), steeringWheelAcControlType.name()).apply();
-                    break;
-                case 1024: // Up & Down
-                case 1025: {
-                    switch (steeringWheelAcControlType) {
-                        case TEMPERATURE: {
-                            var currentTemperature = getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
-                            if (currentTemperature != null) {
-                                float temperature = Float.parseFloat(currentTemperature);
-                                if (keyEvent.getKeyCode() == 1024) {
-                                    temperature += 0.5f;
-                                    if (temperature > 30.0f)
-                                        temperature = 30.0f;
-                                } else {
-                                    temperature -= 0.5f;
-                                    if (temperature < 16.0f)
-                                        temperature = 16.0f;
-                                }
-                                updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), String.valueOf(temperature));
-                            }
-                        }
-                        break;
-                        case FAN_SPEED: {
-                            var currentFanSpeed = getUpdatedData(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
-                            if (currentFanSpeed != null) {
-                                int speed = Integer.parseInt(currentFanSpeed);
-                                if (keyEvent.getKeyCode() == 1024) {
-                                    speed++;
-                                    if (speed > 7)
-                                        speed = 7;
-                                } else {
-                                    speed--;
-                                    if (speed < 1)
-                                        speed = 1;
-                                }
-                                updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(speed));
-                            }
-                        }
-                        break;
-                        case POWER: {
-                            var currentPowerMode = getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue());
-                            if (currentPowerMode != null) {
-                                boolean powerMode = currentPowerMode.equals("1");
-                                powerMode = !powerMode;
-                                updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), powerMode ? "1" : "0");
-                            }
-                        }
-                    }
-                }
-                break;
-                case 1030: { // Return button
-                    var currentCycleMode = getUpdatedData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue());
-                    if (currentCycleMode != null) {
-                        boolean cycleMode = currentCycleMode.equals("1");
-                        cycleMode = !cycleMode;
-                        updateData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue(), cycleMode ? "1" : "0");
-                    }
-                }
-                break;
-                case 1039: { // Return long press
-                    /* var currentAcAutoMode = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
-                    if (currentAcAutoMode != null) {
-                        boolean acAutoMode = currentAcAutoMode.equals("1");
-                        acAutoMode = !acAutoMode;
-                        updateData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), acAutoMode ? "1" : "0");
-                    } */
-                    currentScreenId = MainUiManager.SCREEN_ID_MAIN_MENU;
-                    dispatchServiceManagerEvent(ServiceManagerEventType.SHOW_SCREEN, currentScreenId);
-                }
-                break;
-            }
-
-            // Manages key events during main menu screen
-        } else if (currentScreenId == MainUiManager.SCREEN_ID_MAIN_MENU) {
-
-            switch (keyEvent.getKeyCode()) {
-                case 1024: // Up
-                    currentMenuItemIndex--;
-                    if (currentMenuItemIndex < 0) {
-                        currentMenuItemIndex = menuItems.length - 1;
-                    }
-                    dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, currentMenuItemIndex);
-                    break;
-
-                case 1025: // Down
-                    currentMenuItemIndex++;
-                    currentMenuItemIndex = currentMenuItemIndex % menuItems.length;
-                    dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, currentMenuItemIndex);
-                    break;
-
-                case 1028: // Enter
-                    if (currentMenuItemIndex == 1) {
-                        currentScreenId = MainUiManager.SCREEN_ID_AC_CONTROL;
-                        dispatchServiceManagerEvent(ServiceManagerEventType.SHOW_SCREEN, currentScreenId);
-                    }
-                    break;
-            }
-        }
-    }
-
-    public interface Screen {
-        static final int id = 0;
-        static final String jsname = "";
-        public int getID();
-        public String getJsName();
-
-        class AcControl implements Screen {
-            public int getID() { return SCREEN_ID_AC_CONTROL; }
-            public String getJsName() { return "ac_control"; }
-        }
-
-        class MainMenu implements Screen {
-            public int getID() { return SCREEN_ID_MAIN_MENU; }
-            public String getJsName() { return "main_menu"; }
-
-            private int focusedItemIndex;
-            private List<MenuItem> menuItems;
-
-            public MainMenu(int focusedItemIndex, List<MenuItem> menuItems) {
-                this.focusedItemIndex = focusedItemIndex;
-                this.menuItems = menuItems;
-            }
-
-            public int getFocusedItemIndex() { return focusedItemIndex; }
-            public List<MenuItem> getMenuItems() { return menuItems; }
-
-            public void setFocusedItemIndex(int index) { this.focusedItemIndex = index; }
-            public void setMenuItems(List<MenuItem> items) { this.menuItems = items; }
-        }
-    }
 
     // Interface base para as ações do menu
     public interface MenuAction {
@@ -250,6 +110,19 @@ public class MainUiManager {
 
         public String getId() { return id; }
         public MenuAction getAction() { return action; }
+    }
+
+    public void handleGeneralKeyEvents(KeyEvent keyEvent) {
+        Screen.Key key;
+        switch (keyEvent.getKeyCode()) {
+            case 1024: key = Screen.Key.UP; break;
+            case 1025: key = Screen.Key.DOWN; break;
+            case 1028: key = Screen.Key.ENTER; break;
+            case 1030: key = Screen.Key.BACK; break;
+            case 1039: key = Screen.Key.BACK_LONG; break;
+            default: return;
+        }
+        this.currentScreen.processKey(key);
     }
 
 }

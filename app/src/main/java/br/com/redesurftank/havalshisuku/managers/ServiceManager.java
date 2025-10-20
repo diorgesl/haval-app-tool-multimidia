@@ -774,7 +774,7 @@ public class ServiceManager {
         }
     }
 
-    private void dispatchServiceManagerEvent(ServiceManagerEventType event, Object... args) {
+    public void dispatchServiceManagerEvent(ServiceManagerEventType event, Object... args) {
         Log.w(TAG, "Dispatching service manager event: " + event);
         for (IServiceManagerEvent listener : new ArrayList<>(serviceManagerEventListeners)) {
             try {

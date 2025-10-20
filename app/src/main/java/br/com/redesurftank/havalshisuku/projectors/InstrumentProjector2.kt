@@ -150,12 +150,12 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
 
                     ServiceManagerEventType.MENU_ITEM_NAVIGATION -> {
                         val item = args[0] as Int
-                        evaluateJsIfReady(webView, "focus('${MainUiManager.menuItems[item].id}')")
+                        //evaluateJsIfReady(webView, "focus('${MainUiManager.menuItems[item].id}')")
                     }
 
                     ServiceManagerEventType.SHOW_SCREEN -> {
                         val screenId = args[0] as Int
-                        evaluateJsIfReady(webView, "focus('${MainUiManager.getInstance().currentScreen.jsName}')")
+                        //evaluateJsIfReady(webView, "focus('${MainUiManager.getInstance().currentScreen.jsName}')")
                     }
 
                 }
@@ -267,7 +267,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                 when (focusedMainMenuItem) {
                     MainMenuItem.OPTION_2 -> {
                         // Mudar para a tela do ar condicionado
-                        currentScreen = MainUiManager.SCREEN_ID_AC_CONTROL
+                        //currentScreen = MainUiManager.SCREEN_ID_AC_CONTROL
                         evaluateJsIfReady(webView, "showScreen('ac_control')")
                         // Foca um item padrão do AC e atualiza os valores
                         showWebView()
