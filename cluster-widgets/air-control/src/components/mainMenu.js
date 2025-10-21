@@ -24,9 +24,12 @@ export const menuItems = [
 export function createMainMenu() {
 
     // Cria o container principal para o menu
+    var main = document.createElement('main');
+
     const container = div({className: 'main-menu-container'});
     const carousel = div({className: 'menu-carousel'});
     container.appendChild(carousel);
+    main.appendChild(container);
     const focusedItemId = getState('focusedMenuItem');
     const itemElements = {};
 
@@ -138,9 +141,9 @@ export function createMainMenu() {
     const unsubscribe = subscribe('focusedMenuItem', updateFocus);
 
     // Função de limpeza para remover o listener e evitar memory leaks
-    container.cleanup = () => {
+    main.cleanup = () => {
         unsubscribe();
     };
 
-    return container;
+    return main;
 }
