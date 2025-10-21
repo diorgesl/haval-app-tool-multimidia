@@ -86,7 +86,7 @@ export function createMainMenu() {
 
         const itemEl = div({
             id: itemData.id,
-            className: `menu-item ${isFocused ? 'focused' : ''}`, // Adiciona a classe 'focused' se for o item inicial
+            className: `menu-item ${isFocused ? 'focused' : ''}`,
             'data-index': index,
             children: [
                 // 1. Círculo do Ícone

@@ -17,9 +17,17 @@
     position: relative;
     width: 452px;
     height: 452px;
+
+    /*
+    outline: 2px solid #2b556e;
+    outline-offset: -40px;
+    border: 2px solid #2b556e;
+    box-sizing: border-box;
+    */
+
     background-image: radial-gradient(circle at center,
-        #0c3b4c 0%,
-        transparent 70%
+        #2b486e 0%,
+        transparent 75%
     );
     border-radius: 50%;
 
@@ -28,15 +36,15 @@
      *   VARIÁVEIS DE CONFIGURAÇÃO DE DISTÂNCIA
      * ===============================================
     */
-    --item-gap: 65px; /* Espaçamento entre os itens */
+    --item-gap: 80px; /* Espaçamento entre os itens */
 
     /*
      * ===============================================
      *   (NOVO) CRIAÇÃO DAS LINHAS DE SELEÇÃO
      * ===============================================
     */
-    --line-width: 300px; /* Largura das linhas */
-    --line-offset-y: 32px; /* Distância das linhas a partir do centro */
+    --line-width: 350px; /* Largura das linhas */
+    --line-offset-y: 42px; /* Distância das linhas a partir do centro */
 }
 
 /* (NOVO) Estilo base para as linhas criadas com ::before e ::after */
@@ -68,7 +76,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 300px;
+    width: 380px;
     height: 80px;
     display: flex;
     align-items: center;
@@ -99,7 +107,7 @@
 
 /* O ícone SVG - SEM MUDANÇAS */
 .menu-icon {
-    width: 40px;
+    width: 38px;
     height: 40px;
 }
 
@@ -107,7 +115,7 @@
 .menu-label {
     font-family: 'Khand', sans-serif;
     font-weight: 100;
-    font-size: 22px;
+    font-size: 36px;
     color: #A3AED0;
     white-space: nowrap;
     transition: all 0.3s ease;
@@ -122,7 +130,7 @@
 }
 .menu-item.focused .menu-label {
     color: #FFFFFF;
-    font-size: 42px;
+    font-size: 52px;
     font-weight: 100;
 }
 
@@ -185,7 +193,7 @@
 .menu-carousel.focus-3 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
 .menu-carousel.focus-3 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-3 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-
+.menu-carousel.focus-3 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 
 /* Quando o item 4 está focado */
 .menu-carousel.focus-4 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
@@ -194,10 +202,19 @@
 .menu-carousel.focus-4 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-4 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
 .menu-carousel.focus-4 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
+.menu-carousel.focus-4 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 
-/* Quando o item 4 está focado */
+/* Quando o item 5 está focado */
 .menu-carousel.focus-5 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
 .menu-carousel.focus-5 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-5 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 .menu-carousel.focus-5 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-5 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
+.menu-carousel.focus-5 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
+
+/* Quando o item 6 está focado */
+.menu-carousel.focus-6 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
+.menu-carousel.focus-6 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
+.menu-carousel.focus-6 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
+.menu-carousel.focus-6 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
+.menu-carousel.focus-6 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }

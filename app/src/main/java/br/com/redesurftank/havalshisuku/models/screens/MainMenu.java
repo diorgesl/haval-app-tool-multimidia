@@ -7,6 +7,7 @@ import br.com.redesurftank.havalshisuku.managers.ServiceManager;
 import br.com.redesurftank.havalshisuku.models.CarConstants;
 import br.com.redesurftank.havalshisuku.models.MainUiManager;
 import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType;
+import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys;
 
 public class MainMenu implements Screen {
     private ServiceManager serviceManager;
@@ -20,6 +21,8 @@ public class MainMenu implements Screen {
     public static class EspOptions {
         public static final int ON = 1;
         public static final int OFF = 0;
+
+
     }
 
     public static class EvModeOptions {
@@ -102,6 +105,7 @@ public class MainMenu implements Screen {
 
             // Set default initial position as middle of the menu
             this.currentMenuItemIndex = menuItems.size() / 2;
+            serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
             serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
 
         }
@@ -115,12 +119,15 @@ public class MainMenu implements Screen {
                     currentMenuItemIndex = menuItems.size() - 1;
                 }
                 serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
+                serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
+
                 break;
 
             case DOWN: // Down
                 currentMenuItemIndex++;
                 currentMenuItemIndex = currentMenuItemIndex % menuItems.size();
                 serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
+                serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
                 break;
 
             case ENTER: // Enter

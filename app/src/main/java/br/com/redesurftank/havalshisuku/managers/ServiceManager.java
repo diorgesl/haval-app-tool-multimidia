@@ -105,7 +105,8 @@ public class ServiceManager {
             CarConstants.SYS_SETTINGS_DISPLAY_BACKLIGHT_STATE,
             CarConstants.SYS_SETTINGS_DISPLAY_BRIGHTNESS_LEVEL,
             CarConstants.CAR_DRIVE_SETTING_OUTSIDE_VIEW_MIRROR_FOLD_STATE,
-            CarConstants.CAR_BASIC_ENGINE_STATE
+            CarConstants.CAR_BASIC_ENGINE_STATE,
+            CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE,
     };
 
     private static final CarConstants[] KEYS_TO_SAVE = {

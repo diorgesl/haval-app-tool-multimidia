@@ -54,15 +54,14 @@ function render() {
 }
 
 // Start rendering and subscribe to listen for screen changes thus triggering new render
-render();
+
 subscribe('screen', render);
 subscribe('espStatus', render);
 subscribe('drivingMode', render);
 subscribe('steerMode', render);
 subscribe('regenMode', render);
 subscribe('evMode', render);
-
-
+render();
 
 /**********************************************************
   Functions used by Kotlin code to perform js interaction
@@ -85,7 +84,7 @@ window.focus = function(item) {
     }
 };
 
-// AC controls
+// AC and other screen controls
 window.control = function(key, value) {
     setState(key, value);
 };

@@ -13,8 +13,6 @@ import br.com.redesurftank.havalshisuku.models.screens.Screen;
 
 public class MainUiManager {
 
-    public static final int SCREEN_ID_MAIN_MENU = 0;
-
     // These fields are not declared in the original file. I'm declaring them here to make the code compile.
     private SharedPreferences sharedPreferences;
 
@@ -28,11 +26,13 @@ public class MainUiManager {
     private MainUiManager() {
         // Inicializa o estado com a tela do menu principal
         this.currentScreen = new MainMenu();
+        this.sharedPreferences = ServiceManager.getInstance().getSharedPreferences();
         this.updateScreen();
     }
 
     public void updateScreen() {
         this.currentScreen.initialize(this.currentScreen, ServiceManager.getInstance());
+        if (sharedPreferences != null) sharedPreferences.edit().putString(SharedPreferencesKeys.LAST_CLUSTER_SCREEN.getKey(), this.currentScreen.getJsName()).apply();
     }
 
     public void updateScreen(Screen newScreen) {

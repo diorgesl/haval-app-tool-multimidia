@@ -44,9 +44,6 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         }
     }
 
-    private var currentScreen = MainUiManager.SCREEN_ID_MAIN_MENU // Start from the Main Menu screen
-    private var focusedMainMenuItem = MainMenuItem.OPTION_1 // Starts with first option highlighted
-
     private fun shouldShowProjector(): Boolean {
         return preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, false) && preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false)
     }
@@ -109,9 +106,6 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('aion', $value)")
                     }
 
-                    CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
-                        evaluateJsIfReady(webView, "control('espStatus', $value")
-                    }
 
                     CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
                         evaluateJsIfReady(webView, "control('evMode', $value)")
@@ -129,6 +123,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('regenMode', $value)")
                     }
 
+                    CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
+                        val espStatusString = if (value == "1") "'ON'" else "'OFF'"
+                        evaluateJsIfReady (webView, "control('espStatus', $espStatusString)")
+                    }
 
                     else -> {}
                 }
@@ -231,6 +229,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         val currentAcState = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_POWER_MODE.value)
         val currentRecycleMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_CYCLE_MODE.value)
         val currentAutoMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_AUTO_ENABLE.value)
+        val currentESPMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value)
+        val currentMenuOption = ServiceManager.getInstance().sharedPreferences.getString(
+            SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.key, "option_4")
+        val espStatusString = if (currentESPMode as? Int == 1) "'ON'" else "'OFF'"
 
         evaluateJsIfReady(webView, "control('temp', $currentTemp)")
         evaluateJsIfReady(webView, "control('fan', $currentFanSpeed)")
@@ -238,6 +240,8 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         evaluateJsIfReady(webView, "control('recycle', $currentRecycleMode)")
         evaluateJsIfReady(webView, "control('auto', $currentAutoMode)")
         evaluateJsIfReady(webView, "focus('fan')")
+        evaluateJsIfReady(webView, "control('espStatus', $espStatusString)")
+        evaluateJsIfReady(webView, "focus('$currentMenuOption')")
     }
 
     private fun evaluateJsIfReady(webView: WebView?, js: String) {
@@ -266,69 +270,6 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         }
     }
 
-    private fun focusMainMenuItem(item: MainMenuItem) {
-        focusedMainMenuItem = item
-        // O JS espera o nome em minúsculo: "option_1", "option_2", etc.
-        evaluateJsIfReady(webView, "focusMainMenuItem('${item.name.lowercase()}')")
-    }
-
-    private fun handleMainMenuKey(control: SteeringWheelAcControlType) {
-        val items = MainMenuItem.values()
-        val currentIndex = items.indexOf(focusedMainMenuItem)
-
-        when (control) {
-            SteeringWheelAcControlType.FAN_SPEED -> { // Mapeado para DOWN
-                val nextIndex = (currentIndex + 1) % items.size
-                focusMainMenuItem(items[nextIndex])
-            }
-            SteeringWheelAcControlType.TEMPERATURE -> { // Mapeado para UP
-                val nextIndex = if (currentIndex - 1 < 0) items.size - 1 else currentIndex - 1
-                focusMainMenuItem(items[nextIndex])
-            }
-            SteeringWheelAcControlType.POWER -> { // Mapeado para OK
-                when (focusedMainMenuItem) {
-                    MainMenuItem.OPTION_2 -> {
-                        // Mudar para a tela do ar condicionado
-                        //currentScreen = MainUiManager.SCREEN_ID_AC_CONTROL
-                        evaluateJsIfReady(webView, "showScreen('ac_control')")
-                        // Foca um item padrão do AC e atualiza os valores
-                        showWebView()
-                    }
-                    else -> {
-                        // Ação para outras opções do menu
-                    }
-                }
-            }
-        }
-    }
-
-    private fun handleAcControlKey(control: SteeringWheelAcControlType) {
-        // Esta é a lógica que você já tinha, mas agora em sua própria função.
-        when (control) {
-            SteeringWheelAcControlType.FAN_SPEED -> {
-                evaluateJsIfReady(webView, "focus('fan')")
-            }
-            SteeringWheelAcControlType.TEMPERATURE -> {
-                evaluateJsIfReady(webView, "focus('temp')")
-            }
-            SteeringWheelAcControlType.POWER -> {
-                evaluateJsIfReady(webView, "focus('power')")
-                // Aqui você pode adicionar lógica para, por exemplo,
-                // voltar ao menu principal se a tecla POWER for pressionada novamente.
-            }
-        }
-        // Você precisará adicionar a lógica de "entrar em modo de edição" e
-        // "mudar valor com up/down" que discutimos anteriormente.
-        // O seu enum atual não parece distinguir entre "focar" e "mudar valor".
-    }
 
 }
 
-// Define os itens do nosso novo menu principal
-enum class MainMenuItem(val displayName: String) {
-    OPTION_1("Opção 1"),
-    OPTION_2("Opção 2 (Ar Condicionado)"),
-    OPTION_3("Opção 3"),
-    OPTION_4("Opção 4"),
-    OPTION_5("Opção 5");
-}

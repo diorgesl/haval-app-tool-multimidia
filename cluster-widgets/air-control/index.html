@@ -156,7 +156,7 @@
               } else if (e.key === 'Enter') {
                   console.log(`[AÇÃO] 'Enter' pressionado no menu: ${currentState.focusedMenuItem}`);
                   // Apenas 'option_2' (Ar Condicionado) tem uma ação
-                  if (currentState.focusedMenuItem === 'option_3') {
+                  if (currentState.focusedMenuItem === 'option_4') {
                       window.showScreen('ac_control');
                   }
 
@@ -173,7 +173,7 @@
                       const newMode = modes[nextIndex];
                       console.log(`[AÇÃO] Alterando Modo de '${currentMode}' para '${newMode}'`);
                       setState('evMode', newMode);
-                  } else if (currentState.focusedMenuItem === 'option_4') {
+                  } else if (currentState.focusedMenuItem === 'option_5') {
                       const modes = ['Normal', 'Eco', 'Sport'];
                       const currentMode = stateManager.getState().drivingMode;
                       const currentIndex = modes.indexOf(currentMode);
@@ -181,7 +181,7 @@
                       const newMode = modes[nextIndex];
                       console.log(`[AÇÃO] Alterando Modo de '${currentMode}' para '${newMode}'`);
                       setState('drivingMode', newMode);
-                  } else if (currentState.focusedMenuItem === 'option_5') {
+                  } else if (currentState.focusedMenuItem === 'option_6') {
                       const modes = ['Normal', 'Conforto', 'Esportiva'];
                       const currentMode = stateManager.getState().steerMode;
                       const currentIndex = modes.indexOf(currentMode);
@@ -189,7 +189,7 @@
                       const newMode = modes[nextIndex];
                       console.log(`[AÇÃO] Alterando Modo de Direcao de '${currentMode}' para '${newMode}'`);
                       setState('steerMode', newMode);
-                  } else if (currentState.focusedMenuItem === 'option_6') {
+                  } else if (currentState.focusedMenuItem === 'option_7') {
                       const modes = ['Normal', 'Média', 'Alta'];
                       const currentMode = stateManager.getState().regenMode;
                       const currentIndex = modes.indexOf(currentMode);
