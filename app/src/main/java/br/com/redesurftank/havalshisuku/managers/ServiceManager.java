@@ -503,6 +503,10 @@ public class ServiceManager {
                 }
                 pendingTasks.clear();
             }
+
+            MainUiManager.getInstance().updateScreen();
+
+
             timeInitialized = SystemClock.uptimeMillis();
             Log.w(TAG, "Services initialized successfully");
             ProjectorManager.getInstance().initialize();

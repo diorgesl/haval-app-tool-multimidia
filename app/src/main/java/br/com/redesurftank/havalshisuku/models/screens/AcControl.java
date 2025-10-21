@@ -102,7 +102,7 @@ public class AcControl implements Screen {
     public void initialize(Screen previousScreen, ServiceManager serviceManager) {
         this.previousScreen = previousScreen;
         this.serviceManager = serviceManager;
-        var lastAcConfig = this.serviceManager.getSharedPreferences().getString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType.FAN_SPEED.name());
+        var lastAcConfig = this.serviceManager.getSharedPreferences().getString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), SteeringWheelAcControlType.FAN_SPEED.name());
         steeringWheelAcControlType = SteeringWheelAcControlType.valueOf(Objects.requireNonNullElse(lastAcConfig, SteeringWheelAcControlType.FAN_SPEED.name()));
         steeringWheelAcControlTypeIndex = Arrays.asList(SteeringWheelAcControlType.values()).indexOf(steeringWheelAcControlType);
 
@@ -110,7 +110,7 @@ public class AcControl implements Screen {
         serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.UPDATE_SCREEN,this);
 
         // Updates focus to latest focused item
-        serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
+        //serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
     }
 
 

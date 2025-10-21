@@ -53,7 +53,7 @@ public class MainMenu implements Screen {
     @Override
     public void initialize(Screen previousScreen, ServiceManager serviceManager) {
 
-        if (serviceManager == null) this.serviceManager = serviceManager;
+        if (this.serviceManager == null) this.serviceManager = serviceManager;
 
         if (menuItems == null) {
             Screen acControlScreen = new AcControl();

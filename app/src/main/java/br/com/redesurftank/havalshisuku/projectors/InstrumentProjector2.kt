@@ -110,7 +110,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     }
 
                     CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
-                        evaluateJsIfReady(webView, "control('espStatus', $value ? 1 : 'ON' : 'OFF')")
+                        evaluateJsIfReady(webView, "control('espStatus', $value")
                     }
 
                     CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
