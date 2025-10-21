@@ -21,31 +21,78 @@ public class MainMenu implements Screen {
     public static class EspOptions {
         public static final int ON = 1;
         public static final int OFF = 0;
-
-
+        public static String getLabel(String value) {
+            int val = Integer.parseInt(value);
+            switch (val) {
+                case 1: return "'ON'";
+                case 0: return "'OFF";
+            }
+            return "";
+        }
     }
 
     public static class EvModeOptions {
         public static final int EV = 0;
         public static final int HEV = 1;
         public static final int PHEV = 3;
+
+        public static String getLabel(String value) {
+            int val = Integer.parseInt(value);
+            switch (val) {
+                case 0:
+                    return "'EV";
+                case 1:
+                    return "'HEV'";
+                case 3:
+                    return "'PHEV'";
+            }
+            return "";
+        }
     }
+
     public static class DrivingModeOptions {
-        public static final int NORMAL = 1;
-        public static final int ECO = 2;
-        public static final int SPORT = 3;
+        public static final int NORMAL = 0;
+        public static final int ECO = 1;
+        public static final int SPORT = 2;
+        public static String getLabel(String value) {
+            int val = Integer.parseInt(value);
+            switch (val) {
+                case 0: return "'Normal";
+                case 1: return "'Eco'";
+                case 2: return "'Sport'";
+            }
+            return "";
+        }
     }
 
     public static class SteerModeOptions {
-        public static final int CONFORT = 1;
-        public static final int NORMAL = 2;
-        public static final int SPORT = 3; //
+        public static final int COMFORT = 0;
+        public static final int NORMAL = 1;
+        public static final int SPORT = 2;
+        public static String getLabel(String value) {
+            int val = Integer.parseInt(value);
+            switch (val) {
+                case 0: return "'Comfort";
+                case 1: return "'Normal'";
+                case 2: return "'Sport'";
+            }
+            return "";
+        }
     }
 
     public static class RegenerationOptions {
         public static final int LOW = 0;
         public static final int NORMAL = 1;
         public static final int HIGH = 2;
+        public static String getLabel(String value) {
+            int val = Integer.parseInt(value);
+            switch (val) {
+                case 0: return "'Low";
+                case 1: return "'Normal'";
+                case 2: return "'High'";
+            }
+            return "";
+        }
     }
 
     @Override
@@ -89,7 +136,7 @@ public class MainMenu implements Screen {
                     ),
                     new MenuItem(
                             MenuItem.MENU_ID_STEER_MODE,
-                            new MenuAction.CycleValues(Arrays.asList(SteerModeOptions.CONFORT, SteerModeOptions.NORMAL, SteerModeOptions.SPORT),
+                            new MenuAction.CycleValues(Arrays.asList(SteerModeOptions.COMFORT, SteerModeOptions.NORMAL, SteerModeOptions.SPORT),
                             CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE)
                     ),
                     new MenuItem(

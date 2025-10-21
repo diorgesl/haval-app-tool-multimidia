@@ -23,6 +23,7 @@ import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType
 import br.com.redesurftank.havalshisuku.models.MainUiManager
+import br.com.redesurftank.havalshisuku.models.screens.MainMenu
 import br.com.redesurftank.havalshisuku.models.screens.Screen
 
 class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjector(outerContext, display) {
@@ -108,24 +109,23 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
 
 
                     CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
-                        evaluateJsIfReady(webView, "control('evMode', $value)")
+                        evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(value)})")
                     }
 
                     CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE.value -> {
-                        evaluateJsIfReady(webView, "control('drivingMode', $value)")
+                        evaluateJsIfReady(webView, "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(value)})")
                     }
 
                     CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value -> {
-                        evaluateJsIfReady(webView, "control('steerMode', $value)")
+                        evaluateJsIfReady(webView, "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(value)})")
                     }
 
                     CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value -> {
-                        evaluateJsIfReady(webView, "control('regenMode', $value)")
+                        evaluateJsIfReady(webView, "control('regenMode', ${MainMenu.RegenerationOptions.getLabel(value)})")
                     }
 
                     CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
-                        val espStatusString = if (value == "1") "'ON'" else "'OFF'"
-                        evaluateJsIfReady (webView, "control('espStatus', $espStatusString)")
+                        evaluateJsIfReady (webView, "control('espStatus', ${MainMenu.EspOptions.getLabel(value)})")
                     }
 
                     else -> {}
@@ -229,10 +229,14 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         val currentAcState = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_POWER_MODE.value)
         val currentRecycleMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_CYCLE_MODE.value)
         val currentAutoMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_AUTO_ENABLE.value)
+
+        val currentEVMode = ServiceManager.getInstance().getData(CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value)
+        val currentDrivingMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE.value)
+        val currentSteerMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value)
+        val currentRegenMode = ServiceManager.getInstance().getData(CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value)
         val currentESPMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value)
         val currentMenuOption = ServiceManager.getInstance().sharedPreferences.getString(
             SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.key, "option_4")
-        val espStatusString = if (currentESPMode as? Int == 1) "'ON'" else "'OFF'"
 
         evaluateJsIfReady(webView, "control('temp', $currentTemp)")
         evaluateJsIfReady(webView, "control('fan', $currentFanSpeed)")
@@ -240,7 +244,12 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         evaluateJsIfReady(webView, "control('recycle', $currentRecycleMode)")
         evaluateJsIfReady(webView, "control('auto', $currentAutoMode)")
         evaluateJsIfReady(webView, "focus('fan')")
-        evaluateJsIfReady(webView, "control('espStatus', $espStatusString)")
+
+        evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(currentEVMode)})")
+        evaluateJsIfReady(webView, "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(currentDrivingMode)})")
+        evaluateJsIfReady(webView, "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(currentSteerMode)})")
+        evaluateJsIfReady(webView, "control('regenMode', ${MainMenu.RegenerationOptions.getLabel(currentRegenMode)})")
+        evaluateJsIfReady(webView, "control('espStatus', ${MainMenu.EspOptions.getLabel(currentESPMode)})")
         evaluateJsIfReady(webView, "focus('$currentMenuOption')")
     }
 
