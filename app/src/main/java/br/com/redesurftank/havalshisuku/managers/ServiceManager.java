@@ -107,6 +107,10 @@ public class ServiceManager {
             CarConstants.CAR_DRIVE_SETTING_OUTSIDE_VIEW_MIRROR_FOLD_STATE,
             CarConstants.CAR_BASIC_ENGINE_STATE,
             CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE,
+            CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG,
+            CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE,
+            CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE,
+            CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL,
     };
 
     private static final CarConstants[] KEYS_TO_SAVE = {

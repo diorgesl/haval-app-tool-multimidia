@@ -66,7 +66,7 @@ var stateManager = new StateManager({
     focusedMenuItem: 'option_4',
 
     espStatus: 'ON',
-    drivingMode: 'Sport',
+    drivingMode: 'Normal',
     steerMode: 'Conforto',
     regenMode: 'Normal',
     evMode: 'HEV',

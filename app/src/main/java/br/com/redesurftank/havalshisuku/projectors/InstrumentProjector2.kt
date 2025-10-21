@@ -175,7 +175,8 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
 
                     ServiceManagerEventType.UPDATE_SCREEN -> {
                         val screen = args[0] as Screen
-                        evaluateJsIfReady(webView, "focus('${screen.jsName}')")
+                        val screen_name = screen.jsName;
+                        evaluateJsIfReady(webView, "focus('$screen_name')")
                     }
 
                 }

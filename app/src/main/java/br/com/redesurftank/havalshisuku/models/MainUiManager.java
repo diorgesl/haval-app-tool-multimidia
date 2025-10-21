@@ -36,8 +36,9 @@ public class MainUiManager {
     }
 
     public void updateScreen(Screen newScreen) {
+        newScreen.initialize(this.currentScreen, ServiceManager.getInstance());
         this.currentScreen = newScreen;
-        updateScreen();
+        if (sharedPreferences != null) sharedPreferences.edit().putString(SharedPreferencesKeys.LAST_CLUSTER_SCREEN.getKey(), this.currentScreen.getJsName()).apply();
     }
 
     public static MainUiManager getInstance() {

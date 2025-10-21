@@ -18,7 +18,7 @@ export const menuItems = [
     {id: 'option_4', label: 'Menu A/C', iconSrc: iconAC},
     {id: 'option_5', label: 'Modo', iconSrc: iconMode},
     {id: 'option_6', label: 'Conforto', iconSrc: iconSteer},
-    {id: 'option_7', label: 'Regen. Normal', iconSrc: iconRegen},
+    {id: 'option_7', label: 'Reg. Normal', iconSrc: iconRegen},
 ];
 
 export function createMainMenu() {
@@ -73,7 +73,7 @@ export function createMainMenu() {
         } else if (itemData.id === 'option_7') {
             const regenMode = getState('regenMode');
             labelContent = [
-                'Regen. ',
+                'Reg. ',
                 span({
                     className: `menu-label-status ${regenMode.toLowerCase()}`,
                     children: [regenMode]

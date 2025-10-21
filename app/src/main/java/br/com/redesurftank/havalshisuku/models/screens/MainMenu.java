@@ -25,26 +25,26 @@ public class MainMenu implements Screen {
             int val = Integer.parseInt(value);
             switch (val) {
                 case 1: return "'ON'";
-                case 0: return "'OFF";
+                case 0: return "'OFF'";
             }
             return "";
         }
     }
 
     public static class EvModeOptions {
-        public static final int EV = 0;
+        public static final int PHEV = 0;
         public static final int HEV = 1;
-        public static final int PHEV = 3;
+        public static final int EV = 3;
 
         public static String getLabel(String value) {
             int val = Integer.parseInt(value);
             switch (val) {
                 case 0:
-                    return "'EV";
+                    return "'Modo HEV'";
                 case 1:
-                    return "'HEV'";
+                    return "'Prior. EV'";
                 case 3:
-                    return "'PHEV'";
+                    return "'Modo EV'";
             }
             return "";
         }
@@ -52,44 +52,44 @@ public class MainMenu implements Screen {
 
     public static class DrivingModeOptions {
         public static final int NORMAL = 0;
-        public static final int ECO = 1;
-        public static final int SPORT = 2;
+        public static final int ECO = 2;
+        public static final int SPORT = 1;
         public static String getLabel(String value) {
             int val = Integer.parseInt(value);
             switch (val) {
-                case 0: return "'Normal";
-                case 1: return "'Eco'";
-                case 2: return "'Sport'";
+                case 0: return "'Normal'";
+                case 2: return "'Eco'";
+                case 1: return "'Sport'";
             }
             return "";
         }
     }
 
     public static class SteerModeOptions {
-        public static final int COMFORT = 0;
-        public static final int NORMAL = 1;
-        public static final int SPORT = 2;
+        public static final int COMFORT = 2;
+        public static final int NORMAL = 0;
+        public static final int SPORT = 1;
         public static String getLabel(String value) {
             int val = Integer.parseInt(value);
             switch (val) {
-                case 0: return "'Comfort";
-                case 1: return "'Normal'";
-                case 2: return "'Sport'";
+                case 2: return "'Conforto'";
+                case 0: return "'Normal'";
+                case 1: return "'Esportiva'";
             }
             return "";
         }
     }
 
     public static class RegenerationOptions {
-        public static final int LOW = 0;
-        public static final int NORMAL = 1;
-        public static final int HIGH = 2;
+        public static final int LOW = 2;
+        public static final int NORMAL = 0;
+        public static final int HIGH = 1;
         public static String getLabel(String value) {
             int val = Integer.parseInt(value);
             switch (val) {
-                case 0: return "'Low";
-                case 1: return "'Normal'";
-                case 2: return "'High'";
+                case 2: return "'Baixa'";
+                case 0: return "'Normal'";
+                case 1: return "'Alta'";
             }
             return "";
         }
@@ -204,7 +204,9 @@ public class MainMenu implements Screen {
 
             public CycleValues(List<Object> values, CarConstants carOptionID) {
                 this.values = values;
-                this.currentOptionIndex = 0;
+                String fromCar = ServiceManager.getInstance().getData(carOptionID.getValue());
+                this.currentOptionIndex = this.values.indexOf(Integer.parseInt(fromCar));
+                if (this.currentOptionIndex == -1) this.currentOptionIndex = 0;
                 this.carOptionID = carOptionID;
             }
 
