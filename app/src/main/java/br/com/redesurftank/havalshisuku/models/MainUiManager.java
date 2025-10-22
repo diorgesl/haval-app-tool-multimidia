@@ -31,12 +31,12 @@ public class MainUiManager {
     }
 
     public void updateScreen() {
-        this.currentScreen.initialize(this.currentScreen, ServiceManager.getInstance());
+        this.currentScreen.initialize();
         if (sharedPreferences != null) sharedPreferences.edit().putString(SharedPreferencesKeys.LAST_CLUSTER_SCREEN.getKey(), this.currentScreen.getJsName()).apply();
     }
 
     public void updateScreen(Screen newScreen) {
-        newScreen.initialize(this.currentScreen, ServiceManager.getInstance());
+        newScreen.initialize();
         this.currentScreen = newScreen;
         if (sharedPreferences != null) sharedPreferences.edit().putString(SharedPreferencesKeys.LAST_CLUSTER_SCREEN.getKey(), this.currentScreen.getJsName()).apply();
     }

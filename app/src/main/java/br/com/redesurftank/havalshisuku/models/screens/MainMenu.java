@@ -16,6 +16,8 @@ public class MainMenu implements Screen {
 
     private List<MenuItem> menuItems;
 
+    private Screen previousScreen = this;
+
 
     // Car related control values, these should match the car constants in the server
     public static class EspOptions {
@@ -101,13 +103,14 @@ public class MainMenu implements Screen {
     }
 
     @Override
-    public void initialize(Screen previousScreen, ServiceManager serviceManager) {
+    public void initialize() {
 
-        if (this.serviceManager == null) this.serviceManager = serviceManager;
+        if (this.serviceManager == null) this.serviceManager = ServiceManager.getInstance();
 
         if (menuItems == null) {
             Screen acControlScreen = new AcControl();
-            acControlScreen.initialize(this, serviceManager);
+            acControlScreen.setReturnScreen(this);
+            acControlScreen.initialize();
 
             // Define menu structure and options available
             menuItems = Arrays.asList(
@@ -145,17 +148,22 @@ public class MainMenu implements Screen {
                             CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL)
                     )
             );
-
-            // Send update event to make sure screen is displayed
-            serviceManager.dispatchServiceManagerEvent(br.com.redesurftank.havalshisuku.models.ServiceManagerEventType.UPDATE_SCREEN, this);
-
-
-            // Set default initial position as middle of the menu
-            this.currentMenuItemIndex = menuItems.size() / 2;
-            serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
-            serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
-
         }
+
+        // Send update event to make sure screen is displayed
+        serviceManager.dispatchServiceManagerEvent(br.com.redesurftank.havalshisuku.models.ServiceManagerEventType.UPDATE_SCREEN, this);
+
+        // Set default initial position as middle of the menu
+        this.currentMenuItemIndex = menuItems.size() / 2;
+        serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
+        serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
+
+
+    }
+
+    @Override
+    public void setReturnScreen(Screen previousScreen) {
+        this.previousScreen = previousScreen;
     }
 
     public void processKey(Key key) {

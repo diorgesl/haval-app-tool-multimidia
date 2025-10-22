@@ -15,7 +15,7 @@ import java.util.Objects;
 public class AcControl implements Screen {
 
     private ServiceManager serviceManager;
-    private Screen previousScreen;
+    private Screen previousScreen = this;
     private int steeringWheelAcControlTypeIndex = 0;
     private SteeringWheelAcControlType steeringWheelAcControlType = SteeringWheelAcControlType.TEMPERATURE;
 
@@ -99,9 +99,8 @@ public class AcControl implements Screen {
     }
 
     @Override
-    public void initialize(Screen previousScreen, ServiceManager serviceManager) {
-        this.previousScreen = previousScreen;
-        this.serviceManager = serviceManager;
+    public void initialize() {
+        this.serviceManager = ServiceManager.getInstance();
         var lastAcConfig = this.serviceManager.getSharedPreferences().getString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), SteeringWheelAcControlType.FAN_SPEED.name());
         steeringWheelAcControlType = SteeringWheelAcControlType.valueOf(Objects.requireNonNullElse(lastAcConfig, SteeringWheelAcControlType.FAN_SPEED.name()));
         steeringWheelAcControlTypeIndex = Arrays.asList(SteeringWheelAcControlType.values()).indexOf(steeringWheelAcControlType);
@@ -114,38 +113,10 @@ public class AcControl implements Screen {
     }
 
 
-    // Enum for Car constants
-    private enum CarConstants {
-        CAR_HVAC_DRIVER_TEMPERATURE("car_hvac_driver_temperature"),
-        CAR_HVAC_FAN_SPEED("car_hvac_fan_speed"),
-        CAR_HVAC_POWER_MODE("car_hvac_power_mode"),
-        CAR_HVAC_CYCLE_MODE("car_hvac_cycle_mode");
-
-        private final String value;
-        CarConstants(String value) {
-            this.value = value;
-        }
-        public String getValue() {
-            return value;
-        }
+    @Override
+    public void setReturnScreen(Screen previousScreen) {
+        this.previousScreen = previousScreen;
     }
 
-    // Enum for steering wheel AC control types
-    private enum SteeringWheelAcControlType {
-        TEMPERATURE,
-        FAN_SPEED,
-        POWER
-    }
-    // Enum for SharedPreferences keys
-    private enum SharedPreferencesKeys {
-        LAST_CLUSTER_AC_CONFIG("last_cluster_ac_config");
-        private final String key;
-        SharedPreferencesKeys(String key) {
-            this.key = key;
-        }
-        public String getKey() {
-            return key;
-        }
-    }
 
 }

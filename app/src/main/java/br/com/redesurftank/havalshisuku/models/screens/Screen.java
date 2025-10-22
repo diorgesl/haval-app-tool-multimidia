@@ -11,6 +11,8 @@ public interface Screen {
 
     void processKey(Key key);
 
-    void initialize(Screen previousScreen, ServiceManager serviceManager);
+    void initialize();
+
+    void setReturnScreen(Screen previousScreen);
 
 }

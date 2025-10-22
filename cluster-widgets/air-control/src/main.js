@@ -6,7 +6,7 @@ import { createMainMenu } from './components/mainMenu.js';
 
 
 function createAcControlScreen() {
-    // Este código é basicamente o que você já tinha, mas dentro de uma função.
+
     var main = document.createElement('main');
     main.className = 'main-container';
 
@@ -24,7 +24,7 @@ function createAcControlScreen() {
 
     main.cleanup = function() {
         if (powerElement.cleanup) powerElement.cleanup();
-        if (controlElement.cleanup) controlElement.cleanup();
+        //if (controlElement.cleanup) controlElement.cleanup();
         if (statusElement.cleanup) statusElement.cleanup();
     };
 
@@ -40,7 +40,10 @@ function render() {
     if (currentComponent && currentComponent.cleanup) {
         currentComponent.cleanup();
     }
-    appContainer.innerHTML = ''; // Limpa o DOM de forma simples
+
+    if (appContainer && appContainer.innerHTML) {
+        appContainer.innerHTML = ''; // Limpa o DOM de forma simples
+    }
 
     if (screen === 'main_menu') {
         currentComponent = createMainMenu();
