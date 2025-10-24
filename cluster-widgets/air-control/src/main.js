@@ -1,38 +1,14 @@
-import { createPowerElement } from './components/power.js';
-import { createControlElement } from './components/control.js';
-import { createStatusElement } from './components/status.js';
-import { getState as get, setState, subscribe } from './state.js';
-import { createMainMenu } from './components/mainMenu.js';
+import {getState as get, setState, subscribe} from './state.js';
+import {createMainMenu} from './components/mainMenu.js';
+import {createAcControlScreen, updateProgressRings} from "./components/aircon/mainAcControl.js";
+import {prepareGameScreen, startGame, stopGame} from "./components/doom/doom.js";
 
-
-function createAcControlScreen() {
-
-    var main = document.createElement('main');
-    main.className = 'main-container';
-
-    var circleContainer = document.createElement('div');
-    circleContainer.className = 'circle-container';
-
-    var powerElement = createPowerElement();
-    var controlElement = createControlElement();
-    var statusElement = createStatusElement();
-
-    circleContainer.appendChild(powerElement);
-    circleContainer.appendChild(controlElement);
-    circleContainer.appendChild(statusElement);
-    main.appendChild(circleContainer);
-
-    main.cleanup = function() {
-        if (powerElement.cleanup) powerElement.cleanup();
-        //if (controlElement.cleanup) controlElement.cleanup();
-        if (statusElement.cleanup) statusElement.cleanup();
-    };
-
-    return main;
-}
 
 const appContainer = document.getElementById('app');
 let currentComponent = null;
+
+const doom = prepareGameScreen();
+document.body.append(doom);
 
 function render() {
     const screen = get('screen');
@@ -46,13 +22,19 @@ function render() {
     }
 
     if (screen === 'main_menu') {
+        stopGame();
         currentComponent = createMainMenu();
     } else if (screen === 'ac_control') {
         currentComponent = createAcControlScreen();
+        stopGame();
+    } else if (screen === 'doom') {
+        currentComponent = "";
+        startGame();
     }
 
     if (currentComponent) {
         appContainer.appendChild(currentComponent);
+        if (screen === 'ac_control') updateProgressRings();
     }
 }
 

@@ -75,8 +75,8 @@ var stateManager = new StateManager({
     focusArea: 'fan',
     temp: 25,
     fan: 1,
-    power: 0,
-    auto: 0,
+    power: 1,
+    auto: 1,
     recycle: 0,
     aion: 0,
 });
