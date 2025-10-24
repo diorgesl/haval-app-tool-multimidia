@@ -11,103 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
   </head>
   <body>
+    <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
     <div id="app"></div>
-    <script>
-      function createElement(tagName, props = {}) {
-          // Create the element
-          const element = document.createElement(tagName);
-          const children = props.children || [];
-
-          // Handle props
-          if (props) {
-              // Handle className (convert to class)
-              if (props.className) {
-                  element.className = props.className;
-                  delete props.className;
-              }
-
-              // Handle style object
-              if (props.style && typeof props.style === 'object') {
-                  Object.assign(element.style, props.style);
-                  delete props.style;
-              }
-
-              // Handle event listeners (props starting with 'on')
-              Object.keys(props).forEach(key => {
-                  if (key.startsWith('on') && typeof props[key] === 'function') {
-                      const eventName = key.slice(2).toLowerCase();
-                      element.addEventListener(eventName, props[key]);
-                      delete props[key];
-                  }
-              });
-
-              // Handle other attributes
-              Object.keys(props).forEach(key => {
-                  if (props[key] !== undefined && props[key] !== null) {
-                      element.setAttribute(key, props[key]);
-                  }
-              });
-          }
-
-          // Handle children
-          children.forEach(child => {
-              if (child === null || child === undefined) {
-                  return;
-              }
-
-              if (typeof child === 'string' || typeof child === 'number') {
-                  element.appendChild(document.createTextNode(child));
-              } else if (child instanceof HTMLElement) {
-                  element.appendChild(child);
-              } else if (Array.isArray(child)) {
-                  child.forEach(nestedChild => {
-                      if (nestedChild !== null && nestedChild !== undefined) {
-                          if (typeof nestedChild === 'string' || typeof nestedChild === 'number') {
-                              element.appendChild(document.createTextNode(nestedChild));
-                          } else if (nestedChild instanceof HTMLElement) {
-                              element.appendChild(nestedChild);
-                          }
-                      }
-                  });
-              }
-          });
-
-          return element;
-      }
-
-      /**
-       * Shorthand functions for common elements
-       */
-      const div = (props, ...children) => createElement('div', props, ...children);
-      const span = (props, ...children) => createElement('span', props, ...children);
-      const button = (props, ...children) => createElement('button', props, ...children);
-      const img = (props) => createElement('img', props);
-      const p = (props, ...children) => createElement('p', props, ...children);
-      const h1 = (props, ...children) => createElement('h1', props, ...children);
-      const h2 = (props, ...children) => createElement('h2', props, ...children);
-      const h3 = (props, ...children) => createElement('h3', props, ...children);
-
-      /**
-       * Utility for creating elements with common patterns
-       */
-      const createElementWithClasses = (tagName, className, props = {}, ...children) => {
-          return createElement(tagName, { ...props, className }, ...children);
-      };
-
-      /**
-       * Utility for creating styled elements
-       */
-      const createStyledElement = (tagName, styles, props = {}, ...children) => {
-          return createElement(tagName, { ...props, style: styles }, ...children);
-      };
-
-    </script>
-
     <script type="module" src="/src/main.js"></script>
 
-    <!-- =================================================================== -->
-    <!--   PASSO 1: SCRIPT DE SIMULAÇÃO MELHORADO (COLE ISTO NO SEU HTML)    -->
-    <!-- =================================================================== -->
+
     <script type="module">
       // Importa o stateManager para podermos interagir com ele nos testes
       import { setState, stateManager } from './src/state.js';
@@ -121,7 +29,7 @@
       // --- Definição das áreas focáveis em cada tela ---
       const focusableAreas = {
           main_menu: menuItems.map(item => item.id), // ['option_1', 'option_2', ...]
-          ac_control: ['fan', 'temp', 'power'] // As áreas de controle do AC
+          ac_control: ['fan', 'temp'] // As áreas de controle do AC
       };
 
       // --- Simulação dos botões do volante usando o teclado ---
@@ -153,11 +61,15 @@
               } else if (e.key === 'ArrowDown') {
                   const nextIndex = (currentIndex + 1) % menuItems.length;
                   window.focus(menuItems[nextIndex]);
+
+          // Logica para seleção de items
               } else if (e.key === 'Enter') {
                   console.log(`[AÇÃO] 'Enter' pressionado no menu: ${currentState.focusedMenuItem}`);
                   // Apenas 'option_2' (Ar Condicionado) tem uma ação
                   if (currentState.focusedMenuItem === 'option_4') {
                       window.showScreen('ac_control');
+                  } else if (currentState.focusedMenuItem === 'option_3') {
+                      window.showScreen('doom');
                   }
 
                   if (currentState.focusedMenuItem === 'option_1') {
@@ -227,7 +139,7 @@
 
                   case 'temp':
                       const currentTemp = parseFloat(currentState.temp) || 21.0;
-                      if (e.key === 'ArrowUp' && currentTemp < 30.0) {
+                      if (e.key === 'ArrowUp' && currentTemp < 26.0) {
                           window.control('temp', (currentTemp + 0.5).toFixed(1));
                       } else if (e.key === 'ArrowDown' && currentTemp > 16.0) {
                           window.control('temp', (currentTemp - 0.5).toFixed(1));
@@ -247,6 +159,6 @@
           }
       });
     </script>
-
   </body>
+
 </html>

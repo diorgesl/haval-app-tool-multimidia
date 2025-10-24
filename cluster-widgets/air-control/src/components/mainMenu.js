@@ -14,7 +14,7 @@ const iconEV = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaX
 export const menuItems = [
     {id: 'option_1', label: 'ESP', iconSrc: iconESP},
     {id: 'option_2', label: 'EV mode', iconSrc: iconEV},
-    {id: 'option_3', label: 'Perfis', iconSrc: iconProfiles},
+    {id: 'option_3', label: 'DOOM', iconSrc: iconProfiles},
     {id: 'option_4', label: 'Menu A/C', iconSrc: iconAC},
     {id: 'option_5', label: 'Modo', iconSrc: iconMode},
     {id: 'option_6', label: 'Conforto', iconSrc: iconSteer},

@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Khand:wght@100;300;500;700&display=swap');
+
 * {
   box-sizing: border-box;
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
   padding: 0;
   margin: 0;
 }
@@ -20,20 +23,19 @@ button {
 .main-container {
   background-color: #000000;
   color: #ffffff;
-  height: 100vh;
-  width: 100vw;
+  height: 456px;
+  width: 456px;
 }
 
-.circle-container {
+.ac-circle-container {
   position: relative;
   width: 452px;
   height: 452px;
-  background-color: #000000;
-  border-radius: 50%;
-  display: flex;
+  background: transparent;  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
 }
 
 /* Flexbox Layouts */
@@ -94,6 +96,8 @@ button {
   -webkit-align-items: center;
   -ms-flex-align: center;
   gap: 32px;
+  z-index: 3;
+
 }
 
 .connector {
@@ -131,6 +135,11 @@ button {
   border-radius: 24px;
   -webkit-border-radius: 24px;
   -moz-border-radius: 24px;
+  z-index: 4;
+
+  width: 100px; /* 1. Ajusta a largura para 100px */
+    height: 100px; /* 1. Ajusta a altura para 100px */
+    transform: translateY(-10px);
 }
 
 .focus-area-small {
@@ -161,7 +170,7 @@ button {
 .h-24 { height: 24px; }
 
 /* Colors */
-.text-white { color: #ffffff; }
+.text-white { color: #ffffff; text-shadow: 0 0 8px #00beff; }
 .text-gray { color: #9ca3af; }
 .text-blue { color: #afd3ff; }
 .bg-blue-500 { background-color: #60a5fa; }
@@ -173,8 +182,8 @@ button {
 .text-36 { font-size: 36px; }
 .text-28 { font-size: 28px; }
 .text-20 { font-size: 20px; }
-.font-bold { font-weight: 700; }
-.font-medium { font-weight: 500; }
+.font-bold { font-weight: 300; }
+.font-medium { font-weight: 100; }
 
 /* Spacing */
 .mb-8 { margin-bottom: 8px; }
@@ -279,12 +288,13 @@ button {
 }
 
 /* Status Element */
-.status-element {
-  margin-top: 16px;
+.auto-mode-container {
+  position: absolute;
+  top: 0;
   display: flex;
+  transform: translate(-160px, 182px);
   display: -webkit-box;
   display: -webkit-flex;
-  display: -ms-flexbox;
   justify-content: space-between;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
@@ -292,5 +302,290 @@ button {
   align-items: center;
   -webkit-align-items: center;
   -ms-flex-align: center;
-  width: 50%;
+  z-index: 3;
 }
+
+.recycle-mode-container {
+  position: absolute;
+  top: 0;
+  display: flex;
+  transform: translate(100px, 170px);
+  display: -webkit-box;
+  justify-content: space-between;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  align-items: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  z-index: 3;
+}
+
+/* ============================================= */
+/* NOVOS ESTILOS PARA TELA DE AR CONDICIONADO    */
+/* ============================================= */
+
+.ac-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  background: radial-gradient(circle, #ffffff 50%, #006dff 100%);
+  animation: pulse-glow 10s infinite alternate;
+  z-index: 0;
+}
+
+.ac-inner-ring {
+  position: absolute;
+  width: 392px; /* 452px - (30px * 2) = 392px */
+  height: 392px;
+  border: 3px solid #053477;
+  border-radius: 50%;
+  background: radial-gradient(circle, #150e59 40%, #0a2345 80%);
+  z-index: 2;
+}
+
+.ac-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+@keyframes pulse-glow {
+  0% {box-shadow: inset 0 0 50px #60a5fa;}
+  50% {box-shadow: inset 0 0 0px #60a5fa;}
+  100% {box-shadow: inset 0 0 50px #60a5fa;}
+}
+
+.ac-divider-line {
+  position: absolute;
+  width: 392px;
+  height: 2px;
+  background-color: #4d97ff6b;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.ac-power-icon {
+    position: absolute;
+    top: 50px; /* Distância do topo */
+    left: 50%; /* Centralizado horizontalmente */
+    transform: translateX(-50%); /* Ajuste fino para centralização perfeita */
+    color: #9ca3af;
+    font-size: 24px;
+    z-index: 3; /* Aumentado para ficar sobre a linha divisória */
+}
+
+.ac-power-icon.off {
+  color: #ff4500; /* Cor vermelha/laranja para estado 'desligado' */
+  text-shadow: 0 0 5px #edbba8;
+}
+
+/* Container para os números de velocidade e temperatura */
+.ac-labels-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Impede que os números interfiram nos cliques */
+  z-index: 3;
+}
+
+/* Estilo individual para cada número (label) */
+.ac-label {
+    position: absolute;
+    font-size: 14px;
+    color: #2563eb;
+    transform-origin: center;
+    left: 50%;
+    top: 50%;
+    margin-left: -12px;
+    margin-top: -12px;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+}
+
+/* Destaque para o número ativo */
+.ac-label.active {
+  color: red;
+  font-weight: bold;
+  font-size: 22px;
+  transform: scale(1.1);
+}
+
+/* Áreas de controle */
+
+.fan-display-label {
+    font-size: 86px;
+    line-height: 0.9; /* Adicione esta linha */
+}
+
+.temp-display-label {
+    font-size: 100px;
+    line-height: 0.9; /* Adicione esta linha */
+}
+
+.ac-fan-control-area {
+    position: absolute;
+    top: 0;
+    display: flex;
+    transform: translateY(100px);
+    font-size: 80px;
+    font-weight: 500;
+    color: white;
+    z-index: 3;
+    border-radius: 20%;
+    padding: 5px;
+    transition: box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.ac-temp-control-area {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    transform: translateY(-88px);
+    font-size: 80px;
+    font-weight: 500;
+    color: white;
+    z-index: 3;
+    border-radius: 20%;
+    padding: 5px;
+    transition: box-shadow 0.3s ease, color 0.3s ease;
+}
+
+
+/* ============================================= */
+/* ESTILOS PARA ANÉIS DE PROGRESSO (NOVO)        */
+/* ============================================= */
+
+.progress-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 422px;
+    height: 422px;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+/* Máscara para criar o efeito de anel (vazado no centro) */
+#fan-progress-ring::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+
+    background: conic-gradient(
+        var(--progress-color, #60a5fa) 0deg var(--progress-angle, 0deg),
+        transparent var(--progress-angle, 0deg) 360deg
+
+    );
+
+    filter: drop-shadow(0 0 8px var(--progress-color, white));
+
+    -webkit-mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+    mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+}
+
+#temp-progress-ring::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+
+    background: conic-gradient(
+        transparent 0deg var(--progress-angle, 0deg),
+        #00beff var(--progress-angle, 0deg), var(--progress-color, #3b82f6) 360deg
+    );
+
+    -webkit-mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+    mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+}
+
+#fan-progress-ring {
+    --progress-color: #ffffff;
+    text-shadow: 0 0 8px #00beff;
+    transform: translate(-50%, -50%) rotate(270deg);
+}
+
+#temp-progress-ring {
+    --progress-color: #0051ff;
+    text-shadow: 0 0 8px #00beff;
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+
+
+/* #################################
+   ###      DOOM Game styles     ###
+   #################################
+*/
+canvas {
+    position: relative;
+    width: 452px;
+    height: 452px;
+    background-image: radial-gradient(circle at center, #0a2345 0%, transparent 80%);
+    border-radius: 50%;
+    --item-gap: 80px;
+    --line-width: 350px;
+    --line-offset-y: 42px;
+}
+
+.jsdos-rso, window  {
+    position: relative;
+    width: 452px;
+    height: 452px;
+    background-image: radial-gradient(circle at center, #0a2345 0%, transparent 80%);
+    border-radius: 50%;
+    --item-gap: 80px;
+    --line-width: 350px;
+    --line-offset-y: 42px;
+ }
+
+
+#dosbox .dosbox-overlay {
+     background-color: transparent;
+     background: transparent;
+ }
+
+#dosbox .dosbox-start {
+    color: white;
+}
+
+ .sidebar {
+    visibility: hidden;
+ }
