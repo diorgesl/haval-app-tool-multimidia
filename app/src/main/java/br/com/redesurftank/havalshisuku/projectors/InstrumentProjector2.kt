@@ -24,6 +24,7 @@ import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType
 import br.com.redesurftank.havalshisuku.models.MainUiManager
 import br.com.redesurftank.havalshisuku.models.screens.MainMenu
+import br.com.redesurftank.havalshisuku.models.screens.RegenScreen
 import br.com.redesurftank.havalshisuku.models.screens.Screen
 
 class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjector(outerContext, display) {
@@ -107,7 +108,6 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('aion', $value)")
                     }
 
-
                     CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
                         evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(value)})")
                     }
@@ -118,10 +118,6 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
 
                     CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value -> {
                         evaluateJsIfReady(webView, "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(value)})")
-                    }
-
-                    CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value -> {
-                        evaluateJsIfReady(webView, "control('regenMode', ${MainMenu.RegenerationOptions.getLabel(value)})")
                     }
 
                     CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
@@ -177,6 +173,11 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         val screen = args[0] as Screen
                         val screen_name = screen.jsName;
                         evaluateJsIfReady(webView, "showScreen('$screen_name')")
+                    }
+
+                    ServiceManagerEventType.GRAPH_SCREEN_NAVIGATION -> {
+                        val screen = args[0] as String
+                        evaluateJsIfReady(webView, "control('currentGraph','$screen')")
                     }
 
                 }
@@ -249,7 +250,6 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(currentEVMode)})")
         evaluateJsIfReady(webView, "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(currentDrivingMode)})")
         evaluateJsIfReady(webView, "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(currentSteerMode)})")
-        evaluateJsIfReady(webView, "control('regenMode', ${MainMenu.RegenerationOptions.getLabel(currentRegenMode)})")
         evaluateJsIfReady(webView, "control('espStatus', ${MainMenu.EspOptions.getLabel(currentESPMode)})")
         evaluateJsIfReady(webView, "focus('$currentMenuOption')")
     }

@@ -47,7 +47,7 @@ export function createStatusElement() {
 
     var unsubscribeAuto = subscribe('auto', function(newAuto) {
         const isAutoOn = newAuto === 1;
-        autoModeIconElement.src = autoModeIcon(isAutoOn ? '#ff0000' : '#0051ff');
+        autoModeIconElement.src = autoModeIcon(isAutoOn ? '#00beff' : '#222222');
         autoModeLabel.className = isAutoOn ? 'text-white' : 'text-gray';
     });
 

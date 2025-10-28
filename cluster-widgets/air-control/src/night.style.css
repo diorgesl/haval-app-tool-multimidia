@@ -343,7 +343,7 @@ button {
   height: 392px;
   border: 3px solid #053477;
   border-radius: 50%;
-  background: radial-gradient(circle, #150e59 40%, #0a2345 80%);
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
   z-index: 2;
 }
 
@@ -462,7 +462,7 @@ button {
 
 
 /* ============================================= */
-/* ESTILOS PARA ANÉIS DE PROGRESSO (NOVO)        */
+/* ESTILOS PARA ANÉIS DE PROGRESSO (AirCon)      */
 /* ============================================= */
 
 .progress-ring {
@@ -476,7 +476,6 @@ button {
     z-index: 2;
 }
 
-/* Máscara para criar o efeito de anel (vazado no centro) */
 #fan-progress-ring::before {
     content: '';
     position: absolute;
@@ -589,3 +588,392 @@ canvas {
  .sidebar {
     visibility: hidden;
  }
+
+
+
+/* ####################################
+   ###      Regen Screen Styles     ###
+   ####################################
+*/
+
+.regen-screen {
+  position: relative;
+  width: 452px;
+  height: 452px;
+  background: transparent;  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.regen-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 80px;
+    margin-top: -40px;
+    margin-left: -130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 12px;
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 30px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    transition:
+        transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 0.4s ease,
+        background-color 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.regen-label {
+    font-family: 'Khand', sans-serif;
+    font-weight: 100;
+    font-size: 50px;
+    color: rgb(85, 128, 165, 0.8);
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.regen-item.focused .regen-label {
+    color: #FFFFFF;
+    font-weight: 300;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.regen-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  background: radial-gradient(circle, #ffffff 50%, #006dff 100%);
+  animation: pulse-glow 10s infinite alternate;
+
+  -webkit-mask: radial-gradient(circle at center, transparent 196px, white 197px);
+  mask: radial-gradient(circle at center, transparent 196px, white 197px);
+
+  z-index: 0;
+}
+
+.regen-inner-ring {
+  position: absolute;
+  width: 392px; /* 452px - (30px * 2) = 392px */
+  height: 392px;
+  border: 3px solid #053477;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.regen-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.regen-selector-line {
+    position: absolute;
+    width: 385px;
+    height: 100px;
+    overflow: hidden;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 120, 255, 0.3);
+    transition: transform 0.2   s cubic-bezier(0.2, 1, 0.3, 1);
+    -webkit-mask: radial-gradient(circle at center, white 90%, transparent 90%);
+    mask: radial-gradient(circle at center, white 90%, transparent 90%);
+    filter: drop-shadow(0 0 10px rgba(0, 0, 255, 0.8));
+    z-index: 3;
+}
+
+.regen-item[data-index="0"] { transform: translateY(-90px); opacity: 1; z-index: 10; }
+.regen-item[data-index="1"] { transform: translateY(0px); opacity: 1; z-index: 10; }
+.regen-item[data-index="2"] { transform: translateY(90px); opacity: 1; z-index: 10; }
+
+.regen-item[data-index="0"].focused ~ .regen-selector-line {
+    transform: translate(-50%, -145px);
+    -webkit-mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
+    mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
+}
+.regen-item[data-index="1"].focused ~ .regen-selector-line {
+    transform: translate(-50%, -50%);
+    -webkit-mask: radial-gradient(circle at center, white 92%, transparent 100%);
+    mask: radial-gradient(circle at center, white 92%, transparent 100%);
+}
+.regen-item[data-index="2"].focused ~ .regen-selector-line {
+    transform: translate(-50%, 38px);
+    -webkit-mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
+    mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
+}
+
+#regen-chart {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+canvas.regen-chart {
+    background: transparent;
+}
+
+/* ============================================= */
+/* ESTILOS PARA ANÉIS DE PROGRESSO (REGEN)       */
+/* ============================================= */
+
+.regen-progress-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 422px;
+    height: 422px;
+    border-radius: 50%;
+    z-index: 2;
+
+    transform: translate(-50%, -50%) rotate(135deg);
+
+    --regen-segment-active-level: 0;
+
+}
+
+#regen-progress-ring::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+
+    --segment-1-alpha: clamp(0, var(--regen-segment-active-level) - 0, 1);
+    --segment-2-alpha: clamp(0, var(--regen-segment-active-level) - 1, 1);
+    --segment-3-alpha: clamp(0, var(--regen-segment-active-level) - 2, 1);
+
+    background:
+        conic-gradient(from 240deg, rgba(0,160,255, var(--segment-3-alpha)) 0 110deg, transparent 110deg),
+        conic-gradient(from 120deg, rgba(0,140,255, var(--segment-2-alpha)) 0 110deg, transparent 110deg),
+        conic-gradient(from 0deg,   rgba(0,120,255, var(--segment-1-alpha)) 0 110deg, transparent 110deg);
+
+    filter: drop-shadow(0 0 8px #ffffff);
+
+    -webkit-mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+    mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+}
+
+
+
+/* ####################################
+   ###      Graph Screen Styles     ###
+   ####################################
+*/
+
+.graph-screen {
+    position: relative;
+    width: 452px;
+    height: 452px;
+    background: transparent;  display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.graph-title-label {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Khand', sans-serif;
+    font-weight: 100;
+    font-size: 32px;
+    color: #c2e3ffcc;
+    white-space: nowrap;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 1);
+    transition: opacity 0.3s ease-in-out;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.graph-bullet-container {
+    position: absolute;
+    top: 50%;
+    right: 50px;
+    transform: translateY(-50%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 10;
+}
+
+.graph-bullet {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.graph-bullet.active {
+    background-color: #00A0FF;
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(0, 160, 255, 0.7);
+}
+.graph-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  animation: pulse-glow 20s infinite alternate;
+
+  -webkit-mask: radial-gradient(circle at center, transparent 196px, white 197px);
+  mask: radial-gradient(circle at center, transparent 196px, white 197px);
+
+  z-index: 0;
+}
+
+.graph-inner-ring {
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.graph-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.graph-selector-line {
+    position: absolute;
+    width: 385px;
+    height: 100px;
+    overflow: hidden;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 120, 255, 0.3);
+    transition: transform 0.2   s cubic-bezier(0.2, 1, 0.3, 1);
+    -webkit-mask: radial-gradient(circle at center, white 90%, transparent 90%);
+    mask: radial-gradient(circle at center, white 90%, transparent 90%);
+    filter: drop-shadow(0 0 10px rgba(0, 0, 255, 0.8));
+    z-index: 3;
+}
+
+.graph-item[data-index="0"] { transform: translateY(-90px); opacity: 1; z-index: 10; }
+.graph-item[data-index="1"] { transform: translateY(0px); opacity: 1; z-index: 10; }
+.graph-item[data-index="2"] { transform: translateY(90px); opacity: 1; z-index: 10; }
+
+.graph-item[data-index="0"].focused ~ .graph-selector-line {
+    transform: translate(-50%, -145px);
+    -webkit-mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
+    mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
+}
+.graph-item[data-index="1"].focused ~ .graph-selector-line {
+    transform: translate(-50%, -50%);
+    -webkit-mask: radial-gradient(circle at center, white 92%, transparent 100%);
+    mask: radial-gradient(circle at center, white 92%, transparent 100%);
+}
+.graph-item[data-index="2"].focused ~ .graph-selector-line {
+    transform: translate(-50%, 38px);
+    -webkit-mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
+    mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
+}
+
+#graph-chart {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+canvas.graph-chart {
+    background: transparent;
+}
+
+/* ============================================= */
+/* ESTILOS PARA ANÉIS DE PROGRESSO (Graph)       */
+/* ============================================= */
+
+.graph-progress-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 422px;
+    height: 422px;
+    border-radius: 50%;
+    z-index: 2;
+
+    transform: translate(-50%, -50%) rotate(135deg);
+
+    --graph-segment-active-level: 0;
+
+}
+
+#graph-progress-ring::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+
+    --segment-1-alpha: clamp(0, var(--graph-segment-active-level) - 0, 1);
+    --segment-2-alpha: clamp(0, var(--graph-segment-active-level) - 1, 1);
+    --segment-3-alpha: clamp(0, var(--graph-segment-active-level) - 2, 1);
+
+    background:
+        conic-gradient(from 240deg, rgba(0,160,255, var(--segment-3-alpha)) 0 110deg, transparent 110deg),
+        conic-gradient(from 120deg, rgba(0,140,255, var(--segment-2-alpha)) 0 110deg, transparent 110deg),
+        conic-gradient(from 0deg,   rgba(0,120,255, var(--segment-1-alpha)) 0 110deg, transparent 110deg);
+
+    filter: drop-shadow(0 0 8px #ffffff);
+
+    -webkit-mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+    mask: radial-gradient(
+        transparent 0,
+        transparent calc(50% - 15px),
+        white calc(50% - 15px),
+        white 50%
+    );
+}

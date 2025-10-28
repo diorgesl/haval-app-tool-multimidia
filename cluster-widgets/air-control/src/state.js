@@ -64,11 +64,9 @@ var stateManager = new StateManager({
     // Main Menu state
     screen: 'main_menu',
     focusedMenuItem: 'option_4',
-
     espStatus: 'ON',
     drivingMode: 'Normal',
     steerMode: 'Conforto',
-    regenMode: 'Normal',
     evMode: 'HEV',
 
     // Ac screen states
@@ -79,6 +77,16 @@ var stateManager = new StateManager({
     auto: 1,
     recycle: 0,
     aion: 0,
+
+    // Regen screen states
+    regenMode: 'Media',
+    lastRegenValue: 0,
+
+    // Graph values
+    currentGraph: 'evConsumption',
+    evConsumption: 0,
+    gasConsumption: 12,
+    batteryPercentage: 90
 });
 
 // Convenience functions for easier usage

@@ -1,3 +1,4 @@
+
 let dosboxInstance = null;
 
 export function prepareGameScreen() {
@@ -23,13 +24,13 @@ export function startGame() {
 
     console.log("Iniciando dosbox...");
 
+
     dosboxInstance =  Dos(document.getElementById("dosbox"), {
             url: "./src/components/doom/doom.jsdos",
             autoStart: true,
             renderAspect: "1/1",
             setThinSidebar: true
     });
-
 
 }
 

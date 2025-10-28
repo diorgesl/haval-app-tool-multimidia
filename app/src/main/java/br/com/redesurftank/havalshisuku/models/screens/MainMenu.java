@@ -14,10 +14,9 @@ public class MainMenu implements Screen {
 
     private int currentMenuItemIndex = 0;
 
-    private List<MenuItem> menuItems;
-
     private Screen previousScreen = this;
 
+    private List<MenuItem> menuItems;
 
     // Car related control values, these should match the car constants in the server
     public static class EspOptions {
@@ -82,21 +81,6 @@ public class MainMenu implements Screen {
         }
     }
 
-    public static class RegenerationOptions {
-        public static final int LOW = 2;
-        public static final int NORMAL = 0;
-        public static final int HIGH = 1;
-        public static String getLabel(String value) {
-            int val = Integer.parseInt(value);
-            switch (val) {
-                case 2: return "'Baixa'";
-                case 0: return "'Normal'";
-                case 1: return "'Alta'";
-            }
-            return "";
-        }
-    }
-
     @Override
     public String getJsName() {
         return "main_menu";
@@ -108,9 +92,12 @@ public class MainMenu implements Screen {
         if (this.serviceManager == null) this.serviceManager = ServiceManager.getInstance();
 
         if (menuItems == null) {
-            Screen acControlScreen = new AcControl();
+            Screen acControlScreen = new AcControlScreen();
             acControlScreen.setReturnScreen(this);
+            Screen regenScreen = new RegenScreen();
+            regenScreen.setReturnScreen(this);
             acControlScreen.initialize();
+            regenScreen.initialize();
 
             // Define menu structure and options available
             menuItems = Arrays.asList(
@@ -125,17 +112,13 @@ public class MainMenu implements Screen {
                             CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG)
                     ),
                     new MenuItem(
-                            MenuItem.MENU_ID_PROFILES,
-                            new MenuAction.NavigateTo(this)
+                            MenuItem.MENU_ID_DRIVING_MODE,
+                            new MenuAction.CycleValues(Arrays.asList(DrivingModeOptions.NORMAL, DrivingModeOptions.ECO, DrivingModeOptions.SPORT),
+                                    CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE)
                     ),
                     new MenuItem(
                             MenuItem.MENU_ID_AC_CONTROL,
                             new MenuAction.NavigateTo(acControlScreen)
-                    ),
-                    new MenuItem(
-                            MenuItem.MENU_ID_DRIVING_MODE,
-                            new MenuAction.CycleValues(Arrays.asList(DrivingModeOptions.NORMAL, DrivingModeOptions.ECO, DrivingModeOptions.SPORT),
-                            CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE)
                     ),
                     new MenuItem(
                             MenuItem.MENU_ID_STEER_MODE,
@@ -144,8 +127,11 @@ public class MainMenu implements Screen {
                     ),
                     new MenuItem(
                             MenuItem.MENU_ID_REGENERATION_MODE,
-                            new MenuAction.CycleValues(Arrays.asList(RegenerationOptions.LOW, RegenerationOptions.NORMAL, RegenerationOptions.HIGH),
-                            CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL)
+                            new MenuAction.NavigateTo(regenScreen)
+                    ),
+                    new MenuItem(
+                            MenuItem.MENU_ID_STATS,
+                            new MenuAction.NavigateTo(this) // TODO: create new screen for statistics
                     )
             );
         }
@@ -204,9 +190,8 @@ public class MainMenu implements Screen {
             public Screen getScreen() { return screen; }
         }
 
-        // (ATUALIZADO) A classe Option foi removida daqui
         class CycleValues implements MenuAction {
-            private final List<Object> values; // Armazena uma lista de valores diretamente
+            private final List<Object> values;
             private int currentOptionIndex;
             private final CarConstants carOptionID;
 
@@ -244,11 +229,11 @@ public class MainMenu implements Screen {
     private static class MenuItem {
         public static final String MENU_ID_ESP = "option_1";
         public static final String MENU_ID_EVMODE = "option_2";
-        public static final String MENU_ID_PROFILES = "option_3";
+        public static final String MENU_ID_DRIVING_MODE = "option_3";
         public static final String MENU_ID_AC_CONTROL = "option_4";
-        public static final String MENU_ID_DRIVING_MODE = "option_5";
-        public static final String MENU_ID_STEER_MODE = "option_6";
-        public static final String MENU_ID_REGENERATION_MODE = "option_7";
+        public static final String MENU_ID_STEER_MODE = "option_5";
+        public static final String MENU_ID_REGENERATION_MODE = "option_6";
+        public static final String MENU_ID_STATS = "option_7";
         private final String id;
         private final MenuAction action;
 

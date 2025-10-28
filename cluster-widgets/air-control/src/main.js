@@ -1,14 +1,17 @@
 import {getState as get, setState, subscribe} from './state.js';
 import {createMainMenu} from './components/mainMenu.js';
-import {createAcControlScreen, updateProgressRings} from "./components/aircon/mainAcControl.js";
+import {createAcControlScreen, updateProgressRings as updateProgressRingsAC} from "./components/aircon/mainAcControl.js";
+import {createRegenScreen, updateProgressRings as updateProgressRingsRegen, setupRegenChart } from "./components/regen/regenControl.js";
 import {prepareGameScreen, startGame, stopGame} from "./components/doom/doom.js";
+import {createGraphScreen } from "./components/graphs/graphs.js";
 
 
 const appContainer = document.getElementById('app');
 let currentComponent = null;
 
-const doom = prepareGameScreen();
-document.body.append(doom);
+// ## Tests to run Doom on the cluster screen (Paused for the moment)
+//const doom = prepareGameScreen();
+//document.body.append(doom);
 
 function render() {
     const screen = get('screen');
@@ -21,30 +24,41 @@ function render() {
         appContainer.innerHTML = ''; // Limpa o DOM de forma simples
     }
 
+    //stopGame(); future use to test the doom game
+
     if (screen === 'main_menu') {
-        stopGame();
         currentComponent = createMainMenu();
-    } else if (screen === 'ac_control') {
+    } else if (screen === 'aircon') {
         currentComponent = createAcControlScreen();
-        stopGame();
-    } else if (screen === 'doom') {
-        currentComponent = "";
-        startGame();
+    } else if (screen === 'regen') {
+        currentComponent = createRegenScreen();
+    } else if (screen === 'graph') {
+        currentComponent = createGraphScreen();
     }
 
+//  future use to test the game
+/*    } else if (screen === 'doom') {
+        currentComponent = "";
+        startGame();
+      }
+*/
     if (currentComponent) {
         appContainer.appendChild(currentComponent);
-        if (screen === 'ac_control') updateProgressRings();
+        if (screen === 'aircon') {
+            updateProgressRingsAC();
+        }
+        if (screen === 'regen') {
+            updateProgressRingsRegen();
+            setupRegenChart();
+        }
     }
 }
 
 // Start rendering and subscribe to listen for screen changes thus triggering new render
-
 subscribe('screen', render);
 subscribe('espStatus', render);
 subscribe('drivingMode', render);
 subscribe('steerMode', render);
-subscribe('regenMode', render);
 subscribe('evMode', render);
 render();
 
@@ -61,10 +75,8 @@ window.showScreen = function(screenName) {
 window.focus = function(item) {
     const screen = get('screen');
     if (screen === 'main_menu') {
-        // Se estamos no menu, 'area' é um ID de item de menu.
         setState('focusedMenuItem', item);
-    } else {
-        // Se estamos no AC, 'area' é um item de foco do AC.
+    } else if (screen === 'aircon') {
         setState('focusArea', item);
     }
 };

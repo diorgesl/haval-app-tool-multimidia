@@ -9,9 +9,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.9.0/dist/chartjs-plugin-streaming.min.js"></script>
   </head>
   <body>
-    <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
 
@@ -28,8 +30,10 @@
 
       // --- Definição das áreas focáveis em cada tela ---
       const focusableAreas = {
-          main_menu: menuItems.map(item => item.id), // ['option_1', 'option_2', ...]
-          ac_control: ['fan', 'temp'] // As áreas de controle do AC
+          main_menu: menuItems.map(item => item.id),
+          ac_control: ['fan', 'temp'],
+          regen: ['Normal', 'Media', 'Alta'],
+          graph: ['evConsumption', 'gasConsumption', 'batteryPercentage']
       };
 
       // --- Simulação dos botões do volante usando o teclado ---
@@ -65,12 +69,6 @@
           // Logica para seleção de items
               } else if (e.key === 'Enter') {
                   console.log(`[AÇÃO] 'Enter' pressionado no menu: ${currentState.focusedMenuItem}`);
-                  // Apenas 'option_2' (Ar Condicionado) tem uma ação
-                  if (currentState.focusedMenuItem === 'option_4') {
-                      window.showScreen('ac_control');
-                  } else if (currentState.focusedMenuItem === 'option_3') {
-                      window.showScreen('doom');
-                  }
 
                   if (currentState.focusedMenuItem === 'option_1') {
                       const currentStatus = stateManager.getState().espStatus;
@@ -85,7 +83,7 @@
                       const newMode = modes[nextIndex];
                       console.log(`[AÇÃO] Alterando Modo de '${currentMode}' para '${newMode}'`);
                       setState('evMode', newMode);
-                  } else if (currentState.focusedMenuItem === 'option_5') {
+                  } else if (currentState.focusedMenuItem === 'option_3') {
                       const modes = ['Normal', 'Eco', 'Sport'];
                       const currentMode = stateManager.getState().drivingMode;
                       const currentIndex = modes.indexOf(currentMode);
@@ -93,7 +91,9 @@
                       const newMode = modes[nextIndex];
                       console.log(`[AÇÃO] Alterando Modo de '${currentMode}' para '${newMode}'`);
                       setState('drivingMode', newMode);
-                  } else if (currentState.focusedMenuItem === 'option_6') {
+                  } else if (currentState.focusedMenuItem === 'option_4') {
+                      window.showScreen('aircon');
+                  } else if (currentState.focusedMenuItem === 'option_5') {
                       const modes = ['Normal', 'Conforto', 'Esportiva'];
                       const currentMode = stateManager.getState().steerMode;
                       const currentIndex = modes.indexOf(currentMode);
@@ -101,20 +101,18 @@
                       const newMode = modes[nextIndex];
                       console.log(`[AÇÃO] Alterando Modo de Direcao de '${currentMode}' para '${newMode}'`);
                       setState('steerMode', newMode);
+                  } else if (currentState.focusedMenuItem === 'option_6') {
+                      window.showScreen('regen');
                   } else if (currentState.focusedMenuItem === 'option_7') {
-                      const modes = ['Normal', 'Média', 'Alta'];
-                      const currentMode = stateManager.getState().regenMode;
-                      const currentIndex = modes.indexOf(currentMode);
-                      const nextIndex = (currentIndex + 1) % modes.length;
-                      const newMode = modes[nextIndex];
-                      console.log(`[AÇÃO] Alterando Modo de Regeneracao '${currentMode}' para '${newMode}'`);
-                      setState('regenMode', newMode);
+                      window.showScreen('graph');
                   }
+
+
               }
           }
 
           // --- LÓGICA DE CONTROLE DO AR CONDICIONADO ---
-          else if (currentScreen === 'ac_control') {
+          else if (currentScreen === 'aircon') {
               const focusedArea = currentState.focusArea;
 
               if (e.key === 'Enter') {
@@ -157,7 +155,66 @@
                       break;
               }
           }
+          // --- LÓGICA DE CONTROLE DE REGENERACAO ---
+          else if (currentScreen === 'regen') {
+              const regenMode = currentState.regenMode;
+
+              if (e.key === 'Enter') {
+                  console.log(`[AÇÃO] Alternando foco de '${regenMode}' para 'Media'`);
+                  window.control('regenMode', 'Media');
+              } else if (e.key === 'ArrowUp') {
+                  const controls = focusableAreas.regen;
+                  const currentIndex = controls.indexOf(regenMode);
+                  if (currentIndex < 2) {
+                     const nextIndex = (currentIndex + 1) % controls.length;
+                     console.log(`[AÇÃO] Alternando foco de '${regenMode}' para '${controls[nextIndex]}'`);
+                     window.control('regenMode', controls[nextIndex]);
+                  }
+              } else if (e.key === 'ArrowDown') {
+                  const controls = focusableAreas.regen;
+                  const currentIndex = controls.indexOf(regenMode);
+                  if (currentIndex > 0) {
+                     const nextIndex = (currentIndex - 1) % controls.length;
+                     console.log(`[AÇÃO] Alternando foco de '${regenMode}' para '${controls[nextIndex]}'`);
+                     window.control('regenMode', controls[nextIndex]);
+                  }
+              }
+          }
+          // --- LÓGICA DE CONTROLE DE REGENERACAO ---
+          else if (currentScreen === 'graph') {
+              const currentGraph = currentState.currentGraph;
+
+              if ((e.key === 'Enter') || (e.key === 'ArrowDown')) {
+                  const controls = focusableAreas.graph;
+                  const currentIndex = controls.indexOf(currentGraph);
+                  if (currentIndex < 2) {
+                     const nextIndex = (currentIndex + 1) % controls.length;
+                     console.log(`[AÇÃO] Alternando foco de '${currentGraph}' para '${controls[nextIndex]}'`);
+                     window.control('currentGraph', controls[nextIndex]);
+                  }
+              } else if (e.key === 'ArrowUp') {
+                  const controls = focusableAreas.graph;
+                  const currentIndex = controls.indexOf(currentGraph);
+                  if (currentIndex > 0) {
+                     const nextIndex = (currentIndex - 1) % controls.length;
+                     console.log(`[AÇÃO] Alternando foco de '${currentGraph}' para '${controls[nextIndex]}'`);
+                     window.control('currentGraph', controls[nextIndex]);
+                  }
+              }
+          }
       });
+
+      // --- SIMULAÇÃO DE DADOS DE CONSUMOEV EM TEMPO REAL ---
+      setInterval(() => {
+          // Random value from 1 to 100
+          const randomValue = Math.floor(Math.random() * 101);
+
+          setState('lastRegenValue', randomValue);
+          setState('evConsumption', randomValue);
+
+      }, 1000); // Executa a cada 1000ms (1 segundo)
+
+
     </script>
   </body>
 

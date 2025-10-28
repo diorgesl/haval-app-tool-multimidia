@@ -14,11 +14,11 @@ const iconEV = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaX
 export const menuItems = [
     {id: 'option_1', label: 'ESP', iconSrc: iconESP},
     {id: 'option_2', label: 'EV mode', iconSrc: iconEV},
-    {id: 'option_3', label: 'DOOM', iconSrc: iconProfiles},
+    {id: 'option_3', label: 'Modo', iconSrc: iconMode},
     {id: 'option_4', label: 'Menu A/C', iconSrc: iconAC},
-    {id: 'option_5', label: 'Modo', iconSrc: iconMode},
-    {id: 'option_6', label: 'Conforto', iconSrc: iconSteer},
-    {id: 'option_7', label: 'Reg. Normal', iconSrc: iconRegen},
+    {id: 'option_5', label: 'Conforto', iconSrc: iconSteer},
+    {id: 'option_6', label: 'Regeneração', iconSrc: iconRegen},
+    {id: 'option_7', label: 'Gráficos', iconSrc: iconProfiles},
 ];
 
 export function createMainMenu() {
@@ -55,7 +55,7 @@ export function createMainMenu() {
                     children: [evMode]
                 })
             ];
-        } else if (itemData.id === 'option_5') {
+        } else if (itemData.id === 'option_3') {
             const drivingMode = getState('drivingMode');
             labelContent = [
                 'Modo ',
@@ -64,22 +64,13 @@ export function createMainMenu() {
                     children: [drivingMode]
                 })
             ];
-        } else if (itemData.id === 'option_6') {
+        } else if (itemData.id === 'option_5') {
             const steerMode = getState('steerMode');
             labelContent = [
                 '',
                 span({
                     className: `menu-label-status ${steerMode.toLowerCase()}`,
                     children: [steerMode]
-                })
-            ];
-        } else if (itemData.id === 'option_7') {
-            const regenMode = getState('regenMode');
-            labelContent = [
-                'Reg. ',
-                span({
-                    className: `menu-label-status ${regenMode.toLowerCase()}`,
-                    children: [regenMode]
                 })
             ];
         } else {
