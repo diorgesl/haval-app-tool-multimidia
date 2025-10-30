@@ -98,6 +98,9 @@ public class MainMenu implements Screen {
             regenScreen.setReturnScreen(this);
             acControlScreen.initialize();
             regenScreen.initialize();
+            Screen graphScreen = new GraphicsScreen();
+            graphScreen.setReturnScreen(this);
+            graphScreen.initialize();
 
             // Define menu structure and options available
             menuItems = Arrays.asList(
@@ -131,7 +134,7 @@ public class MainMenu implements Screen {
                     ),
                     new MenuItem(
                             MenuItem.MENU_ID_STATS,
-                            new MenuAction.NavigateTo(this) // TODO: create new screen for statistics
+                            new MenuAction.NavigateTo(graphScreen)
                     )
             );
         }
@@ -140,7 +143,7 @@ public class MainMenu implements Screen {
         serviceManager.dispatchServiceManagerEvent(br.com.redesurftank.havalshisuku.models.ServiceManagerEventType.UPDATE_SCREEN, this);
 
         // Set default initial position as middle of the menu
-        this.currentMenuItemIndex = menuItems.size() / 2;
+        if (this.currentMenuItemIndex == 0) this.currentMenuItemIndex = menuItems.size() / 2;
         serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
         serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
 

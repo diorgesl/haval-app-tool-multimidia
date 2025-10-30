@@ -1,6 +1,13 @@
 import {getState, subscribe} from '../../state.js';
 import {div, img, span} from '../../utils/createElement.js';
 
+/*
+import '/node_modules/luxon/build/global/luxon.min.js'
+import '/node_modules/chart.js/dist/chart.min.js'
+import '/node_modules/chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js'
+import '/node_modules/chartjs-plugin-streaming/dist/chartjs-plugin-streaming.min.js'
+*/
+
 
 export const graphList = [
     {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption' },
@@ -13,50 +20,73 @@ const graphController = {
     chartInstance: null,
     currentDataKey: null,
     unsubscribeFromData: null,
+    isInitialized: false,
 
     init(canvasContext) {
+        if (this.isInitialized) return;
+
         this.chartInstance = new Chart(canvasContext, {
             type: 'line',
             data: { datasets: [{
-                label: '', // Dynamic Title
+                label: '',
                 backgroundColor: 'rgba(0, 120, 255, 0.15)',
                 borderColor: '#00c3ff',
                 borderWidth: 2,
                 pointRadius: 0,
                 fill: true,
+                tension: 0.3,
                 shadowColor: 'rgba(0, 195, 255, 0.5)',
                 shadowBlur: 10,
-            }] },
+            }]},
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                legend: { display: false },
-                tooltips: { enabled: false },
-                scales: {
-                    xAxes: [{ type: 'realtime', display: false }],
-                    yAxes: [{ display: false, ticks: { beginAtZero: true, max: 100 } }]
-                },
                 plugins: {
-                    streaming: { duration: 20000, refresh: 1000, frameRate: 30 }
+                    legend: { display: false },
+                    tooltip: { enabled: false },
+                    streaming: {
+                        duration: 20000,
+                        refresh: 1000,
+                        frameRate: 30
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'realtime',
+                        display: false
+                    },
+                    y: {
+                        display: false,
+                        ticks: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
                 }
             }
         });
+        this.isInitialized = true;
     },
 
     switchTo(graphId) {
+        if (!this.isInitialized) {
+            console.warn("GraphController: Tentativa de troca antes da inicialização.");
+            return;
+        }
+
         const graphInfo = graphList.find(g => g.id === graphId);
         if (!graphInfo || graphInfo.dataKey === this.currentDataKey) {
             return;
         }
 
-        this.chartInstance.canvas.style.transition = 'opacity 0.3s ease-out';
-        this.chartInstance.canvas.style.opacity = 0;
-
         if (this.unsubscribeFromData) {
             this.unsubscribeFromData();
+            this.unsubscribeFromData = null;
         }
 
         this.currentDataKey = graphInfo.dataKey;
+        this.chartInstance.canvas.style.transition = 'opacity 0.3s ease-out';
+        this.chartInstance.canvas.style.opacity = 0;
 
         setTimeout(() => {
             this.chartInstance.data.datasets[0].label = graphInfo.displayLabel;
@@ -73,7 +103,6 @@ const graphController = {
             });
 
             this.chartInstance.canvas.style.opacity = 1;
-
         }, 300);
     }
 };

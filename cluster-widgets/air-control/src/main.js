@@ -1,15 +1,14 @@
 import {getState as get, setState, subscribe} from './state.js';
 import {createMainMenu} from './components/mainMenu.js';
 import {createAcControlScreen, updateProgressRings as updateProgressRingsAC} from "./components/aircon/mainAcControl.js";
-import {createRegenScreen, updateProgressRings as updateProgressRingsRegen, setupRegenChart } from "./components/regen/regenControl.js";
+import {createRegenScreen, updateProgressRings as updateProgressRingsRegen } from "./components/regen/regenControl.js";
 import {prepareGameScreen, startGame, stopGame} from "./components/doom/doom.js";
 import {createGraphScreen } from "./components/graphs/graphs.js";
-
 
 const appContainer = document.getElementById('app');
 let currentComponent = null;
 
-// ## Tests to run Doom on the cluster screen (Paused for the moment)
+// ## Tests to run Doom on the cluster screen (On Hold for the moment as need to fix JSDOS imports)
 //const doom = prepareGameScreen();
 //document.body.append(doom);
 
@@ -21,7 +20,7 @@ function render() {
     }
 
     if (appContainer && appContainer.innerHTML) {
-        appContainer.innerHTML = ''; // Limpa o DOM de forma simples
+        appContainer.innerHTML = '';
     }
 
     //stopGame(); future use to test the doom game
@@ -49,12 +48,10 @@ function render() {
         }
         if (screen === 'regen') {
             updateProgressRingsRegen();
-            setupRegenChart();
         }
     }
 }
 
-// Start rendering and subscribe to listen for screen changes thus triggering new render
 subscribe('screen', render);
 subscribe('espStatus', render);
 subscribe('drivingMode', render);

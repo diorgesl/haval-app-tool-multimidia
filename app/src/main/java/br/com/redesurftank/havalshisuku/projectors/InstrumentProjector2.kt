@@ -23,6 +23,7 @@ import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType
 import br.com.redesurftank.havalshisuku.models.MainUiManager
+import br.com.redesurftank.havalshisuku.models.screens.GraphicsScreen
 import br.com.redesurftank.havalshisuku.models.screens.MainMenu
 import br.com.redesurftank.havalshisuku.models.screens.RegenScreen
 import br.com.redesurftank.havalshisuku.models.screens.Screen
@@ -126,6 +127,22 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
 
                     CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value -> {
                         evaluateJsIfReady (webView, "control('regenMode', ${RegenScreen.RegenOptions.getLabel(value)})")
+                    }
+
+                    CarConstants.CAR_EV_INFO_ENERGY_RECOVERY_INFO.value -> {
+                        evaluateJsIfReady (webView, "control('regenMode', ${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME})")
+                    }
+
+                    CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO.value -> {
+                        evaluateJsIfReady (webView, "control('regenMode', ${GraphicsScreen.GraphOptions.EV_CONSUMPTION})")
+                    }
+
+                    CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO.value -> {
+                        evaluateJsIfReady (webView, "control('regenMode', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION})")
+                    }
+
+                    CarConstants.CAR_EV_INFO_CUR_BATTERY_POWER_PERCENTAGE.value -> {
+                        evaluateJsIfReady (webView, "control('regenMode', ${GraphicsScreen.GraphOptions.BATTERY_PERCENTAGE})")
                     }
 
                     else -> {}
