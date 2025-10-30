@@ -17,10 +17,22 @@ public class RegenScreen implements Screen {
 
     private static final String TAG = "RegenScreen";
 
-    public static final int NORMAL = 2;
-    public static final int MEDIUM = 0;
-    public static final int HIGH = 1;
-    private static final int[] regenValueMap = {NORMAL, MEDIUM, HIGH};
+
+    public static class RegenOptions {
+        public static final int NORMAL = 2;
+        public static final int MEDIUM = 0;
+        public static final int HIGH = 1;
+        public static String getLabel(String value) {
+            int val = Integer.parseInt(value);
+            switch (val) {
+                case 2: return "'Normal'";
+                case 0: return "'Media'";
+                case 1: return "'Alta'";
+            }
+            return "";
+        }
+    }
+    private static final int[] regenValueMap = {RegenOptions.NORMAL, RegenOptions.MEDIUM, RegenOptions.HIGH};
     private int currentRegenIndex = 0;
 
     private ServiceManager serviceManager;
@@ -65,7 +77,7 @@ public class RegenScreen implements Screen {
         serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.UPDATE_SCREEN,this);
     }
 
-    private int findIndexFromValue(int carValue) {
+    public int findIndexFromValue(int carValue) {
         for (int i = 0; i < regenValueMap.length; i++) {
             if (regenValueMap[i] == carValue) {
                 return i;

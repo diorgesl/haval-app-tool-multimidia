@@ -1,6 +1,8 @@
 import {getState, subscribe} from '../../state.js';
 import {div, img, span} from '../../utils/createElement.js';
-
+import Chart from 'chart.js/auto';
+import 'chartjs-plugin-streaming';
+//import 'chartjs-adapter-moment';
 
 export const regenItems = [
     {id: 'Alta', displayLabel: 'ALTA'},
@@ -88,10 +90,6 @@ export function createRegenScreen() {
 
 export function setupRegenChart() {
     const ctx = document.getElementById('regen-chart');
-    if (!ctx) {
-        console.error("Elemento canvas #regen-chart não encontrado!");
-        return;
-    }
 
     const regenChartInstance = new Chart(ctx, {
         type: 'line',

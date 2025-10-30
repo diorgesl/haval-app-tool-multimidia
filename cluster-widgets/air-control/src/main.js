@@ -5,7 +5,6 @@ import {createRegenScreen, updateProgressRings as updateProgressRingsRegen, setu
 import {prepareGameScreen, startGame, stopGame} from "./components/doom/doom.js";
 import {createGraphScreen } from "./components/graphs/graphs.js";
 
-
 const appContainer = document.getElementById('app');
 let currentComponent = null;
 

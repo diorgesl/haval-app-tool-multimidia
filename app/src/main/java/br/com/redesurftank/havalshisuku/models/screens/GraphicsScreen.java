@@ -6,6 +6,7 @@ import br.com.redesurftank.havalshisuku.managers.ServiceManager;
 import br.com.redesurftank.havalshisuku.models.CarConstants;
 import br.com.redesurftank.havalshisuku.models.MainUiManager;
 import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType;
+import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType;
 
 
 public class GraphicsScreen implements Screen {
@@ -27,11 +28,11 @@ public class GraphicsScreen implements Screen {
     public void processKey(Key key) {
         switch (key) {
             case UP:
-                if (currentGraphIndex < graphsValueMap.length - 1) currentGraphIndex++;
+                if (currentGraphIndex > 0) currentGraphIndex--;
                 break;
             case ENTER:
             case DOWN:
-                if (currentGraphIndex > 0) currentGraphIndex--;
+                if (currentGraphIndex < graphsValueMap.length - 1) currentGraphIndex++;
                 break;
             case BACK:
                 MainUiManager.getInstance().updateScreen(previousScreen);
@@ -42,7 +43,7 @@ public class GraphicsScreen implements Screen {
         }
 
         String valueToSend = graphsValueMap[currentGraphIndex];
-        serviceManager.updateData(CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.getValue(), valueToSend);
+        serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.GRAPH_SCREEN_NAVIGATION, valueToSend);
         Log.i(TAG, "Graph changed to screen: " + valueToSend);
 
     }
@@ -50,8 +51,6 @@ public class GraphicsScreen implements Screen {
     @Override
     public void initialize() {
         this.serviceManager = ServiceManager.getInstance();
-        //String fromCar = ServiceManager.getInstance().getData(CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.getValue());
-        //this.currentGraphIndex = findIndexFromValue(Integer.parseInt(fromCar));
         serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.UPDATE_SCREEN,this);
     }
 

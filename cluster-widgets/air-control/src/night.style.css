@@ -653,9 +653,6 @@ canvas {
   border: 3px solid #1d4ed8;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
-  background: radial-gradient(circle, #ffffff 50%, #006dff 100%);
-  animation: pulse-glow 10s infinite alternate;
-
   -webkit-mask: radial-gradient(circle at center, transparent 196px, white 197px);
   mask: radial-gradient(circle at center, transparent 196px, white 197px);
 
@@ -668,7 +665,7 @@ canvas {
   height: 392px;
   border: 3px solid #053477;
   border-radius: 50%;
-  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  background: radial-gradient(circle, #0a2345 0%, #000000 90%);
   overflow: hidden;
   z-index: 2;
 }
@@ -767,8 +764,6 @@ canvas.regen-chart {
         conic-gradient(from 120deg, rgba(0,140,255, var(--segment-2-alpha)) 0 110deg, transparent 110deg),
         conic-gradient(from 0deg,   rgba(0,120,255, var(--segment-1-alpha)) 0 110deg, transparent 110deg);
 
-    filter: drop-shadow(0 0 8px #ffffff);
-
     -webkit-mask: radial-gradient(
         transparent 0,
         transparent calc(50% - 15px),
@@ -850,7 +845,6 @@ canvas.regen-chart {
   border: 3px solid #1d4ed8;
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
-  animation: pulse-glow 20s infinite alternate;
 
   -webkit-mask: radial-gradient(circle at center, transparent 196px, white 197px);
   mask: radial-gradient(circle at center, transparent 196px, white 197px);
@@ -863,7 +857,7 @@ canvas.regen-chart {
   width: 392px;
   height: 392px;
   border-radius: 50%;
-  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  background: radial-gradient(circle, #0a2345 0%, #000000 90%);
   overflow: hidden;
   z-index: 2;
 }
