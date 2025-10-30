@@ -699,17 +699,17 @@ canvas {
 .regen-item[data-index="1"] { transform: translateY(0px); opacity: 1; z-index: 10; }
 .regen-item[data-index="2"] { transform: translateY(90px); opacity: 1; z-index: 10; }
 
-.regen-item[data-index="0"].focused ~ .regen-selector-line {
+.regen-item[data-index="0"].focused ~ #regen-inner-ring.regen-selector-line {
     transform: translate(-50%, -145px);
     -webkit-mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
     mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
 }
-.regen-item[data-index="1"].focused ~ .regen-selector-line {
+.regen-item[data-index="1"].focused ~ #regen-inner-ring.regen-selector-line {
     transform: translate(-50%, -50%);
     -webkit-mask: radial-gradient(circle at center, white 92%, transparent 100%);
     mask: radial-gradient(circle at center, white 92%, transparent 100%);
 }
-.regen-item[data-index="2"].focused ~ .regen-selector-line {
+.regen-item[data-index="2"].focused ~ #regen-inner-ring.regen-selector-line {
     transform: translate(-50%, 38px);
     -webkit-mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
     mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);

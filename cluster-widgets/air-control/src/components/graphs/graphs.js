@@ -1,6 +1,10 @@
 import {getState, subscribe} from '../../state.js';
 import {div, img, span} from '../../utils/createElement.js';
 
+import { Chart, registerables } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
+import 'chartjs-adapter-date-fns';
+Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
     {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption' },

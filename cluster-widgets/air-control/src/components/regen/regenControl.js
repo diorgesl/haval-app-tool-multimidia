@@ -1,6 +1,10 @@
 import {getState, subscribe} from '../../state.js';
 import {div, img, span} from '../../utils/createElement.js';
 
+import { Chart, registerables } from 'chart.js';
+import streamingPlugin from 'chartjs-plugin-streaming';
+import 'chartjs-adapter-date-fns';
+Chart.register(...registerables, streamingPlugin);
 
 export const regenItems = [
     {id: 'Alta', displayLabel: 'ALTA'},
@@ -121,6 +125,7 @@ export function createRegenScreen() {
     canvas.className = 'regen-chart';
     canvas.id = 'regen-chart';
     innerRing.appendChild(canvas);
+    innerRing.appendChild(divider);
 
     container.appendChild(outerRing);
     container.appendChild(innerRingShadow);
@@ -147,8 +152,6 @@ export function createRegenScreen() {
         container.appendChild(itemEl);
         itemElements[itemData.id] = itemEl;
     });
-
-    container.appendChild(divider);
 
     setTimeout(() => {
         const ctx = document.getElementById('regen-chart');
