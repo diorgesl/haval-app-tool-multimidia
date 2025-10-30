@@ -1,13 +1,6 @@
 import {getState, subscribe} from '../../state.js';
 import {div, img, span} from '../../utils/createElement.js';
 
-/*
-import '/node_modules/luxon/build/global/luxon.min.js'
-import '/node_modules/chart.js/dist/chart.min.js'
-import '/node_modules/chartjs-adapter-luxon/dist/chartjs-adapter-luxon.umd.min.js'
-import '/node_modules/chartjs-plugin-streaming/dist/chartjs-plugin-streaming.min.js'
-*/
-
 
 export const graphList = [
     {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption' },
