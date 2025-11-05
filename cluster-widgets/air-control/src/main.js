@@ -3,11 +3,15 @@ import { createControlElement } from './components/control.js';
 import { createStatusElement } from './components/status.js';
 import { getState as get, setState, subscribe } from './state.js';
 import { createMainMenu } from './components/mainMenu.js';
+import { div } from '../utils/createElement.js';
 
+if (process.env.NODE_ENV === 'development') {
+  import('./testing-utils.js');
+}
 
 function createAcControlScreen() {
 
-    var main = document.createElement('main');
+    var main = div('main');
     main.className = 'main-container';
 
     var circleContainer = document.createElement('div');
