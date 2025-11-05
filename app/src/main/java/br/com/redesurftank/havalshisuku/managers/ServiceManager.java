@@ -111,7 +111,7 @@ public class ServiceManager {
             CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE,
             CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE,
             CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL,
-            CarConstants.CAR_EV_INFO_ENERGY_RECOVERY_INFO,
+            CarConstants.CAR_EV_INFO_ENERGY_OUTPUT_PERCENTAGE,
             CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO,
             CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO,
     };
@@ -162,6 +162,9 @@ public class ServiceManager {
             CarConstants.CAR_INTELLIGENT_DRIVING_SETTING_SRAS_RCW_STATE,
             CarConstants.CAR_INTELLIGENT_DRIVING_SETTING_SRAS_RSA_RSB_STATE,
             CarConstants.CAR_INTELLIGENT_DRIVING_SETTING_SRAS_RSA_RSB_WARNING_STATE,
+            CarConstants.CAR_EV_INFO_ENERGY_OUTPUT_PERCENTAGE,
+            CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO,
+            CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO,
     };
     private static ServiceManager instance;
     private final List<IDataChanged> dataChangedListeners;

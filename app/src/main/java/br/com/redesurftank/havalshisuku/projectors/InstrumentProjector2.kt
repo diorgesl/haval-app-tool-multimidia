@@ -129,20 +129,20 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady (webView, "control('regenMode', ${RegenScreen.RegenOptions.getLabel(value)})")
                     }
 
-                    CarConstants.CAR_EV_INFO_ENERGY_RECOVERY_INFO.value -> {
-                        evaluateJsIfReady (webView, "control('regenMode', ${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME})")
+                    CarConstants.CAR_EV_INFO_ENERGY_OUTPUT_PERCENTAGE.value -> {
+                        evaluateJsIfReady (webView, "control('${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME}',$value)")
                     }
 
                     CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO.value -> {
-                        evaluateJsIfReady (webView, "control('regenMode', ${GraphicsScreen.GraphOptions.EV_CONSUMPTION})")
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.EV_CONSUMPTION})',$value")
                     }
 
                     CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO.value -> {
-                        evaluateJsIfReady (webView, "control('regenMode', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION})")
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}',$value)")
                     }
 
                     CarConstants.CAR_EV_INFO_CUR_BATTERY_POWER_PERCENTAGE.value -> {
-                        evaluateJsIfReady (webView, "control('regenMode', ${GraphicsScreen.GraphOptions.BATTERY_PERCENTAGE})")
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.BATTERY_PERCENTAGE}',$value)")
                     }
 
                     else -> {}

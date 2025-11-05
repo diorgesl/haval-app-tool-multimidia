@@ -1,4 +1,3 @@
-// Importe as funções de estado e também as de criação de elementos
 import {getState, subscribe} from '../state.js';
 import {div, img, span} from '../utils/createElement.js';
 
@@ -23,7 +22,6 @@ export const menuItems = [
 
 export function createMainMenu() {
 
-    // Cria o container principal para o menu
     var main = document.createElement('main');
 
     const container = div({className: 'main-menu-container'});
@@ -38,12 +36,12 @@ export function createMainMenu() {
 
         let labelContent;
         if (itemData.id === 'option_1') {
-            const espStatus = getState('espStatus'); // Pega o status atual do ESP
+            const espStatus = getState('espStatus');
             labelContent = [
-                'ESP ', // A parte fixa do texto, com um espaço
+                'ESP ',
                 span({
-                    className: `menu-label-status ${espStatus.toLowerCase()}`, // ex: 'menu-label-status on'
-                    children: [espStatus] // 'ON' ou 'OFF'
+                    className: `menu-label-status ${espStatus.toLowerCase()}`,
+                    children: [espStatus]
                 })
             ];
         } else if (itemData.id === 'option_2') {
@@ -74,7 +72,6 @@ export function createMainMenu() {
                 })
             ];
         } else {
-            // Lógica padrão para todos os outros itens
             labelContent = itemData.label;
         }
 
@@ -83,7 +80,6 @@ export function createMainMenu() {
             className: `menu-item ${isFocused ? 'focused' : ''}`,
             'data-index': index,
             children: [
-                // 1. Círculo do Ícone
                 div({
                     className: 'icon-container',
                     children: [
@@ -94,7 +90,6 @@ export function createMainMenu() {
                         })
                     ]
                 }),
-                // 2. Texto do Menu
                 span({
                     className: 'menu-label ${drivingMode.toLowerCase()}',
                     children: [labelContent]
@@ -102,36 +97,27 @@ export function createMainMenu() {
             ]
         });
 
-        // Adiciona o elemento criado ao carousel container
         carousel.appendChild(itemEl);
         itemElements[itemData.id] = itemEl;
     });
 
-    // Função para atualizar a classe 'focused' (reaproveitada da sua lógica)
     const updateFocus = (newFocusedId) => {
-        // Remove o foco de todos os itens
         Object.values(itemElements).forEach(el => el.classList.remove('focused'));
-        // Adiciona a classe 'focused' apenas ao item correto
         if (itemElements[newFocusedId]) {
             itemElements[newFocusedId].classList.add('focused');
         }
-        // Limpa classes de foco antigas do carrossel
         carousel.className = 'menu-carousel';
         const focusedIndex = menuItems.findIndex(item => item.id === newFocusedId);
 
         if (focusedIndex !== -1) {
-            // Adiciona a nova classe de foco ao carrossel
             carousel.classList.add(`focus-${focusedIndex}`);
         }
     };
 
-    // Define o estado inicial da rotação
     updateFocus(focusedItemId);
 
-    // Inscreve-se para futuras atualizações de foco no estado
     const unsubscribe = subscribe('focusedMenuItem', updateFocus);
 
-    // Função de limpeza para remover o listener e evitar memory leaks
     main.cleanup = () => {
         unsubscribe();
     };

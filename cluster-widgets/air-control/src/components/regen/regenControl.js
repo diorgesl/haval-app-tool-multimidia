@@ -101,31 +101,23 @@ const regenChartController = {
 
 export function createRegenScreen() {
 
-    var main = document.createElement('main');
-    main.className = 'main-container';
+    var main = div({className: 'main-container'});
 
-    const container = document.createElement('div');
-    container.className = 'regen-screen';
+    const container = div({className: 'regen-screen'});
 
-    const regenProgressRing = document.createElement('div');
+    const regenProgressRing = div({className: 'regen-progress-ring'});
     regenProgressRing.id = 'regen-progress-ring';
-    regenProgressRing.className = 'regen-progress-ring';
     container.appendChild(regenProgressRing);
 
-    const divider = document.createElement('div');
-    divider.className = 'regen-selector-line';
-    const outerRing = document.createElement('div');
-    outerRing.className = 'regen-outer-ring';
-    const innerRingShadow = document.createElement('div');
-    innerRingShadow.className = 'regen-inner-ring-shadow';
-    const innerRing = document.createElement('div');
-    innerRing.className = 'regen-inner-ring';
+    const divider = div({className: 'regen-selector-line'});
+    const outerRing = div({className: 'regen-outer-ring'});
+    const innerRingShadow = div({className: 'regen-inner-ring-shadow'});
+    const innerRing = div({className: 'regen-inner-ring'});
 
     const canvas = document.createElement('canvas');
     canvas.className = 'regen-chart';
     canvas.id = 'regen-chart';
     innerRing.appendChild(canvas);
-    innerRing.appendChild(divider);
 
     container.appendChild(outerRing);
     container.appendChild(innerRingShadow);
@@ -149,9 +141,11 @@ export function createRegenScreen() {
             ]
         });
 
-        container.appendChild(itemEl);
+        innerRing.appendChild(itemEl);
         itemElements[itemData.id] = itemEl;
     });
+
+    innerRing.appendChild(divider);
 
     setTimeout(() => {
         const ctx = document.getElementById('regen-chart');

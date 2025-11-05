@@ -549,48 +549,6 @@ button {
 
 
 
-/* #################################
-   ###      DOOM Game styles     ###
-   #################################
-*/
-canvas {
-    position: relative;
-    width: 452px;
-    height: 452px;
-    background-image: radial-gradient(circle at center, #0a2345 0%, transparent 80%);
-    border-radius: 50%;
-    --item-gap: 80px;
-    --line-width: 350px;
-    --line-offset-y: 42px;
-}
-
-.jsdos-rso, window  {
-    position: relative;
-    width: 452px;
-    height: 452px;
-    background-image: radial-gradient(circle at center, #0a2345 0%, transparent 80%);
-    border-radius: 50%;
-    --item-gap: 80px;
-    --line-width: 350px;
-    --line-offset-y: 42px;
- }
-
-
-#dosbox .dosbox-overlay {
-     background-color: transparent;
-     background: transparent;
- }
-
-#dosbox .dosbox-start {
-    color: white;
-}
-
- .sidebar {
-    visibility: hidden;
- }
-
-
-
 /* ####################################
    ###      Regen Screen Styles     ###
    ####################################
@@ -687,10 +645,8 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 120, 255, 0.3);
+    background-color: rgba(0, 120, 255, 0.2);
     transition: transform 0.2   s cubic-bezier(0.2, 1, 0.3, 1);
-    -webkit-mask: radial-gradient(circle at center, white 90%, transparent 90%);
-    mask: radial-gradient(circle at center, white 90%, transparent 90%);
     filter: drop-shadow(0 0 10px rgba(0, 0, 255, 0.8));
     z-index: 3;
 }
@@ -699,20 +655,14 @@ canvas {
 .regen-item[data-index="1"] { transform: translateY(0px); opacity: 1; z-index: 10; }
 .regen-item[data-index="2"] { transform: translateY(90px); opacity: 1; z-index: 10; }
 
-.regen-item[data-index="0"].focused ~ #regen-inner-ring.regen-selector-line {
+.regen-item[data-index="0"].focused ~ .regen-selector-line {
     transform: translate(-50%, -145px);
-    -webkit-mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
-    mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
 }
-.regen-item[data-index="1"].focused ~ #regen-inner-ring.regen-selector-line {
+.regen-item[data-index="1"].focused ~ .regen-selector-line {
     transform: translate(-50%, -50%);
-    -webkit-mask: radial-gradient(circle at center, white 92%, transparent 100%);
-    mask: radial-gradient(circle at center, white 92%, transparent 100%);
 }
-.regen-item[data-index="2"].focused ~ #regen-inner-ring.regen-selector-line {
+.regen-item[data-index="2"].focused ~ .regen-selector-line {
     transform: translate(-50%, 38px);
-    -webkit-mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
-    mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
 }
 
 #regen-chart {

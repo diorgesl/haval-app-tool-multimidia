@@ -67,7 +67,6 @@ const graphController = {
 
     switchTo(graphId) {
         if (!this.isInitialized) {
-            console.warn("GraphController: Tentativa de troca antes da inicialização.");
             return;
         }
 
@@ -101,34 +100,43 @@ const graphController = {
 
             this.chartInstance.canvas.style.opacity = 1;
         }, 300);
+    },
+
+    cleanup() {
+        if (this.unsubscribeFromData) {
+            this.unsubscribeFromData();
+            this.unsubscribeFromData = null;
+        }
+
+        if (this.chartInstance) {
+            this.chartInstance.destroy();
+            this.chartInstance = null;
+        }
+
+        this.isInitialized = false;
+        this.currentDataKey = null;
     }
+
 };
 
 export function createGraphScreen() {
 
-    var main = document.createElement('main');
-    main.className = 'main-container';
+    var main = div({className: 'main-container'});
 
-    const container = document.createElement('div');
-    container.className = 'graph-screen';
+    const container = div({className: 'graph-screen'});
 
-    const graphProgressRing = document.createElement('div');
+    const graphProgressRing = div({className: 'graph-progress-ring'});
     graphProgressRing.id = 'graph-progress-ring';
-    graphProgressRing.className = 'graph-progress-ring';
     container.appendChild(graphProgressRing);
 
-    const divider = document.createElement('div');
-    divider.className = 'graph-selector-line';
-    const outerRing = document.createElement('div');
-    outerRing.className = 'graph-outer-ring';
-    const innerRingShadow = document.createElement('div');
-    innerRingShadow.className = 'graph-inner-ring-shadow';
-    const innerRing = document.createElement('div');
-    innerRing.className = 'graph-inner-ring';
+    const divider = div({className: 'graph-selector-line'});
+    const outerRing = div({className: 'graph-outer-ring'});
+    const innerRingShadow = div({className: 'graph-inner-ring-shadow'});
+    const innerRing = div({className: 'graph-inner-ring'});
 
     const canvas = document.createElement('canvas');
-    canvas.className = 'graph-chart';
-    canvas.id = 'graph-chart';
+    canvas.className = 'regen-chart';
+    canvas.id = 'regen-chart';
     innerRing.appendChild(canvas);
 
     container.appendChild(outerRing);
@@ -146,9 +154,8 @@ export function createGraphScreen() {
             'data-id': itemData.id
         });
         bulletContainer.appendChild(bulletEl);
-        bulletElements[itemData.id] = bulletEl; // Guarda a referência
+        bulletElements[itemData.id] = bulletEl;
     });
-
 
     container.appendChild(bulletContainer);
 
@@ -170,6 +177,13 @@ export function createGraphScreen() {
         updateFocus(getState('currentGraph'));
 
     }, 0);
+
+   main.cleanup = () => {
+        if (unsubscribeFromGraphChange) {
+            unsubscribeFromGraphChange();
+        }
+        graphController.cleanup();
+    };
 
     const updateFocus = (currentGraphId) => {
         Object.values(bulletElements).forEach(bullet => {
