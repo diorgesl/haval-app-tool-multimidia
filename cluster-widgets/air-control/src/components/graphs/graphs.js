@@ -7,11 +7,10 @@ import 'chartjs-adapter-date-fns';
 Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
-    {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption' },
-    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption' },
-    {id: 'batteryPercentage', displayLabel: 'BATERIA %', dataKey: 'batteryPercentage' },
+    {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption', unity: '%' },
+    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption', unity: '%'  },
+    {id: 'batteryPercentage', displayLabel: 'BATERIA %', dataKey: 'batteryPercentage', unity: '%'  },
 ];
-
 
 const graphController = {
     chartInstance: null,
@@ -45,7 +44,7 @@ const graphController = {
                         duration: 20000,
                         refresh: 1000,
                         frameRate: 30
-                    }
+                    },
                 },
                 scales: {
                     x: {
@@ -53,11 +52,20 @@ const graphController = {
                         display: false
                     },
                     y: {
-                        display: false,
+                        display: true,
+                        min: 0,
+                        max: 100,
                         ticks: {
-                            beginAtZero: true,
-                            max: 100
-                        }
+                            padding: 10,
+                            color: 'rgba(100,172,255,0.7)',
+                            callback: function(value, index, ticks) { return value >= 40 && value <= 60 ? value : ''; },
+                        },
+                        grid: {
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            color: 'rgba(0,160,255,0.1)',
+                        },
                     }
                 }
             }
@@ -67,7 +75,6 @@ const graphController = {
 
     switchTo(graphId) {
         if (!this.isInitialized) {
-            console.warn("GraphController: Tentativa de troca antes da inicialização.");
             return;
         }
 
@@ -97,34 +104,63 @@ const graphController = {
                         y: newValue
                     });
                 }
+
+                const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
+                const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line'); // <-- NOVO
+                if (tooltipEl && lineEl) {
+                    const newYpos = Math.min(350,450 - (newValue * 450/100));
+                    if (newYpos) {
+                        tooltipEl.textContent = Math.round(newValue)  + " " + graphInfo.unity;;
+                        tooltipEl.style.top = `${newYpos}px`;
+                        tooltipEl.style.opacity = 1;
+
+                        lineEl.style.top = `${newYpos - 20}px`;
+                        lineEl.style.opacity = 1;
+                    }
+                }
+
             });
 
             this.chartInstance.canvas.style.opacity = 1;
         }, 300);
+    },
+
+    cleanup() {
+        if (this.unsubscribeFromData) {
+            this.unsubscribeFromData();
+            this.unsubscribeFromData = null;
+        }
+
+        if (this.chartInstance) {
+            this.chartInstance.destroy();
+            this.chartInstance = null;
+        }
+
+        this.isInitialized = false;
+        this.currentDataKey = null;
     }
+
 };
 
 export function createGraphScreen() {
 
-    var main = document.createElement('main');
-    main.className = 'main-container';
+    var main = div({className: 'main-container'});
 
-    const container = document.createElement('div');
-    container.className = 'graph-screen';
+    const container = div({className: 'graph-screen'});
 
-    const graphProgressRing = document.createElement('div');
+    const graphProgressRing = div({className: 'graph-progress-ring'});
     graphProgressRing.id = 'graph-progress-ring';
-    graphProgressRing.className = 'graph-progress-ring';
     container.appendChild(graphProgressRing);
 
-    const divider = document.createElement('div');
-    divider.className = 'graph-selector-line';
-    const outerRing = document.createElement('div');
-    outerRing.className = 'graph-outer-ring';
-    const innerRingShadow = document.createElement('div');
-    innerRingShadow.className = 'graph-inner-ring-shadow';
-    const innerRing = document.createElement('div');
-    innerRing.className = 'graph-inner-ring';
+    const divider = div({className: 'graph-selector-line'});
+    const outerRing = div({className: 'graph-outer-ring'});
+    const innerRingShadow = div({className: 'graph-inner-ring-shadow'});
+    const innerRing = div({className: 'graph-inner-ring'});
+
+    const dynamicTooltip = div({ className: 'dynamic-tooltip' });
+    innerRing.appendChild(dynamicTooltip);
+    const dynamicTooltipLine = div({ className: 'dynamic-tooltip-line' });
+    innerRing.appendChild(dynamicTooltipLine);
 
     const canvas = document.createElement('canvas');
     canvas.className = 'graph-chart';
@@ -146,9 +182,8 @@ export function createGraphScreen() {
             'data-id': itemData.id
         });
         bulletContainer.appendChild(bulletEl);
-        bulletElements[itemData.id] = bulletEl; // Guarda a referência
+        bulletElements[itemData.id] = bulletEl;
     });
-
 
     container.appendChild(bulletContainer);
 
@@ -170,6 +205,10 @@ export function createGraphScreen() {
         updateFocus(getState('currentGraph'));
 
     }, 0);
+
+   main.cleanup = () => {
+        graphController.cleanup();
+    };
 
     const updateFocus = (currentGraphId) => {
         Object.values(bulletElements).forEach(bullet => {

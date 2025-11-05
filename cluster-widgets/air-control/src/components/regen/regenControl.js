@@ -39,7 +39,7 @@ const regenChartController = {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: false },
+                    tooltip: { enabled: true },
                     streaming: {
                         duration: 30000,
                         refresh: 1000,
@@ -47,7 +47,23 @@ const regenChartController = {
                 },
                 scales: {
                     x: { type: 'realtime', display: false },
-                    y: { display: false, ticks: { beginAtZero: true, max: 100 } }
+                    y: {
+                        min: 0,
+                        max: 100,
+                        display: true,
+                        ticks: {
+                            padding: 17,
+                            color: 'rgba(100,172,255,0.7)',
+                            callback: function(value, index, ticks) { return value >= 30 && value <= 70 ? value : ''; },
+
+                        },
+                        grid: {
+                          display: true,
+                          drawOnChartArea: true,
+                          drawTicks: true,
+                          color: 'rgba(0,160,255,0.1)'
+                        },
+                    }
                 }
             }
         });
@@ -101,31 +117,23 @@ const regenChartController = {
 
 export function createRegenScreen() {
 
-    var main = document.createElement('main');
-    main.className = 'main-container';
+    var main = div({className: 'main-container'});
 
-    const container = document.createElement('div');
-    container.className = 'regen-screen';
+    const container = div({className: 'regen-screen'});
 
-    const regenProgressRing = document.createElement('div');
+    const regenProgressRing = div({className: 'regen-progress-ring'});
     regenProgressRing.id = 'regen-progress-ring';
-    regenProgressRing.className = 'regen-progress-ring';
     container.appendChild(regenProgressRing);
 
-    const divider = document.createElement('div');
-    divider.className = 'regen-selector-line';
-    const outerRing = document.createElement('div');
-    outerRing.className = 'regen-outer-ring';
-    const innerRingShadow = document.createElement('div');
-    innerRingShadow.className = 'regen-inner-ring-shadow';
-    const innerRing = document.createElement('div');
-    innerRing.className = 'regen-inner-ring';
+    const divider = div({className: 'regen-selector-line'});
+    const outerRing = div({className: 'regen-outer-ring'});
+    const innerRingShadow = div({className: 'regen-inner-ring-shadow'});
+    const innerRing = div({className: 'regen-inner-ring'});
 
     const canvas = document.createElement('canvas');
     canvas.className = 'regen-chart';
     canvas.id = 'regen-chart';
     innerRing.appendChild(canvas);
-    innerRing.appendChild(divider);
 
     container.appendChild(outerRing);
     container.appendChild(innerRingShadow);
@@ -149,9 +157,11 @@ export function createRegenScreen() {
             ]
         });
 
-        container.appendChild(itemEl);
+        innerRing.appendChild(itemEl);
         itemElements[itemData.id] = itemEl;
     });
+
+    innerRing.appendChild(divider);
 
     setTimeout(() => {
         const ctx = document.getElementById('regen-chart');
