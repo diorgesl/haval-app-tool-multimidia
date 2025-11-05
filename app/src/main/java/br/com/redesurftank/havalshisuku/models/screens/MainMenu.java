@@ -60,8 +60,12 @@ public class MainMenu implements Screen {
             int val = Integer.parseInt(value);
             switch (val) {
                 case 0: return "'Normal'";
-                case 2: return "'Eco'";
                 case 1: return "'Sport'";
+                case 2: return "'Eco'";
+                case 3: return "'Neve'";
+                case 4: return "'Areia'";
+                case 5: return "'Lama'";
+                case 11: return "'AWD'";
             }
             return "";
         }

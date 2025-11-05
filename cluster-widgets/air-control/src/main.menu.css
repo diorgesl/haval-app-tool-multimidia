@@ -1,10 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Khand:wght@100;300;500;700&display=swap');
+@font-face {
+  font-display: swap;
+  font-family: 'Khand';
+  font-style: normal;
+  font-weight: 300;
+  src: url('./fonts/khand-v22-latin-300.woff2') format('woff2');
+}
 
-/* ================================================= */
-/*  main.menu.css - Versão com Linhas de Seleção Fixas  */
-/* ================================================= */
+@font-face {
+  font-display: swap;
+  font-family: 'Khand';
+  font-style: normal;
+  font-weight: 500;
+  src: url('./fonts/khand-v22-latin-500.woff2') format('woff2');
+}
 
-/* Container principal - SEM MUDANÇAS */
+@font-face {
+  font-display: swap;
+  font-family: 'Khand';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./fonts/khand-v22-latin-700.woff2') format('woff2');
+}
+
 .main-menu-container {
     background-color: #000000;
     color: #ffffff;
@@ -12,18 +29,10 @@
     width: 100vw;
 }
 
-/* Container interno que agrupa os itens */
 .menu-carousel {
     position: relative;
     width: 452px;
     height: 452px;
-
-    /*
-    outline: 2px solid #2b556e;
-    outline-offset: -40px;
-    border: 2px solid #2b556e;
-    box-sizing: border-box;
-    */
 
     background-image: radial-gradient(circle at center,
         #0a2345 0%,
@@ -31,47 +40,31 @@
     );
     border-radius: 50%;
 
-    /*
-     * ===============================================
-     *   VARIÁVEIS DE CONFIGURAÇÃO DE DISTÂNCIA
-     * ===============================================
-    */
-    --item-gap: 80px; /* Espaçamento entre os itens */
-
-    /*
-     * ===============================================
-     *   (NOVO) CRIAÇÃO DAS LINHAS DE SELEÇÃO
-     * ===============================================
-    */
-    --line-width: 350px; /* Largura das linhas */
-    --line-offset-y: 42px; /* Distância das linhas a partir do centro */
+    --item-gap: 80px;
+    --line-width: 350px;
+    --line-offset-y: 42px;
 }
 
-/* (NOVO) Estilo base para as linhas criadas com ::before e ::after */
 .menu-carousel::before,
 .menu-carousel::after {
-    content: ''; /* Essencial para pseudo-elementos */
+    content: '';
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     width: var(--line-width);
     height: 2px;
-    background-color: #5d9ef4; /* Cor das linhas */
-    z-index: 100; /* Garante que as linhas fiquem NA FRENTE de tudo */
+    background-color: #5d9ef4;
+    z-index: 100;
 }
 
-/* (NOVO) Posição da linha superior */
 .menu-carousel::before {
     top: calc(50% - var(--line-offset-y));
 }
 
-/* (NOVO) Posição da linha inferior */
 .menu-carousel::after {
     top: calc(50% + var(--line-offset-y));
 }
 
-
-/* Estilo base para cada item do menu - SEM MUDANÇAS */
 .menu-item {
     position: absolute;
     top: 50%;
@@ -92,7 +85,6 @@
         background-color 0.3s ease;
 }
 
-/* Container do ícone - SEM MUDANÇAS */
 .icon-container {
     width: 56px;
     height: 56px;
@@ -105,25 +97,22 @@
     transition: all 0.3s ease;
 }
 
-/* O ícone SVG - SEM MUDANÇAS */
 .menu-icon {
     width: 38px;
     height: 40px;
 }
 
-/* O texto (rótulo) - SEM MUDANÇAS */
 .menu-label {
     font-family: 'Khand', sans-serif;
-    font-weight: 100;
+    font-weight: 300;
     font-size: 36px;
     color: #A3AED0;
     white-space: nowrap;
     transition: all 0.3s ease;
 }
 
-/* --- ESTADO FOCADO (ITEM CENTRAL) --- */
 .menu-item.focused {
-    background-color: transparent; /* GARANTE QUE NÃO HÁ MAIS FUNDO */
+    background-color: transparent;
 }
 .menu-item.focused .icon-container {
     background-color: transparent;
@@ -131,44 +120,35 @@
 .menu-item.focused .menu-label {
     color: #FFFFFF;
     font-size: 52px;
-    font-weight: 100;
+    font-weight: 300;
 }
 
-/* Estilo para itens com status alteraveis */
 .menu-label-status {
-    font-weight: 300; /* Sempre em negrito */
+    font-weight: 300;
 }
 
-/* Estilo específico para quando o status for 'ON' */
 .menu-label-status.on {
-    color: #00beff; /* Um tom de vermelho vivo */
+    color: #00beff;
 }
 
-/* Estilo opcional para quando o status for 'OFF' */
 .menu-label-status.off {
-    color: #e7ebff; /* Mesma cor do texto normal do menu */
+    color: #e7ebff;
 }
 
 .menu-label-status.sport {
-    color: #FF4D4D; /* Um tom de vermelho vivo */
+    color: #FF4D4D;
 }
 
 .menu-label-status.eco {
-    color: #4CAF50; /* Um tom de verde claro e legível */
+    color: #4CAF50;
 }
 
-/* --- POSICIONAMENTO RELATIVO AO ITEM FOCADO --- */
-/* Esta seção inteira permanece exatamente a mesma */
-
-/* Quando o item 0 está focado */
 .menu-carousel.focus-0 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
 .menu-carousel.focus-0 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-0 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 .menu-carousel.focus-0 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-0 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  2)) scale(0.2); opacity: 0;   z-index: 6; }
 
-
-/* Quando o item 1 está focado */
 .menu-carousel.focus-1 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-1 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
 .menu-carousel.focus-1 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
@@ -176,8 +156,6 @@
 .menu-carousel.focus-1 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-1 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  2)) scale(0.2); opacity: 0;   z-index: 6; }
 
-
-/* Quando o item 2 está focado */
 .menu-carousel.focus-2 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 .menu-carousel.focus-2 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-2 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
@@ -185,8 +163,6 @@
 .menu-carousel.focus-2 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 .menu-carousel.focus-2 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 
-
-/* Quando o item 3 está focado */
 .menu-carousel.focus-3 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-3 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 .menu-carousel.focus-3 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
@@ -195,7 +171,6 @@
 .menu-carousel.focus-3 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 .menu-carousel.focus-3 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 
-/* Quando o item 4 está focado */
 .menu-carousel.focus-4 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
 .menu-carousel.focus-4 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-4 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
@@ -204,7 +179,6 @@
 .menu-carousel.focus-4 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
 .menu-carousel.focus-4 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
 
-/* Quando o item 5 está focado */
 .menu-carousel.focus-5 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
 .menu-carousel.focus-5 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-5 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
@@ -212,7 +186,6 @@
 .menu-carousel.focus-5 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
 .menu-carousel.focus-5 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
 
-/* Quando o item 6 está focado */
 .menu-carousel.focus-6 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
 .menu-carousel.focus-6 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
 .menu-carousel.focus-6 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
