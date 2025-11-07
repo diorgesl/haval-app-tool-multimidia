@@ -83,6 +83,13 @@ const graphController = {
             return;
         }
 
+        const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
+        const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line');
+        if (tooltipEl && lineEl) {
+            tooltipEl.style.opacity = 0;
+            lineEl.style.opacity = 0;
+        }
+
         if (this.unsubscribeFromData) {
             this.unsubscribeFromData();
             this.unsubscribeFromData = null;
@@ -111,7 +118,6 @@ const graphController = {
                     const newYpos = Math.min(350,450 - (newValue * 450/100));
                     if (newYpos) {
                         tooltipEl.textContent = Math.round(newValue)  + " " + graphInfo.unity;;
-                        tooltipEl.style.top = `${newYpos}px`;
                         tooltipEl.style.opacity = 1;
 
                         lineEl.style.top = `${newYpos - 20}px`;

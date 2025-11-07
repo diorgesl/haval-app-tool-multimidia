@@ -101,7 +101,10 @@ export function createAcControlScreen() {
     if (activeTempLabel) activeTempLabel.classList.add('active');
   }, 0);
 
-  return main;
+  return {
+      element: main,
+      onMount: () => { updateProgressRings(); }
+  };
 
 }
 

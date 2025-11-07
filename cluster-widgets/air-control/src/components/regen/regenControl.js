@@ -182,15 +182,18 @@ export function createRegenScreen() {
     };
 
     updateFocus(regenStatus);
-
     const unsubscribe = subscribe('regenMode', updateFocus);
 
     main.cleanup = () => {
         unsubscribe();
+        regenChartController.cleanup();
     };
 
+    return {
+        element: main,
+        onMount: () => { updateProgressRings(); }
+    };
 
-    return main;
 }
 
 

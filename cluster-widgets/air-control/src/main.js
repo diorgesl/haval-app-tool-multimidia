@@ -25,7 +25,7 @@ function render() {
 
     if (screen === 'main_menu') {
         currentComponent = createMainMenu();
-    } else if (screen === 'ac_control') {
+    } else if (screen === 'aircon') {
         currentComponent = createAcControlScreen();
     } else if (screen === 'regen') {
         currentComponent = createRegenScreen();
@@ -34,24 +34,18 @@ function render() {
     }
 
     if (currentComponent) {
-        appContainer.appendChild(currentComponent);
-        if (screen === 'aircon') {
-            updateProgressRingsAC();
-        }
-        if (screen === 'regen') {
-            updateProgressRingsRegen();
+        const element = currentComponent.element || currentComponent;
+        const onMount = currentComponent.onMount;
+        currentComponent = element;
+        appContainer.appendChild(element);
+        if (onMount) {
+            onMount();
         }
     }
 }
 
 // Start rendering and subscribe to listen for screen changes thus triggering new render
-
 subscribe('screen', render);
-subscribe('espStatus', render);
-subscribe('drivingMode', render);
-subscribe('steerMode', render);
-subscribe('regenMode', render);
-subscribe('evMode', render);
 render();
 
 
