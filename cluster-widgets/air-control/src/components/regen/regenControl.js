@@ -39,7 +39,7 @@ const regenChartController = {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { enabled: false },
+                    tooltip: { enabled: true },
                     streaming: {
                         duration: 30000,
                         refresh: 1000,
@@ -47,7 +47,23 @@ const regenChartController = {
                 },
                 scales: {
                     x: { type: 'realtime', display: false },
-                    y: { display: false, ticks: { beginAtZero: true, max: 100 } }
+                    y: {
+                        min: 0,
+                        max: 100,
+                        display: true,
+                        ticks: {
+                            padding: 17,
+                            color: 'rgba(100,172,255,0.7)',
+                            callback: function(value, index, ticks) { return value >= 30 && value <= 70 ? value : ''; },
+
+                        },
+                        grid: {
+                          display: true,
+                          drawOnChartArea: true,
+                          drawTicks: true,
+                          color: 'rgba(0,160,255,0.1)'
+                        },
+                    }
                 }
             }
         });
@@ -166,15 +182,18 @@ export function createRegenScreen() {
     };
 
     updateFocus(regenStatus);
-
     const unsubscribe = subscribe('regenMode', updateFocus);
 
     main.cleanup = () => {
         unsubscribe();
+        regenChartController.cleanup();
     };
 
+    return {
+        element: main,
+        onMount: () => { updateProgressRings(); }
+    };
 
-    return main;
 }
 
 

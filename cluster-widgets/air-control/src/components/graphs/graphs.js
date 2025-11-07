@@ -7,11 +7,10 @@ import 'chartjs-adapter-date-fns';
 Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
-    {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption' },
-    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption' },
-    {id: 'batteryPercentage', displayLabel: 'BATERIA %', dataKey: 'batteryPercentage' },
+    {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption', unity: '%' },
+    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption', unity: '%'  },
+    {id: 'batteryPercentage', displayLabel: 'BATERIA %', dataKey: 'batteryPercentage', unity: '%'  },
 ];
-
 
 const graphController = {
     chartInstance: null,
@@ -45,7 +44,7 @@ const graphController = {
                         duration: 20000,
                         refresh: 1000,
                         frameRate: 30
-                    }
+                    },
                 },
                 scales: {
                     x: {
@@ -53,11 +52,20 @@ const graphController = {
                         display: false
                     },
                     y: {
-                        display: false,
+                        display: true,
+                        min: 0,
+                        max: 100,
                         ticks: {
-                            beginAtZero: true,
-                            max: 100
-                        }
+                            padding: 10,
+                            color: 'rgba(100,172,255,0.7)',
+                            callback: function(value, index, ticks) { return value >= 40 && value <= 60 ? value : ''; },
+                        },
+                        grid: {
+                            display: true,
+                            drawOnChartArea: true,
+                            drawTicks: false,
+                            color: 'rgba(0,160,255,0.1)',
+                        },
                     }
                 }
             }
@@ -73,6 +81,13 @@ const graphController = {
         const graphInfo = graphList.find(g => g.id === graphId);
         if (!graphInfo || graphInfo.dataKey === this.currentDataKey) {
             return;
+        }
+
+        const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
+        const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line');
+        if (tooltipEl && lineEl) {
+            tooltipEl.style.opacity = 0;
+            lineEl.style.opacity = 0;
         }
 
         if (this.unsubscribeFromData) {
@@ -96,6 +111,20 @@ const graphController = {
                         y: newValue
                     });
                 }
+
+                const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
+                const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line'); // <-- NOVO
+                if (tooltipEl && lineEl) {
+                    const newYpos = Math.min(350,450 - (newValue * 450/100));
+                    if (newYpos) {
+                        tooltipEl.textContent = Math.round(newValue)  + " " + graphInfo.unity;;
+                        tooltipEl.style.opacity = 1;
+
+                        lineEl.style.top = `${newYpos - 20}px`;
+                        lineEl.style.opacity = 1;
+                    }
+                }
+
             });
 
             this.chartInstance.canvas.style.opacity = 1;
@@ -134,9 +163,14 @@ export function createGraphScreen() {
     const innerRingShadow = div({className: 'graph-inner-ring-shadow'});
     const innerRing = div({className: 'graph-inner-ring'});
 
+    const dynamicTooltip = div({ className: 'dynamic-tooltip' });
+    innerRing.appendChild(dynamicTooltip);
+    const dynamicTooltipLine = div({ className: 'dynamic-tooltip-line' });
+    innerRing.appendChild(dynamicTooltipLine);
+
     const canvas = document.createElement('canvas');
-    canvas.className = 'regen-chart';
-    canvas.id = 'regen-chart';
+    canvas.className = 'graph-chart';
+    canvas.id = 'graph-chart';
     innerRing.appendChild(canvas);
 
     container.appendChild(outerRing);
@@ -179,9 +213,6 @@ export function createGraphScreen() {
     }, 0);
 
    main.cleanup = () => {
-        if (unsubscribeFromGraphChange) {
-            unsubscribeFromGraphChange();
-        }
         graphController.cleanup();
     };
 

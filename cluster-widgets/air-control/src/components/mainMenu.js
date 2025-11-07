@@ -11,13 +11,13 @@ const iconRegen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEEAAABBCAYAAAC
 const iconEV = "data:image/png;base64,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";
 
 export const menuItems = [
-    {id: 'option_1', label: 'ESP', iconSrc: iconESP},
-    {id: 'option_2', label: 'EV mode', iconSrc: iconEV},
-    {id: 'option_3', label: 'Modo', iconSrc: iconMode},
-    {id: 'option_4', label: 'Menu A/C', iconSrc: iconAC},
-    {id: 'option_5', label: 'Conforto', iconSrc: iconSteer},
-    {id: 'option_6', label: 'Regeneração', iconSrc: iconRegen},
-    {id: 'option_7', label: 'Gráficos', iconSrc: iconProfiles},
+    {id: 'option_1', label: 'ESP',         stateKey: 'espStatus',   iconSrc: iconESP},
+    {id: 'option_2', label: '',            stateKey: 'evMode',      iconSrc: iconEV},
+    {id: 'option_3', label: 'Modo',        stateKey: 'drivingMode', iconSrc: iconMode},
+    {id: 'option_4', label: 'Menu A/C',                             iconSrc: iconAC},
+    {id: 'option_5', label: 'Modo',        stateKey: 'steerMode',   iconSrc: iconSteer},
+    {id: 'option_6', label: 'Regeneração',                          iconSrc: iconRegen},
+    {id: 'option_7', label: 'Gráficos',                             iconSrc: iconProfiles},
 ];
 
 export function createMainMenu() {
@@ -31,68 +31,34 @@ export function createMainMenu() {
     const focusedItemId = getState('focusedMenuItem');
     const itemElements = {};
 
-    menuItems.forEach((itemData, index) => {
-        const isFocused = itemData.id === focusedItemId;
-
-        let labelContent;
-        if (itemData.id === 'option_1') {
-            const espStatus = getState('espStatus');
-            labelContent = [
-                'ESP ',
-                span({
-                    className: `menu-label-status ${espStatus.toLowerCase()}`,
-                    children: [espStatus]
-                })
-            ];
-        } else if (itemData.id === 'option_2') {
-            const evMode = getState('evMode');
-            labelContent = [
-                '',
-                span({
-                    className: `menu-label-status ${evMode.toLowerCase()}`,
-                    children: [evMode]
-                })
-            ];
-        } else if (itemData.id === 'option_3') {
-            const drivingMode = getState('drivingMode');
-            labelContent = [
-                'Modo ',
-                span({
-                    className: `menu-label-status ${drivingMode.toLowerCase()}`,
-                    children: [drivingMode]
-                })
-            ];
-        } else if (itemData.id === 'option_5') {
-            const steerMode = getState('steerMode');
-            labelContent = [
-                '',
-                span({
-                    className: `menu-label-status ${steerMode.toLowerCase()}`,
-                    children: [steerMode]
-                })
-            ];
-        } else {
-            labelContent = itemData.label;
+    const createLabelContent = (itemData) => {
+        if (!itemData.stateKey) {
+            return itemData.label;
         }
+        const stateValue = getState(itemData.stateKey);
+        return [
+            itemData.label,
+            ' ',
+            span({
+                className: `menu-label-status ${String(stateValue).toLowerCase()}`,
+                children: [stateValue]
+            })
+        ];
+    };
 
+    menuItems.forEach((itemData, index) => {
         const itemEl = div({
             id: itemData.id,
-            className: `menu-item ${isFocused ? 'focused' : ''}`,
+            className: `menu-item ${itemData.id === focusedItemId ? 'focused' : ''}`,
             'data-index': index,
             children: [
                 div({
                     className: 'icon-container',
-                    children: [
-                        img({
-                            className: 'menu-icon',
-                            src: itemData.iconSrc,
-                            alt: itemData.label
-                        })
-                    ]
+                    children: [img({ className: 'menu-icon', src: itemData.iconSrc, alt: itemData.label })]
                 }),
                 span({
-                    className: 'menu-label ${drivingMode.toLowerCase()}',
-                    children: [labelContent]
+                    className: 'menu-label',
+                    children: [createLabelContent(itemData)]
                 })
             ]
         });
@@ -108,18 +74,35 @@ export function createMainMenu() {
         }
         carousel.className = 'menu-carousel';
         const focusedIndex = menuItems.findIndex(item => item.id === newFocusedId);
-
         if (focusedIndex !== -1) {
             carousel.classList.add(`focus-${focusedIndex}`);
         }
     };
 
-    updateFocus(focusedItemId);
+    const updateValue = (newValue, key) => {
+        const targetItemData = menuItems.find(item => item.stateKey === key);
+        if (!targetItemData) return;
 
-    const unsubscribe = subscribe('focusedMenuItem', updateFocus);
+        const labelElement = itemElements[targetItemData.id]?.querySelector('.menu-label');
+        if (labelElement) {
+            labelElement.innerHTML = '';
+            labelElement.append(...createLabelContent(targetItemData));
+        }
+    };
+
+    const subscriptions = [];
+
+    updateFocus(focusedItemId);
+    subscriptions.push(subscribe('focusedMenuItem', updateFocus));
+
+    menuItems.forEach(item => {
+        if (item.stateKey) {
+            subscriptions.push(subscribe(item.stateKey, updateValue));
+        }
+    });
 
     main.cleanup = () => {
-        unsubscribe();
+        subscriptions.forEach(unsubscribe => unsubscribe());
     };
 
     return main;
