@@ -1,24 +1,18 @@
 import {createStatusElement} from "./status.js";
-import { stateManager, subscribe, setState } from '../../state.js';
+import {stateManager, subscribe, setState} from '../../state.js';
 import {createTemperatureElement} from "./temperature.js";
 import {createFanElement} from "./fan.js";
-import {div} from "../../utils/createElement.js";
+import {div, span, img} from "../../utils/createElement.js";
 
-/**
- * Cria e posiciona as labels (números) em um arco.
- * @param {HTMLElement} container Onde adicionar as labels.
- * @param {string} prefix Prefixo para o ID de cada label (ex: 'fan' ou 'temp').
- * @param {number[]} values Array de números a serem exibidos.
- * @param {number} radius Raio em pixels para posicionar os números.
- * @param {number} startAngle Ângulo inicial em graus.
- * @param {number} endAngle Ângulo final em graus.
- */
+var acON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABmUlEQVR4nN2US0oDQRCGSyVCQD2HBA8h6t5XVLxBjEHRC7hWFyq4CVMdFwlB5jRiFJWo4OMCEnxufumemkmi3ZPMuPOHhkmq6/+qX0X0v+VjmCpYiX4rwIxQOqbnpJJCnhSeugx/AvQ345EYi0mqHiLGUWSm0IgBNKL/GAe0g8F+Kj+UhHdiFAgYcAK0ocKamRtCYqWXGpp7mLTAuwGhKpgihQ+Jz9vN9WExngVQcKwOVkBQXFHiD1RGxpa8KuZnzr1UMQCdwzg38c6b11HBqQCK9iVSPEDLQ0k86rbkexM8wXhqgEJOAHe2FbyZoI9saoCPrMx5tSW3hD5KaVXFmHi82AA3Qs+lBjAmxOPaFqwLffMPgG3xqP4OKixHrUG3i6TyTYu5FI+866HdyoT1xACFDclt2h+alocFWeInMaYTmM+Qwpc8stlek/cjiIdS7HbpWFB5YM7Y7V1N0CH3Otr1BSlsmRtyjBEz9Lc+0PaeB+Z9tetQjDmzn22QazR7b4tLZWSIsUQKNWJcyWNsyXfN3Bbngf4XfQMPBJzW+8lHnAAAAABJRU5ErkJggg==";
+var acOFF = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABr0lEQVR4nN2US0oDQRCGR4OBgHoOEQ8h6t5XVLxBjCGiF8haXahnUILMKqsw9Xcgu1llIUaJEhV8XEDE52akpBqapHuSjLs0NEzP3/V/1dUPzxvq5vt+OgiCDT0GEHHXY9Z4TiJzIsoCeDYNOwEyflJKrQ6SdQrAiTYD0IwBNPU/IjoqlUqj/WR+LAGfAHJRFI24AGyolNqSuX+QWHNeqjZXSs126p0AI6k5AF8Su+wqTZqIXsQkZ5sDB0AgeQE8NhqNMVvwphhcuGqJGADHENEl6+bJM4PPJYO8dYlePED0gniUbeKD0KeSAmq12rQA7rtEIvpgMQzDTFJAGIYZmfNuA7yxWKlUJryErVqtTgrg1Qa4ZZGXmRRARDMCuLGJZRF3/gHYE4/TLhHAun4a+LkY1Nz3/RQRXcsmZ10X7U4mbCfIvigJtq0XTVaxIpO+Acz3a66UWiCiH45VSi32yuTQgBTiyiVlKWpzAPs9s+ErD+DAeK6viGiXT0i9Xh/nzt+8obrm2ryv51q3IAiWuJ6Ggau3e5bF1XizAKwBOAPQ4ssoF7LF//i0ODd0aNovv1MAVXvuRh4AAAAASUVORK5CYII=";
+
 function createArcLabels(container, prefix, values, radius, startAngle, endAngle) {
   const angleStep = (endAngle - startAngle) / (values.length - 1);
 
   values.forEach((value, index) => {
     const angle = startAngle + (index * angleStep);
-    const angleRad = angle * (Math.PI / 180); // Converte para radianos
+    const angleRad = angle * (Math.PI / 180);
 
     const label = document.createElement('div');
     label.className = 'ac-label';
@@ -35,6 +29,9 @@ function createArcLabels(container, prefix, values, radius, startAngle, endAngle
 
 
 export function createAcControlScreen() {
+  const isPowerOn = stateManager.get('power') === 1;
+  const internalTemp = stateManager.get('inside_temp') || '--';
+  const externalTemp = stateManager.get('outside_temp') || '--';
 
   var main = document.createElement('main');
   main.className = 'main-container';
@@ -53,14 +50,13 @@ export function createAcControlScreen() {
   container.appendChild(fanProgressRing);
   container.appendChild(tempProgressRing);
 
-  const powerIcon = document.createElement('div');
-  powerIcon.className = 'ac-power-icon';
-  powerIcon.innerHTML = '&#9211;';
-  if (stateManager.get('power') === 0) {
-      powerIcon.classList.add('off');
-  }
+  var powerIcon = img({
+      src: isPowerOn ? acON : acOFF,
+      className: 'w-32 h-32 ac-power-icon',
+      id: 'ac-power-icon',
+  });
 
-  const divider = document.createElement('div');
+   const divider = document.createElement('div');
   divider.className = 'ac-divider-line';
   const outerRing = document.createElement('div');
   outerRing.className = 'ac-outer-ring';
@@ -80,8 +76,8 @@ export function createAcControlScreen() {
   const temperatureElement = createTemperatureElement();
   const fanElement = createFanElement();
   const statusElement = createStatusElement();
+  const tempInfoElement = createTempInfoElement()
 
-  // Monta a tela
   container.appendChild(outerRing);
   container.appendChild(innerRingShadow);
   container.appendChild(innerRing);
@@ -91,6 +87,7 @@ export function createAcControlScreen() {
   container.appendChild(temperatureElement);
   container.appendChild(labelsContainer);
   container.appendChild(statusElement);
+  container.appendChild(tempInfoElement);
   main.appendChild(container);
 
   setTimeout(() => {
@@ -101,11 +98,78 @@ export function createAcControlScreen() {
     if (activeTempLabel) activeTempLabel.classList.add('active');
   }, 0);
 
-  return {
-      element: main,
-      onMount: () => { updateProgressRings(); }
+  const onMountFuncs = [
+      tempInfoElement.onMount,
+      () => updateProgressRings(),
+  ].filter(Boolean);
+
+  let cleanupFuncs = [];
+
+  main.onMount = () => {
+    cleanupFuncs = onMountFuncs.map(fn => fn()).filter(Boolean);
+
+    const activeFanLabel = container.querySelector(`#fan-label-${stateManager.get('fanSpeed')}`);
+    if (activeFanLabel) activeFanLabel.classList.add('active');
+    const activeTempLabel = container.querySelector(`#temp-label-${stateManager.get('temperature')}`);
+    if (activeTempLabel) activeTempLabel.classList.add('active');
   };
 
+  main.cleanup = () => {
+      cleanupFuncs.forEach(fn => fn());
+  };
+
+  return main;
+}
+
+function createTempInfoElement() {
+
+    const container = div({ className: 'temp-info-container' });
+
+
+    var internalTempLabel = div({
+        className: 'temp-info-label',
+        children: [ 'Internal Temp.',],
+    });
+    var internalTemp = div({
+        className: 'temp-info-value-left',
+        children: [
+            stateManager.get('outside_temp') + '°C',
+        ],
+    });
+    var externalTempLabel = div({
+        className: 'temp-info-label',
+        children: [ 'External Temp.',],
+    });
+    var externalTemp = div({
+        className: 'temp-info-value-right',
+        children: [
+            stateManager.get('inside_temp') + '°C',
+        ],
+    });
+    internalTempLabel.append(internalTemp);
+    container.append(internalTempLabel);
+    externalTempLabel.append(externalTemp);
+    container.append(externalTempLabel);
+
+    container.onMount = () => {
+        const internalSub = subscribe('inside_temp', (newValue) => {
+            internalTemp.textContent = `${newValue || '--'}°`;
+        });
+        const externalSub = subscribe('outside_temp', (newValue) => {
+            externalTemp.textContent = `${newValue || '--'}°`;
+        });
+        const unsubscribePower = subscribe('power', function(newPower) {
+            document.getElementById('ac-power-icon').source = (newPower == 1 ? acON : acOFF);
+        });
+
+        return () => {
+            internalSub();
+            externalSub();
+            unsubscribePower()
+        };
+    };
+
+    return container;
 }
 
 export function updateProgressRings() {

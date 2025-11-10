@@ -7,9 +7,9 @@ import 'chartjs-adapter-date-fns';
 Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
-    {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption', unity: '%' },
-    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption', unity: '%'  },
-    {id: 'batteryPercentage', displayLabel: 'BATERIA %', dataKey: 'batteryPercentage', unity: '%'  },
+    {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption', unity: '%', decimalPlaces: 0 },
+    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption', unity: '%' , decimalPlaces: 1 },
+    {id: 'carSpeed', displayLabel: 'Velocidade', dataKey: 'carSpeed', unity: 'km/h', decimalPlaces: 0 },
 ];
 
 const graphController = {
@@ -42,7 +42,7 @@ const graphController = {
                     tooltip: { enabled: false },
                     streaming: {
                         duration: 20000,
-                        refresh: 1000,
+                        refresh: 500,
                         frameRate: 30
                     },
                 },
@@ -58,7 +58,7 @@ const graphController = {
                         ticks: {
                             padding: 10,
                             color: 'rgba(100,172,255,0.7)',
-                            callback: function(value, index, ticks) { return value >= 40 && value <= 60 ? value : ''; },
+                            callback: function(value, index, ticks) { return value <= -40 || value >= 40 ? value : ''; },
                         },
                         grid: {
                             display: true,
@@ -83,6 +83,29 @@ const graphController = {
             return;
         }
 
+        if (graphId === 'gasConsumption') {
+            this.chartInstance.options.scales.y.min = 0;
+            this.chartInstance.options.scales.y.max = null;
+            this.chartInstance.options.scales.y.stepsSize = 0.1;
+            this.chartInstance.options.scales.y.grace = '10%';
+            graphInfo.unity = getState('gasConsumptionMetric');
+        } else if (graphId === 'carSpeed') {
+            this.chartInstance.options.scales.y.min = 0;
+            this.chartInstance.options.scales.y.max = null;
+            this.chartInstance.options.scales.y.stepsSize = 1;
+            this.chartInstance.options.scales.y.grace = '20%';
+        } else if (graphId === 'evConsumption') {
+            this.chartInstance.options.scales.y.min = -100;
+            this.chartInstance.options.scales.y.max = 100;
+            this.chartInstance.options.scales.y.stepsSize = 1;
+            this.chartInstance.options.scales.y.grace = '10%';
+        } else {
+            this.chartInstance.options.scales.y.min = 0;
+            this.chartInstance.options.scales.y.max = 100;
+            this.chartInstance.options.scales.y.grace = '10%';
+
+        }
+
         const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
         const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line');
         if (tooltipEl && lineEl) {
@@ -90,9 +113,9 @@ const graphController = {
             lineEl.style.opacity = 0;
         }
 
-        if (this.unsubscribeFromData) {
-            this.unsubscribeFromData();
-            this.unsubscribeFromData = null;
+        if (this.dataUpdater) {
+            clearInterval(this.dataUpdater);
+            this.dataUpdater = null;
         }
 
         this.currentDataKey = graphInfo.dataKey;
@@ -104,25 +127,29 @@ const graphController = {
             this.chartInstance.data.datasets[0].data = [];
             this.chartInstance.update({ duration: 0 });
 
-            this.unsubscribeFromData = subscribe(this.currentDataKey, (newValue) => {
-                if (this.chartInstance) {
-                    this.chartInstance.data.datasets[0].data.push({
-                        x: Date.now(),
-                        y: newValue
-                    });
-                }
+            this.dataUpdater = setInterval(() => {
+                if (!this.chartInstance) return;
+
+                const currentValue = getState(this.currentDataKey);
+                if (currentValue === undefined) return;
+
+                this.chartInstance.data.datasets[0].data.push({
+                    x: Date.now(),
+                    y: currentValue
+                });
 
                 const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
-                const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line'); // <-- NOVO
-                if (tooltipEl && lineEl) {
-                    const newYpos = Math.min(350,450 - (newValue * 450/100));
-                    if (newYpos) {
-                        tooltipEl.textContent = Math.round(newValue)  + " " + graphInfo.unity;;
-                        tooltipEl.style.opacity = 1;
+                const lineEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip-line');
 
-                        lineEl.style.top = `${newYpos - 20}px`;
-                        lineEl.style.opacity = 1;
-                    }
+                if (tooltipEl && lineEl) {
+                    const yAxis = this.chartInstance.scales.y;
+                    const newYpos = yAxis.getPixelForValue(currentValue);
+
+                    tooltipEl.textContent = currentValue.toFixed(graphInfo.decimalPlaces || 0) + " " + graphInfo.unity;
+                    tooltipEl.style.opacity = 1;
+
+                    lineEl.style.top = `${newYpos}px`;
+                    lineEl.style.opacity = 1;
                 }
 
             });

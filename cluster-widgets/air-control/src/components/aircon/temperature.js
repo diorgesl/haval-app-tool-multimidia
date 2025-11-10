@@ -27,7 +27,6 @@ export function createTemperatureElement() {
         ]
     });
 
-    // Subscribe to state changes
     var unsubscribeFocus = subscribe('focusArea', function(newFocusArea) {
         var isFocused = newFocusArea === 'temp';
         

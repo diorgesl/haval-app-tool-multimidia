@@ -109,6 +109,14 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('aion', $value)")
                     }
 
+                    CarConstants.CAR_BASIC_OUTSIDE_TEMP.value -> {
+                        evaluateJsIfReady(webView, "control('outside_temp', $value)")
+                    }
+
+                    CarConstants.CAR_BASIC_INSIDE_TEMP.value -> {
+                        evaluateJsIfReady(webView, "control('inside_temp', $value)")
+                    }
+
                     CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
                         evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(value)})")
                     }
@@ -130,19 +138,51 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     }
 
                     CarConstants.CAR_EV_INFO_ENERGY_OUTPUT_PERCENTAGE.value -> {
-                        evaluateJsIfReady (webView, "control('${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME}',$value)")
+                        val regenValue = kotlin.math.max(0.0f,-1 * (value).toFloat())
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.EV_CONSUMPTION}',$value)")
+                        evaluateJsIfReady (webView, "control('${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME}', $regenValue)")
+
                     }
 
-                    CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO.value -> {
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.EV_CONSUMPTION})',$value")
+                    CarConstants.CAR_BASIC_INSTANT_FUEL_CONSUMPTION.value -> {
+                        val stringValue = value.toString()
+                        var metricValue = 0.0f
+                        var consumptionValue = 0.0f
+                        var consumptionMetric = ""
+                        var adjustedValue = 0.0f
+                        if (stringValue.startsWith("{") && stringValue.endsWith("}") && stringValue.contains(",")) {
+                            try {
+                                val cleanedString = stringValue.substring(1, stringValue.length - 1)
+                                val parts = cleanedString.split(',')
+
+                                if (parts.size >= 2) {
+                                    metricValue = parts[0].trim().toFloat()
+                                    consumptionValue = parts[1].trim().toFloat()
+                                }
+                            } catch (e: Exception) {
+                                metricValue = 0.0f
+                                consumptionValue = 0.0f
+                            }
+                        }
+                        if (metricValue == 4.0f) {
+                            consumptionMetric = "L/h"
+                            if (consumptionValue > 0.0f) {
+                                adjustedValue = kotlin.math.truncate(consumptionValue * 10) / 10
+                            }
+                        } else {
+                            consumptionMetric = "km/l"
+                            if (consumptionValue > 0.0f) {
+                                adjustedValue = kotlin.math.truncate(10 * 100 / consumptionValue) / 10
+                            }
+                        }
+
+                        evaluateJsIfReady(webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC}', '$consumptionMetric')")
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)")
                     }
 
-                    CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO.value -> {
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}',$value)")
-                    }
 
-                    CarConstants.CAR_EV_INFO_CUR_BATTERY_POWER_PERCENTAGE.value -> {
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.BATTERY_PERCENTAGE}',$value)")
+                    CarConstants.CAR_BASIC_VEHICLE_SPEED.value -> {
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.CAR_SPEED}',$value)")
                     }
 
                     else -> {}

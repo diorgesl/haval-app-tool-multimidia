@@ -26,8 +26,8 @@ public class AcControlScreen implements Screen {
     public void processKey(Key key) {
         switch (key) {
             case ENTER: // Enter
-                steeringWheelAcControlTypeIndex++;
-                steeringWheelAcControlTypeIndex = steeringWheelAcControlTypeIndex % SteeringWheelAcControlType.values().length;
+                if (steeringWheelAcControlTypeIndex == 0) steeringWheelAcControlTypeIndex = 1;
+                else steeringWheelAcControlTypeIndex = 0;
                 steeringWheelAcControlType = SteeringWheelAcControlType.values()[steeringWheelAcControlTypeIndex];
                 serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
                 serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), steeringWheelAcControlType.name()).apply();

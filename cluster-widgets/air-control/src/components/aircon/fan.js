@@ -85,7 +85,6 @@ export function createFanElement() {
         icon.src = fanIconSvg(getFanIconColor());
     });
 
-    // Add cleanup method to the element
     focusArea.cleanup = function() {
         unsubscribeFocus();
         unsubscribeFan();

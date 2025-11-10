@@ -77,6 +77,8 @@ var stateManager = new StateManager({
     auto: 1,
     recycle: 0,
     aion: 0,
+    outside_temp: 25,
+    inside_temp: 22,
 
     // Regen screen states
     regenMode: 'Media',
@@ -85,8 +87,9 @@ var stateManager = new StateManager({
     // Graph values
     currentGraph: 'evConsumption',
     evConsumption: 0,
-    gasConsumption: 12,
-    batteryPercentage: 90
+    gasConsumption: 0.0,
+    gasConsumptionMetric: 'L/h',
+    carSpeed: 0
 });
 
 // Convenience functions for easier usage

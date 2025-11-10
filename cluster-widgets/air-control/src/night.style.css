@@ -321,6 +321,43 @@ button {
   z-index: 3;
 }
 
+.temp-info-container {
+  position: absolute;
+  bottom: 170px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  gap: 180px;
+  width: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.temp-info-label {
+  font-family: 'Khand';
+  font-weight: 100;
+  font-size: 14px;
+  font-weight: 300;
+  color: #4d97ff;
+}
+
+.temp-info-value-left {
+  alight: left;
+  font-size: 20px;
+  font-weight: 300;
+  color: #4d97ff;
+  transform: translateY(-5px);
+}
+
+.temp-info-value-right {
+  justify: right;
+  font-size: 20px;
+  font-weight: 300;
+  color: #4d97ff;
+  transform: translate(38px,-5px);
+}
+
 /* ============================================= */
 /* NOVOS ESTILOS PARA TELA DE AR CONDICIONADO    */
 /* ============================================= */
@@ -858,16 +895,16 @@ canvas.regen-chart {
 }
 
 .dynamic-tooltip {
-    top: 405px;
+    top: 419px;
     left: 50%;
     position: absolute;
-    background-color: rgba(0, 195, 255, 0.9);
+    background-color: rgba(0, 40, 80, 0.8);
     color: #ffffff;
     padding: 6px 12px;
     border-radius: 6px;
-    font-size: 18px;
+    font-size: 28px;
     font-family: 'Khand', sans-serif;
-    font-weight: 500;
+    font-weight: 300;
     pointer-events: none;
     opacity: 0;
     transform: translate(-50%, -150%);

@@ -73,42 +73,34 @@ const regenChartController = {
     },
 
     startDataSubscription() {
-        if (!this.isInitialized || this.unsubscribeFromData) return;
+        if (!this.isInitialized || this.dataUpdater) return;
 
-        this.unsubscribeFromData = subscribe('lastRegenValue', (newValue) => {
-            if (this.chartInstance) {
-                this.resetWatchdog();
-                this.chartInstance.data.datasets[0].data.push({
-                    x: Date.now(),
-                    y: newValue
-                });
+        this.dataUpdater = setInterval(() => {
+            if (!this.chartInstance) return;
+
+            const data = this.chartInstance.data.datasets[0].data;
+            const newValue = getState('lastRegenValue') || 0;
+
+            data.push({
+                x: Date.now(),
+                y: newValue
+            });
+
+            while (data.length > 30) {
+                data.shift();
             }
-        });
-        this.resetWatchdog();
-    },
 
-    injectZeroDataPoint() {
-        if (this.isInitialized && this.chartInstance) {
-            this.chartInstance.data.datasets[0].data.push({ x: Date.now(), y: 0 });
-        }
-    },
-
-    resetWatchdog() {
-        clearTimeout(this.watchdogTimer);
-        this.watchdogTimer = setTimeout(this.injectZeroDataPoint.bind(this), 1500);
+            this.chartInstance.update('quiet');
+        }, 1000);
     },
 
     cleanup() {
-        if (this.unsubscribeFromData) {
-            this.unsubscribeFromData();
-            this.unsubscribeFromData = null;
-        }
-        if (this.watchdogTimer) {
-            clearTimeout(this.watchdogTimer);
-            this.watchdogTimer = null;
+        if (this.dataUpdater) {
+            clearInterval(this.dataUpdater);
+            this.dataUpdater = null;
         }
         if(this.chartInstance) {
-            this.chartInstance.destroy(); // Libera a memória do Chart.js
+            this.chartInstance.destroy();
         }
         this.isInitialized = false;
         this.chartInstance = null;
