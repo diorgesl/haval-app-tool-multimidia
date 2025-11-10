@@ -5,7 +5,7 @@ const focusableAreas = {
   main_menu: menuItems.map(item => item.id),
   ac_control: ['fan', 'temp'],
   regen: ['Normal', 'Media', 'Alta'],
-  graph: ['evConsumption', 'gasConsumption', 'batteryPercentage']
+  graph: ['evConsumption', 'gasConsumption', 'carSpeed']
 };
 
 document.addEventListener('keydown', (e) => {
@@ -150,15 +150,15 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-let smoothedEvConsumption = 100;
-let smoothedLastRegenValue = 50;
+let lastValue = 0;
 const smoothingFactor = 0.1;
 
 setInterval(() => {
   const randomTarget = Math.floor(Math.random() * 101);
-  smoothedEvConsumption = (smoothedEvConsumption * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
-  smoothedLastRegenValue = (smoothedLastRegenValue * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
-  setState('evConsumption', Math.round(smoothedEvConsumption) - 50);
-  setState('lastRegenValue', Math.round(smoothedLastRegenValue));
+  lastValue = (lastValue * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
+  setState('evConsumption', Math.round(lastValue) - 50);
+  setState('lastRegenValue', Math.round(lastValue));
+  setState('gasConsumption', Math.round(lastValue)/3);
+  setState('carSpeed', Math.round(lastValue));
 
 }, 200);
