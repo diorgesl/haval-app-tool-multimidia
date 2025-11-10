@@ -77,8 +77,8 @@ var stateManager = new StateManager({
     auto: 1,
     recycle: 0,
     aion: 0,
-    outside_temp: 25,
-    inside_temp: 22,
+    outside_temp: '-',
+    inside_temp: '-',
 
     // Regen screen states
     regenMode: 'Media',
