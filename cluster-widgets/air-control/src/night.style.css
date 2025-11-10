@@ -323,12 +323,12 @@ button {
 
 .temp-info-container {
   position: absolute;
-  bottom: 170px;
+  bottom: 152px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   justify-content: center;
-  gap: 180px;
+  gap: 220px;
   width: 100%;
   pointer-events: none;
   z-index: 3;
@@ -337,25 +337,25 @@ button {
 .temp-info-label {
   font-family: 'Khand';
   font-weight: 100;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 300;
   color: #4d97ff;
 }
 
 .temp-info-value-left {
-  alight: left;
-  font-size: 20px;
+  text-align: left;
+  font-size: 30px;
   font-weight: 300;
   color: #4d97ff;
-  transform: translateY(-5px);
+  transform: translateY(-15px);
 }
 
 .temp-info-value-right {
-  justify: right;
-  font-size: 20px;
+  text-align: right;
+  font-size: 30px;
   font-weight: 300;
   color: #4d97ff;
-  transform: translate(38px,-5px);
+  transform: translateY(-15px);
 }
 
 /* ============================================= */
@@ -877,31 +877,20 @@ canvas.regen-chart {
 .graph-item[data-index="0"] { transform: translateY(-90px); opacity: 1; z-index: 10; }
 .graph-item[data-index="1"] { transform: translateY(0px); opacity: 1; z-index: 10; }
 .graph-item[data-index="2"] { transform: translateY(90px); opacity: 1; z-index: 10; }
-
-.graph-item[data-index="0"].focused ~ .graph-selector-line {
-    transform: translate(-50%, -145px);
-    -webkit-mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
-    mask: radial-gradient(circle at center 132%, white 72%, transparent 90%);
-}
-.graph-item[data-index="1"].focused ~ .graph-selector-line {
-    transform: translate(-50%, -50%);
-    -webkit-mask: radial-gradient(circle at center, white 92%, transparent 100%);
-    mask: radial-gradient(circle at center, white 92%, transparent 100%);
-}
-.graph-item[data-index="2"].focused ~ .graph-selector-line {
-    transform: translate(-50%, 38px);
-    -webkit-mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
-    mask: radial-gradient(circle at center -50%, white 75%, transparent 90%);
-}
+.graph-item[data-index="0"].focused ~ .graph-selector-line { transform: translate(-50%, -145px); }
+.graph-item[data-index="1"].focused ~ .graph-selector-line { transform: translate(-50%, -50%); }
+.graph-item[data-index="2"].focused ~ .graph-selector-line { transform: translate(-50%, 38px); }
 
 .dynamic-tooltip {
-    top: 419px;
+    top: 408px;
     left: 50%;
+    min-width: 80px;
+    text-align: center;
     position: absolute;
-    background-color: rgba(0, 40, 80, 0.8);
+    background-color: rgba(0, 40, 80, 0.5);
     color: #ffffff;
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 0px 12px;
+    border-radius: 12px;
     font-size: 28px;
     font-family: 'Khand', sans-serif;
     font-weight: 300;
@@ -917,7 +906,7 @@ canvas.regen-chart {
     position: absolute;
     width: 100%;
     height: 1px;
-    background: rgba(0, 195, 255, 0.3);
+    background: rgba(0, 195, 255, 0.5);
     opacity: 0;
     pointer-events: none;
     transition: all 2s linear;

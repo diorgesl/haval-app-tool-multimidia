@@ -52,19 +52,22 @@ const graphController = {
                         display: false
                     },
                     y: {
-                        display: true,
                         min: 0,
                         max: 100,
                         ticks: {
-                            padding: 10,
+                            stepsSize: 10,
                             color: 'rgba(100,172,255,0.7)',
-                            callback: function(value, index, ticks) { return value <= -40 || value >= 40 ? value : ''; },
+                            callback: function(value) {
+                                return (value >= -50 && value <= 50) ? value : ''
+                                3211;                            }
                         },
                         grid: {
                             display: true,
                             drawOnChartArea: true,
                             drawTicks: false,
                             color: 'rgba(0,160,255,0.1)',
+                            zeroLineColor: 'rgba(100, 172, 255, 0.4)',
+                            zeroLineWidth: 3
                         },
                     }
                 }
@@ -95,10 +98,10 @@ const graphController = {
             this.chartInstance.options.scales.y.stepsSize = 1;
             this.chartInstance.options.scales.y.grace = '20%';
         } else if (graphId === 'evConsumption') {
-            this.chartInstance.options.scales.y.min = -100;
-            this.chartInstance.options.scales.y.max = 100;
+            this.chartInstance.options.scales.y.min = -120;
+            this.chartInstance.options.scales.y.max = 120;
             this.chartInstance.options.scales.y.stepsSize = 1;
-            this.chartInstance.options.scales.y.grace = '10%';
+            this.chartInstance.options.scales.y.grace = '20%';
         } else {
             this.chartInstance.options.scales.y.min = 0;
             this.chartInstance.options.scales.y.max = 100;
@@ -155,7 +158,7 @@ const graphController = {
             });
 
             this.chartInstance.canvas.style.opacity = 1;
-        }, 300);
+        }, 100);
     },
 
     cleanup() {

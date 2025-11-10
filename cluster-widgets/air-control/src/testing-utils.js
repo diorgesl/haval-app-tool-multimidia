@@ -150,11 +150,15 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+let smoothedEvConsumption = 100;
+let smoothedLastRegenValue = 50;
+const smoothingFactor = 0.1;
+
 setInterval(() => {
-  const randomValue = Math.floor(Math.random() * 101);
+  const randomTarget = Math.floor(Math.random() * 101);
+  smoothedEvConsumption = (smoothedEvConsumption * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
+  smoothedLastRegenValue = (smoothedLastRegenValue * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
+  setState('evConsumption', Math.round(smoothedEvConsumption) - 50);
+  setState('lastRegenValue', Math.round(smoothedLastRegenValue));
 
-  setState('lastRegenValue', randomValue);
-  setState('evConsumption', randomValue);
-
-}, 1000);
-
+}, 200);

@@ -1,7 +1,8 @@
 import {createStatusElement} from "./status.js";
 import {stateManager, subscribe, setState} from '../../state.js';
-import {createTemperatureElement} from "./temperature.js";
+import {createTemperatureElement} from "./acTemperature.js";
 import {createFanElement} from "./fan.js";
+import {createTempInfoElement} from "./infoTemperature.js";
 import {div, span, img} from "../../utils/createElement.js";
 
 var acON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABmUlEQVR4nN2US0oDQRCGSyVCQD2HBA8h6t5XVLxBjEHRC7hWFyq4CVMdFwlB5jRiFJWo4OMCEnxufumemkmi3ZPMuPOHhkmq6/+qX0X0v+VjmCpYiX4rwIxQOqbnpJJCnhSeugx/AvQ345EYi0mqHiLGUWSm0IgBNKL/GAe0g8F+Kj+UhHdiFAgYcAK0ocKamRtCYqWXGpp7mLTAuwGhKpgihQ+Jz9vN9WExngVQcKwOVkBQXFHiD1RGxpa8KuZnzr1UMQCdwzg38c6b11HBqQCK9iVSPEDLQ0k86rbkexM8wXhqgEJOAHe2FbyZoI9saoCPrMx5tSW3hD5KaVXFmHi82AA3Qs+lBjAmxOPaFqwLffMPgG3xqP4OKixHrUG3i6TyTYu5FI+866HdyoT1xACFDclt2h+alocFWeInMaYTmM+Qwpc8stlek/cjiIdS7HbpWFB5YM7Y7V1N0CH3Otr1BSlsmRtyjBEz9Lc+0PaeB+Z9tetQjDmzn22QazR7b4tLZWSIsUQKNWJcyWNsyXfN3Bbngf4XfQMPBJzW+8lHnAAAAABJRU5ErkJggg==";
@@ -29,10 +30,6 @@ function createArcLabels(container, prefix, values, radius, startAngle, endAngle
 
 
 export function createAcControlScreen() {
-  const isPowerOn = stateManager.get('power') === 1;
-  const internalTemp = stateManager.get('inside_temp') || '--';
-  const externalTemp = stateManager.get('outside_temp') || '--';
-
   var main = document.createElement('main');
   main.className = 'main-container';
 
@@ -51,7 +48,7 @@ export function createAcControlScreen() {
   container.appendChild(tempProgressRing);
 
   var powerIcon = img({
-      src: isPowerOn ? acON : acOFF,
+      src: stateManager.get('power') === 1 ? acON : acOFF,
       className: 'w-32 h-32 ac-power-icon',
       id: 'ac-power-icon',
   });
@@ -119,57 +116,6 @@ export function createAcControlScreen() {
   };
 
   return main;
-}
-
-function createTempInfoElement() {
-
-    const container = div({ className: 'temp-info-container' });
-
-
-    var internalTempLabel = div({
-        className: 'temp-info-label',
-        children: [ 'Internal Temp.',],
-    });
-    var internalTemp = div({
-        className: 'temp-info-value-left',
-        children: [
-            stateManager.get('outside_temp') + '°C',
-        ],
-    });
-    var externalTempLabel = div({
-        className: 'temp-info-label',
-        children: [ 'External Temp.',],
-    });
-    var externalTemp = div({
-        className: 'temp-info-value-right',
-        children: [
-            stateManager.get('inside_temp') + '°C',
-        ],
-    });
-    internalTempLabel.append(internalTemp);
-    container.append(internalTempLabel);
-    externalTempLabel.append(externalTemp);
-    container.append(externalTempLabel);
-
-    container.onMount = () => {
-        const internalSub = subscribe('inside_temp', (newValue) => {
-            internalTemp.textContent = `${newValue || '--'}°`;
-        });
-        const externalSub = subscribe('outside_temp', (newValue) => {
-            externalTemp.textContent = `${newValue || '--'}°`;
-        });
-        const unsubscribePower = subscribe('power', function(newPower) {
-            document.getElementById('ac-power-icon').source = (newPower == 1 ? acON : acOFF);
-        });
-
-        return () => {
-            internalSub();
-            externalSub();
-            unsubscribePower()
-        };
-    };
-
-    return container;
 }
 
 export function updateProgressRings() {

@@ -4,7 +4,7 @@ import { div } from '../../utils/createElement.js';
 import { updateProgressRings } from './mainAcControl.js'
 
 export function createTemperatureElement() {
-    
+
     var tempDisplay = div({
         className: 'temp-display-label font-bold',
         children: [
@@ -29,10 +29,10 @@ export function createTemperatureElement() {
 
     var unsubscribeFocus = subscribe('focusArea', function(newFocusArea) {
         var isFocused = newFocusArea === 'temp';
-        
+
         // Apply base styles with browser prefixes
         //focusArea.className = 'focus-area focus-area-small';
-        
+
         if (isFocused) {
             focusArea.classList.add('transition-all', 'focus-active');
             focusArea.classList.remove('focus-inactive');
