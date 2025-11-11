@@ -62,8 +62,11 @@ public class AcControlScreen implements Screen {
                                     speed = 7;
                             } else {
                                 speed--;
-                                if (speed < 1)
-                                    speed = 1;
+                                if (speed < 0)
+                                    speed = 0;
+                            }
+                            if (speed == 0) {
+                                serviceManager.updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "0");
                             }
                             serviceManager.updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(speed));
                         }

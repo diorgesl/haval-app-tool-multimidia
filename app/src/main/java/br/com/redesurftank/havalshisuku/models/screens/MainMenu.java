@@ -2,6 +2,7 @@ package br.com.redesurftank.havalshisuku.models.screens;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import br.com.redesurftank.havalshisuku.managers.ServiceManager;
 import br.com.redesurftank.havalshisuku.models.CarConstants;
@@ -147,11 +148,24 @@ public class MainMenu implements Screen {
         serviceManager.dispatchServiceManagerEvent(br.com.redesurftank.havalshisuku.models.ServiceManagerEventType.UPDATE_SCREEN, this);
 
         // Set default initial position as middle of the menu
-        if (this.currentMenuItemIndex == 0) this.currentMenuItemIndex = menuItems.size() / 2;
-        serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), menuItems.get(currentMenuItemIndex).getId()).apply();
+        String lastMenuOption = ServiceManager.getInstance().getSharedPreferences().getString(
+                SharedPreferencesKeys.LAST_CLUSTER_MENU_ITEM.getKey(), "option_4");
+        this.currentMenuItemIndex = IntStream.range(0, menuItems.size())
+                .filter(i -> menuItems.get(i).getId().equals(lastMenuOption))
+                .findFirst()
+                .orElse(menuItems.size() / 2);
         serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MENU_ITEM_NAVIGATION, menuItems.get(currentMenuItemIndex).getId());
 
+    }
 
+    public Screen setInitialScreen(MainUiManager uiManager) {
+        String lastScreenKey = ServiceManager.getInstance().getSharedPreferences().getString(SharedPreferencesKeys.LAST_CLUSTER_SCREEN.getKey(), "main_menu");
+        Screen lastScreen = this;
+        if (!lastScreenKey.equals("main_menu")) {
+            lastScreen = ((MenuAction.NavigateTo)menuItems.get(currentMenuItemIndex).getAction()).getScreen();
+            uiManager.updateScreen(lastScreen);
+}
+        return lastScreen;
     }
 
     @Override

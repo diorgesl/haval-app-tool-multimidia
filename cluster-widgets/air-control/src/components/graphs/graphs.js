@@ -8,7 +8,7 @@ Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
     {id: 'evConsumption', displayLabel: 'Consumo EV', dataKey: 'evConsumption', unity: '%', decimalPlaces: 0 },
-    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption', unity: '%' , decimalPlaces: 1 },
+    {id: 'gasConsumption', displayLabel: 'Consumo Combustão', dataKey: 'gasConsumption', unity: 'km/l' , decimalPlaces: 1 },
     {id: 'carSpeed', displayLabel: 'Velocidade', dataKey: 'carSpeed', unity: 'km/h', decimalPlaces: 0 },
 ];
 
@@ -143,7 +143,7 @@ const graphController = {
 
                 if (tooltipEl && lineEl) {
                     const yAxis = this.chartInstance.scales.y;
-                    const newYpos = yAxis.getPixelForValue(currentValue);
+                    const newYpos = yAxis.getPixelForValue(currentValue) + 5;
 
                     tooltipEl.textContent = currentValue.toFixed(graphInfo.decimalPlaces || 0) + " " + graphInfo.unity;
                     tooltipEl.style.opacity = 1;

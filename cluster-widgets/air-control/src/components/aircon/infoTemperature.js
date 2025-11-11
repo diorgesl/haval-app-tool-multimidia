@@ -35,10 +35,10 @@ export function createTempInfoElement() {
 
     container.onMount = () => {
        const internalSub = subscribe('inside_temp', (newValue) => {
-           internalTemp.textContent = `${newValue || '--'}°`;
+           internalTemp.textContent = `${newValue}°C`;
        });
        const externalSub = subscribe('outside_temp', (newValue) => {
-           externalTemp.textContent = `${newValue || '--'}°`;
+           externalTemp.textContent = `${newValue}°C`;
        });
        const unsubscribePower = subscribe('power', function(newPower) {
            document.getElementById('ac-power-icon').source = (newPower == 1 ? acON : acOFF);

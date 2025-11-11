@@ -53,7 +53,7 @@ export function createAcControlScreen() {
       id: 'ac-power-icon',
   });
 
-   const divider = document.createElement('div');
+  const divider = document.createElement('div');
   divider.className = 'ac-divider-line';
   const outerRing = document.createElement('div');
   outerRing.className = 'ac-outer-ring';
@@ -98,6 +98,15 @@ export function createAcControlScreen() {
   const onMountFuncs = [
       tempInfoElement.onMount,
       () => updateProgressRings(),
+      () => {
+          const unsubscribePower = subscribe('power', (newPower) => {
+              const icon = document.getElementById('ac-power-icon');
+              if (icon) {
+                  icon.src = newPower === 1 ? acON : acOFF;
+              }
+          });
+          return unsubscribePower;
+      },
   ].filter(Boolean);
 
   let cleanupFuncs = [];

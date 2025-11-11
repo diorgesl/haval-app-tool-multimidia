@@ -17,9 +17,10 @@ public class MainUiManager {
     private Screen currentScreen;
 
     private MainUiManager() {
-        this.currentScreen = new MainMenu();
+        MainMenu initialMenu = new MainMenu();
+        initialMenu.initialize();
+        this.currentScreen = initialMenu.setInitialScreen(this);
         this.sharedPreferences = ServiceManager.getInstance().getSharedPreferences();
-        this.updateScreen();
     }
 
     public void updateScreen() {

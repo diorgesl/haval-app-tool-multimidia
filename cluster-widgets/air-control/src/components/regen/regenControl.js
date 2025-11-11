@@ -48,10 +48,12 @@ const regenChartController = {
                 scales: {
                     x: { type: 'realtime', display: false },
                     y: {
-                        min: 0,
-                        max: 100,
+                        min: -10,
+                        max: 110,
+                        grace: 20,
                         display: true,
                         ticks: {
+                            stepSize: 10,
                             padding: 17,
                             color: 'rgba(100,172,255,0.7)',
                             callback: function(value, index, ticks) { return value >= 30 && value <= 70 ? value : ''; },

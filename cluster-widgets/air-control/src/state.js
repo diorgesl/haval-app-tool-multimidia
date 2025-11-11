@@ -88,7 +88,7 @@ var stateManager = new StateManager({
     currentGraph: 'evConsumption',
     evConsumption: 0,
     gasConsumption: 0.0,
-    gasConsumptionMetric: 'L/h',
+    gasConsumptionMetric: 'Km/l',
     carSpeed: 0
 });
 

@@ -323,7 +323,7 @@ button {
 
 .temp-info-container {
   position: absolute;
-  bottom: 152px;
+  bottom: 150px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -337,7 +337,7 @@ button {
 .temp-info-label {
   font-family: 'Khand';
   font-weight: 100;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 300;
   color: #4d97ff;
 }
@@ -347,7 +347,7 @@ button {
   font-size: 30px;
   font-weight: 300;
   color: #4d97ff;
-  transform: translateY(-15px);
+  transform: translateY(-12px);
 }
 
 .temp-info-value-right {
@@ -355,7 +355,7 @@ button {
   font-size: 30px;
   font-weight: 300;
   color: #4d97ff;
-  transform: translateY(-15px);
+  transform: translateY(-12px);
 }
 
 /* ============================================= */
@@ -682,7 +682,7 @@ button {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 120, 255, 0.7);
+    background-color: rgba(0, 120, 255, 0.2);
     transition: transform 0.2   s cubic-bezier(0.2, 1, 0.3, 1);
     filter: drop-shadow(0 0 10px rgba(0, 0, 255, 0.8));
     z-index: 3;
