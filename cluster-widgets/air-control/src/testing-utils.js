@@ -4,7 +4,7 @@ import { menuItems } from './components/mainMenu.js';
 const focusableAreas = {
   main_menu: menuItems.map(item => item.id),
   ac_control: ['fan', 'temp'],
-  regen: ['Normal', 'Media', 'Alta'],
+  regen: ['Baixo', 'Normal', 'Alto'],
   graph: ['evConsumption', 'gasConsumption', 'carSpeed']
 };
 
@@ -78,6 +78,10 @@ document.addEventListener('keydown', (e) => {
           const currentIndex = controls.indexOf(focusedArea);
           const nextIndex = (currentIndex + 1) % controls.length;
           window.focus(controls[nextIndex]);
+      } else if (e.key === ' ') {
+           e.preventDefault();
+           const newAutoModeState = (currentState.auto == 0 ? 1 : 0);
+           setState('auto', newAutoModeState);
       }
 
       switch (focusedArea) {
@@ -99,11 +103,7 @@ document.addEventListener('keydown', (e) => {
               }
               break;
 
-          case 'power':
-              if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                   const newPowerState = currentState.power === '0' ? '1' : '0';
-                   window.control('power', newPowerState);
-              }
+          default:
               break;
       }
   }
@@ -112,7 +112,7 @@ document.addEventListener('keydown', (e) => {
       const regenMode = currentState.regenMode;
 
       if (e.key === 'Enter') {
-          window.control('regenMode', 'Media');
+          window.control('onepedal', !currentState.onepedal);
       } else if (e.key === 'ArrowUp') {
           const controls = focusableAreas.regen;
           const currentIndex = controls.indexOf(regenMode);

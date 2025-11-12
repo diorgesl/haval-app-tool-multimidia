@@ -7,9 +7,9 @@ import 'chartjs-adapter-date-fns';
 Chart.register(...registerables, streamingPlugin);
 
 export const regenItems = [
-    {id: 'Alta', displayLabel: 'ALTA'},
-    {id: 'Media', displayLabel: 'MEDIA'},
+    {id: 'Alto', displayLabel: 'ALTO'},
     {id: 'Normal', displayLabel: 'NORMAL'},
+    {id: 'Baixo', displayLabel: 'BAIXO'},
 ];
 
 const regenChartController = {
@@ -111,8 +111,9 @@ const regenChartController = {
 
 export function createRegenScreen() {
 
-    var main = div({className: 'main-container'});
+    const regenStatus = getState('regenMode');
 
+    var main = div({className: 'main-container'});
     const container = div({className: 'regen-screen'});
 
     const regenProgressRing = div({className: 'regen-progress-ring'});
@@ -133,9 +134,8 @@ export function createRegenScreen() {
     container.appendChild(innerRingShadow);
     container.appendChild(innerRing);
     main.appendChild(container);
-    const regenStatus = getState('regenMode');
-    const itemElements = {};
 
+    const itemElements = {};
     regenItems.forEach((itemData, index) => {
         const isFocused = itemData.id === regenStatus;
 
@@ -154,6 +154,26 @@ export function createRegenScreen() {
         innerRing.appendChild(itemEl);
         itemElements[itemData.id] = itemEl;
     });
+
+    const onePedalInstruction = div({
+        className: 'one-pedal-instruction',
+        children: [
+            'Long press ',
+            span({
+                className: 'font-bold',
+                children: ['OK']
+            }),
+            ' toggles One-Pedal'
+        ]
+    });
+    innerRing.appendChild(onePedalInstruction);
+
+    const onePedalModeLabel = div({
+        id: 'one-pedal-mode-label',
+        className: `one-pedal-mode-label ${getState('onepedal') ? '' : 'hidden'}`,
+        children: ['One-Pedal']
+    });
+    innerRing.appendChild(onePedalModeLabel);
 
     innerRing.appendChild(divider);
 
@@ -178,8 +198,30 @@ export function createRegenScreen() {
     updateFocus(regenStatus);
     const unsubscribe = subscribe('regenMode', updateFocus);
 
+    const toggleOnePedalView = (isOnePedalActive) => {
+        const elementsToHide = [
+            ...Object.values(itemElements),
+            divider,
+            regenProgressRing
+        ];
+
+        const onePedalLabel = document.getElementById('one-pedal-mode-label');
+
+        if (isOnePedalActive) {
+            elementsToHide.forEach(el => el.classList.add('hidden'));
+            if (onePedalLabel) onePedalLabel.classList.remove('hidden');
+        } else {
+            elementsToHide.forEach(el => el.classList.remove('hidden'));
+            if (onePedalLabel) onePedalLabel.classList.add('hidden');
+            updateFocus(getState('regenMode'));
+        }
+    };
+    const unsubscribeOnePedal = subscribe('onepedal', toggleOnePedalView);
+    toggleOnePedalView(getState('onepedal'));
+
     main.cleanup = () => {
         unsubscribe();
+        unsubscribeOnePedal();
         regenChartController.cleanup();
     };
 

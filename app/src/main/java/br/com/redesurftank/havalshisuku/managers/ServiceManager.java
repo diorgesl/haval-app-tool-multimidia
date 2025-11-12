@@ -113,6 +113,7 @@ public class ServiceManager {
             CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL,
             CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO,
             CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO,
+            CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE,
     };
 
     private static final CarConstants[] KEYS_TO_SAVE = {
@@ -383,6 +384,7 @@ public class ServiceManager {
                                 case 1025: key = Screen.Key.DOWN; break;
                                 case 1028: key = Screen.Key.ENTER; break;
                                 case 1030: key = Screen.Key.BACK; break;
+                                case 1037: key = Screen.Key.ENTER_LONG; break;
                                 case 1039: key = Screen.Key.BACK_LONG; break;
                             }
                             if (key != null) MainUiManager.getInstance().handleGeneralKeyEvents(key);

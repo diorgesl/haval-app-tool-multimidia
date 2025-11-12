@@ -81,8 +81,9 @@ var stateManager = new StateManager({
     inside_temp: '-',
 
     // Regen screen states
-    regenMode: 'Media',
+    regenMode: 'Normal',
     lastRegenValue: 0,
+    onepedal: false,
 
     // Graph values
     currentGraph: 'evConsumption',

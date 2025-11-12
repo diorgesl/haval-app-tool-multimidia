@@ -135,6 +135,9 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady (webView, "control('espStatus', ${MainMenu.EspOptions.getLabel(value)})")
                     }
 
+                    CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value -> {
+                        evaluateJsIfReady(webView, "control('onepedal', ${value == "1"})")                    }
+
                     CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value -> {
                         evaluateJsIfReady (webView, "control('regenMode', ${RegenScreen.RegenOptions.getLabel(value)})")
                     }

@@ -19,7 +19,6 @@ button {
   -moz-box-shadow: none;
 }
 
-/* Layout Classes */
 .main-container {
   background-color: #000000;
   color: #ffffff;
@@ -38,7 +37,6 @@ button {
 
 }
 
-/* Flexbox Layouts */
 .flex-center {
   display: flex;
   display: -webkit-box;
@@ -137,8 +135,8 @@ button {
   -moz-border-radius: 24px;
   z-index: 4;
 
-  width: 100px; /* 1. Ajusta a largura para 100px */
-    height: 100px; /* 1. Ajusta a altura para 100px */
+  width: 100px;
+    height: 100px;
     transform: translateY(-10px);
 }
 
@@ -150,7 +148,6 @@ button {
   height: 128px;
 }
 
-/* Dimensions */
 .w-128 { width: 128px; }
 .h-128 { height: 128px; }
 .w-208 { width: 208px; }
@@ -169,7 +166,6 @@ button {
 .w-24 { width: 24px; }
 .h-24 { height: 24px; }
 
-/* Colors */
 .text-white { color: #ffffff; text-shadow: 0 0 8px #00beff; }
 .text-gray { color: #9ca3af; }
 .text-blue { color: #afd3ff; }
@@ -178,26 +174,21 @@ button {
 .bg-blue-700 { background-color: #1d4ed8; }
 .bg-gray-500 { background-color: #6b7280; }
 
-/* Typography */
 .text-36 { font-size: 36px; }
 .text-28 { font-size: 28px; }
 .text-20 { font-size: 20px; }
 .font-bold { font-weight: 300; }
 .font-medium { font-weight: 100; }
 
-/* Spacing */
 .mb-8 { margin-bottom: 8px; }
 .mt-8 { margin-top: 8px; }
 .mb-32 { margin-bottom: 32px; }
 
-/* Border Radius */
 .rounded-full { border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%; }
 .rounded-24 { border-radius: 24px; -webkit-border-radius: 24px; -moz-border-radius: 24px; }
 
-/* Text Alignment */
 .text-center { text-align: center; }
 
-/* Transitions */
 .transition-all {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
@@ -205,7 +196,6 @@ button {
   -o-transition: all 0.3s ease;
 }
 
-/* Focus States */
 .focus-active {
   transform: scale(1.3);
   -webkit-transform: scale(1.3);
@@ -228,7 +218,6 @@ button {
   -moz-box-shadow: none;
 }
 
-/* Shadows */
 .shadow-default {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   -webkit-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -263,7 +252,6 @@ button {
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Power Focus Effect */
 .power-focus {
   transform: scale(1.05) !important;
   -webkit-transform: scale(1.05) !important;
@@ -279,7 +267,6 @@ button {
   -o-transition: all 0.3s ease !important;
 }
 
-/* Gradients */
 .gradient-line {
   background: linear-gradient(to bottom, #60a5fa 0%, #3b82f6 50%, transparent 100%);
   background: -webkit-linear-gradient(top, #60a5fa 0%, #3b82f6 50%, transparent 100%);
@@ -287,7 +274,6 @@ button {
   background: -o-linear-gradient(top, #60a5fa 0%, #3b82f6 50%, transparent 100%);
 }
 
-/* Status Element */
 .auto-mode-container {
   position: absolute;
   top: 0;
@@ -359,7 +345,7 @@ button {
 }
 
 /* ============================================= */
-/* NOVOS ESTILOS PARA TELA DE AR CONDICIONADO    */
+/*               AC SCREEN STYLES                */
 /* ============================================= */
 
 .ac-outer-ring {
@@ -376,7 +362,7 @@ button {
 
 .ac-inner-ring {
   position: absolute;
-  width: 392px; /* 452px - (30px * 2) = 392px */
+  width: 392px;
   height: 392px;
   border: 3px solid #053477;
   border-radius: 50%;
@@ -412,29 +398,27 @@ button {
 
 .ac-power-icon {
     position: absolute;
-    top: 50px; /* Distância do topo */
-    left: 50%; /* Centralizado horizontalmente */
-    transform: translateX(-50%); /* Ajuste fino para centralização perfeita */
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
     color: #9ca3af;
     font-size: 24px;
-    z-index: 3; /* Aumentado para ficar sobre a linha divisória */
+    z-index: 3;
 }
 
 .ac-power-icon.off {
-  color: #ff4500; /* Cor vermelha/laranja para estado 'desligado' */
+  color: #ff4500;
   text-shadow: 0 0 5px #edbba8;
 }
 
-/* Container para os números de velocidade e temperatura */
 .ac-labels-container {
   position: absolute;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* Impede que os números interfiram nos cliques */
+  pointer-events: none;
   z-index: 3;
 }
 
-/* Estilo individual para cada número (label) */
 .ac-label {
     position: absolute;
     font-size: 14px;
@@ -449,7 +433,6 @@ button {
     text-align: center;
 }
 
-/* Destaque para o número ativo */
 .ac-label.active {
   color: red;
   font-weight: bold;
@@ -457,16 +440,15 @@ button {
   transform: scale(1.1);
 }
 
-/* Áreas de controle */
 
 .fan-display-label {
     font-size: 86px;
-    line-height: 0.9; /* Adicione esta linha */
+    line-height: 0.9;
 }
 
 .temp-display-label {
     font-size: 100px;
-    line-height: 0.9; /* Adicione esta linha */
+    line-height: 0.9;
 }
 
 .ac-fan-control-area {
@@ -496,11 +478,6 @@ button {
     padding: 5px;
     transition: box-shadow 0.3s ease, color 0.3s ease;
 }
-
-
-/* ============================================= */
-/* ESTILOS PARA ANÉIS DE PROGRESSO (AirCon)      */
-/* ============================================= */
 
 .progress-ring {
     position: absolute;
@@ -586,10 +563,10 @@ button {
 
 
 
-/* ####################################
-   ###      Regen Screen Styles     ###
-   ####################################
-*/
+/* ============================================= */
+/*             REGEN SCREEN STYLES               */
+/* ============================================= */
+
 
 .regen-screen {
   position: relative;
@@ -656,7 +633,7 @@ button {
 
 .regen-inner-ring {
   position: absolute;
-  width: 392px; /* 452px - (30px * 2) = 392px */
+  width: 392px;
   height: 392px;
   border: 3px solid #053477;
   border-radius: 50%;
@@ -714,9 +691,44 @@ canvas.regen-chart {
     background: transparent;
 }
 
-/* ============================================= */
-/* ESTILOS PARA ANÉIS DE PROGRESSO (REGEN)       */
-/* ============================================= */
+.hidden {
+    display: none !important;
+}
+
+.one-pedal-instruction {
+    text-align: center;
+    color: #4d97ff;
+    width: 150px;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 0.9;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.one-pedal-mode-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+
+    font-family: 'Khand', sans-serif;
+    font-weight: 100;
+    font-size: 50px;
+    color: rgb(85, 128, 165, 0.8);
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    color: #FFFFFF;
+    font-weight: 300;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+
+
+    letter-spacing: 1px;
+    z-index: 4;
+}
 
 .regen-progress-ring {
     position: absolute;
@@ -766,11 +778,9 @@ canvas.regen-chart {
 }
 
 
-
-/* ####################################
-   ###      Graph Screen Styles     ###
-   ####################################
-*/
+/* ============================================= */
+/*             GRAPHS SCREEN STYLES              */
+/* ============================================= */
 
 .graph-screen {
     position: relative;
@@ -923,57 +933,4 @@ canvas.regen-chart {
 
 canvas.graph-chart {
     background: transparent;
-}
-
-/* ============================================= */
-/* ESTILOS PARA ANÉIS DE PROGRESSO (Graph)       */
-/* ============================================= */
-
-.graph-progress-ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 422px;
-    height: 422px;
-    border-radius: 50%;
-    z-index: 2;
-
-    transform: translate(-50%, -50%) rotate(135deg);
-
-    --graph-segment-active-level: 0;
-
-}
-
-#graph-progress-ring::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-
-    --segment-1-alpha: clamp(0, var(--graph-segment-active-level) - 0, 1);
-    --segment-2-alpha: clamp(0, var(--graph-segment-active-level) - 1, 1);
-    --segment-3-alpha: clamp(0, var(--graph-segment-active-level) - 2, 1);
-
-    background:
-        conic-gradient(from 240deg, rgba(0,160,255, var(--segment-3-alpha)) 0 110deg, transparent 110deg),
-        conic-gradient(from 120deg, rgba(0,140,255, var(--segment-2-alpha)) 0 110deg, transparent 110deg),
-        conic-gradient(from 0deg,   rgba(0,120,255, var(--segment-1-alpha)) 0 110deg, transparent 110deg);
-
-    filter: drop-shadow(0 0 8px #ffffff);
-
-    -webkit-mask: radial-gradient(
-        transparent 0,
-        transparent calc(50% - 15px),
-        white calc(50% - 15px),
-        white 50%
-    );
-    mask: radial-gradient(
-        transparent 0,
-        transparent calc(50% - 15px),
-        white calc(50% - 15px),
-        white 50%
-    );
 }

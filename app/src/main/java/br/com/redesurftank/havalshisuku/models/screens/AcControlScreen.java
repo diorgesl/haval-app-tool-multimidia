@@ -65,34 +65,39 @@ public class AcControlScreen implements Screen {
                                 if (speed < 0)
                                     speed = 0;
                             }
+
+                            boolean powerMode = serviceManager.getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue()).equals("1");
                             if (speed == 0) {
                                 serviceManager.updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "0");
+                            } else if (!powerMode) {
+                                serviceManager.updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "1");
                             }
                             serviceManager.updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(speed));
                         }
                     }
                     break;
-                    case POWER: {
-                        var currentPowerMode = serviceManager.getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue());
-                        if (currentPowerMode != null) {
-                            boolean powerMode = currentPowerMode.equals("1");
-                            powerMode = !powerMode;
-                            serviceManager.updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), powerMode ? "1" : "0");
-                        }
-                    }
                 }
             }
             break;
-            case BACK: { // Return button
+            case BACK: {
                 MainUiManager.getInstance().updateScreen(previousScreen);
             }
             break;
-            case BACK_LONG: { // Return long press
+            case BACK_LONG: {
                 var currentCycleMode = serviceManager.getUpdatedData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue());
                 if (currentCycleMode != null) {
                     boolean cycleMode = currentCycleMode.equals("1");
                     cycleMode = !cycleMode;
                     serviceManager.updateData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue(), cycleMode ? "1" : "0");
+                }
+                break;
+            }
+            case ENTER_LONG: {
+                var currentAutoMode = serviceManager.getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
+                if (currentAutoMode != null) {
+                    boolean autoMode = currentAutoMode.equals("1");
+                    autoMode = !autoMode;
+                    serviceManager.updateData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), autoMode ? "1" : "0");
                 }
                 break;
             }
