@@ -61,6 +61,8 @@ import br.com.redesurftank.havalshisuku.models.MainUiManager;
 import br.com.redesurftank.havalshisuku.models.screens.Screen;
 import br.com.redesurftank.havalshisuku.utils.FridaUtils;
 import br.com.redesurftank.havalshisuku.utils.ShizukuUtils;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuBinderWrapper;
 
@@ -185,6 +187,7 @@ public class ServiceManager {
     private IIntelligentVehicleControlService controlService;
     private IVehicle vehicle;
     private IDvr dvr;
+    private boolean delayNextAVM = false;
     private IVehicleModel vehicleModel;
     private IClusterService clusterService;
     private ServiceConnection clusterServiceConnection;
@@ -383,6 +386,7 @@ public class ServiceManager {
                                 case 1024: key = Screen.Key.UP; break;
                                 case 1025: key = Screen.Key.DOWN; break;
                                 case 1028: key = Screen.Key.ENTER; break;
+                                case 1029: key = Screen.Key.HOME; break;
                                 case 1030: key = Screen.Key.BACK; break;
                                 case 1037: key = Screen.Key.ENTER_LONG; break;
                                 case 1039: key = Screen.Key.BACK_LONG; break;
@@ -622,6 +626,27 @@ public class ServiceManager {
                     } else {
                         Log.e(TAG, "App not found: " + packageName);
                     }
+                }
+                break;
+            case TOGGLE_CAMERA_AVM:
+                boolean cameraAVM = sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), false);
+                cameraAVM = !cameraAVM;
+                sharedPreferences.edit().putBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), cameraAVM).apply();
+                Log.w(TAG, "Camera AVM state changed to: " + cameraAVM);
+                break;
+            case OPEN_AVM_ONCE:
+                try {
+                    if (getData(CarConstants.SYS_AVM_PREVIEW_STATUS.getValue()).equals("0")) {
+                        delayNextAVM = true;
+                        dvr.setAVM(1);
+                        Log.w(TAG, "Camera AVM temporarily triggered");
+                    } else {
+                        delayNextAVM = false;
+                        dvr.setAVM(0);
+                        Log.w(TAG, "Camera AVM closed");
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Error to launch AVM camera");
                 }
                 break;
         }
@@ -929,10 +954,14 @@ public class ServiceManager {
                     closeSunroofDueToeSpeed = false;
                 }
                 if (currentSpeed <= 0 & sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), false) && !getData(CarConstants.CAR_BASIC_GEAR_STATUS.getValue()).equals("4")) {
-                    dvr.setAVM(0);
+                    if (value.equals("1") && !delayNextAVM) dvr.setAVM(0);
                 }
-            } else if (key.equals(CarConstants.SYS_AVM_PREVIEW_STATUS.getValue()) && sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), false) && value.equals("1") && Float.parseFloat(getData(CarConstants.CAR_BASIC_VEHICLE_SPEED.getValue())) <= 0f && !getData(CarConstants.CAR_BASIC_GEAR_STATUS.getValue()).equals("4")) {
-                dvr.setAVM(0);
+            } else if (key.equals(CarConstants.SYS_AVM_PREVIEW_STATUS.getValue()) && sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), false) && Float.parseFloat(getData(CarConstants.CAR_BASIC_VEHICLE_SPEED.getValue())) <= 0f && !getData(CarConstants.CAR_BASIC_GEAR_STATUS.getValue()).equals("4")) {
+                if (value.equals("1")) {
+                    if (!delayNextAVM) dvr.setAVM(0);
+                } else {
+                    delayNextAVM = false;
+                }
             } else if (key.equals(CarConstants.CAR_BASIC_DRIVING_READY_STATE.getValue())) {
                 if ((value.equals("-1") || value.equals("0"))) {
                     boolean disableBluetoothOnPowerOff = sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_BLUETOOTH_ON_POWER_OFF.getKey(), false);
