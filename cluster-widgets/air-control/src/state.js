@@ -77,6 +77,7 @@ var stateManager = new StateManager({
     auto: 1,
     recycle: 0,
     aion: 0,
+    maxauto: 0,
     outside_temp: '-',
     inside_temp: '-',
 

@@ -431,7 +431,7 @@ fun BasicSettingsTab() {
                 sliderLabel = "Velocidade: ${closeSunroofSpeedThreshold.toInt()} km/h"
             ),
             SettingItem(
-                title = "A/C no máximo ao destravar",
+                title = "A/C no máximo ao ligar o carro",
                 description = SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.description,
                 checked = enableMaxAcOnUnlock,
                 onCheckedChange = {

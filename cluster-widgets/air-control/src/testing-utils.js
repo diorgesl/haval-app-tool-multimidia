@@ -82,6 +82,10 @@ document.addEventListener('keydown', (e) => {
            e.preventDefault();
            const newAutoModeState = (currentState.auto == 0 ? 1 : 0);
            setState('auto', newAutoModeState);
+      } else if (e.key === 'a') {
+           e.preventDefault();
+           const newMaxModeState = (currentState.maxauto == 0 ? 1 : 0);
+           setState('maxauto', newMaxModeState);
       }
 
       switch (focusedArea) {

@@ -307,6 +307,21 @@ button {
   z-index: 3;
 }
 
+.maxauto-icon-container {
+    z-index: 3;
+    justify-content: space-between;
+    align-items: center;
+    font-family: Khand, sans-serif;
+    font-weight: 300;
+    display: -webkit-box;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, 365px);
+    font-size: 18px;
+    color: #3bf676;
+}
+
 .temp-info-container {
   position: absolute;
   bottom: 150px;

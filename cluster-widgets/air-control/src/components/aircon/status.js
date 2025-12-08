@@ -11,6 +11,7 @@ var recycleIn = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8BAMAAADI0
 export function createStatusElement() {
     const isAutoOn = stateManager.get('auto') === 1;
     const isRecycleIn = stateManager.get('recycle') === 1;
+    const isMaxAuto = stateManager.get('maxauto') === 1;
 
     var autoModeIconElement = img({
         src: autoModeIcon(isAutoOn ? '#2563eb' : '#9ca3af'),
@@ -24,6 +25,10 @@ export function createStatusElement() {
     var autoModeLabel = span({
         src: autoModeIcon(isAutoOn ? '#2563eb' : '#9ca3af'),
         children: ['AUTO'],
+    });
+
+    var maxAutoIconElement = span({
+        children: ['MAX AUTO ON']
     });
 
     var statusElement = div({
@@ -42,6 +47,12 @@ export function createStatusElement() {
                     recycleIconElement
                 ],
             }),
+            div({
+                className: `maxauto-icon-container ${isMaxAuto ? '' : 'hidden'}`,
+                children: [
+                    maxAutoIconElement
+                ],
+            }),
         ],
     })
 
@@ -56,9 +67,16 @@ export function createStatusElement() {
         recycleIconElement.src = isRecycleIn ? recycleIn : recycleOut;
     });
 
+    const maxAutoContainer = statusElement.querySelector('.maxauto-icon-container');
+    var unsubscribeMaxAuto = subscribe('maxauto', function(newMaxAuto) {
+        const isMaxAuto = newMaxAuto === 1;
+        maxAutoContainer.classList.toggle('hidden', !isMaxAuto);
+    });
+
     statusElement.cleanup = function() {
         unsubscribeAuto();
         unsubscribeRecycle();
+        unsubscribeMaxAuto();
     };
 
     return statusElement;
