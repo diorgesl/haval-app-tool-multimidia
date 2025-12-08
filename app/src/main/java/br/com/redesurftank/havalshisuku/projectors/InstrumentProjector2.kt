@@ -151,8 +151,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         val stringValue = value.toString()
                         var metricValue = 0.0f
                         var consumptionValue = 0.0f
-                        var consumptionMetric = ""
+                        var consumptionMetric = "km/l"
+                        var consumptionMetricIdle = "l/h"
                         var adjustedValue = 0.0f
+                        var adjustedValueIdle = 0.0f
                         if (stringValue.startsWith("{") && stringValue.endsWith("}") && stringValue.contains(",")) {
                             try {
                                 val cleanedString = stringValue.substring(1, stringValue.length - 1)
@@ -168,21 +170,27 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                             }
                         }
                         if (metricValue == 4.0f) {
-                            // Commented out as graph is not ready to plot L/h information
-                            //
-                            // consumptionMetric = "L/h"
-                            // if (consumptionValue > 0.0f) {
-                            //     adjustedValue = kotlin.math.truncate(consumptionValue * 10) / 10
-                            // }
-                        } else {
-                            consumptionMetric = "km/l"
+                            if (consumptionValue > 0.0f) {
+                                adjustedValueIdle = kotlin.math.truncate(consumptionValue * 10) / 10
+                                adjustedValue = 0.0f
+                                evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})")
+                            } else {
+                                adjustedValueIdle = 0.0f
+                            }
+                        } else if (metricValue == 1.0f) {
                             if (consumptionValue > 0.0f) {
                                 adjustedValue = kotlin.math.truncate(10 * 100 / consumptionValue) / 10
+                                adjustedValueIdle = 0.0f
+                                evaluateJsIfReady(
+                                    webView,
+                                    "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})"
+                                )
+                            } else {
+                                adjustedValue = 0.0f
                             }
-                            evaluateJsIfReady(webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC}', '$consumptionMetric')")
-                            evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)")
                         }
-
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_IDLE}', $adjustedValueIdle)")
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)")
                     }
 
 

@@ -29,13 +29,13 @@ export const graphList = [
              {
                  label: 'Consumo Instantâneo',
                  dataKey: 'gasConsumption',
-                 unity: 'km/L',
+                 unity: 'Km/L',
                  yAxisID: 'y'
              },
              {
                  label: 'Consumo em Idle',
                  dataKey: 'gasConsumptionIdle',
-                 unity: 'l/min',
+                 unity: 'L/hora',
                  yAxisID: 'y1'
              }
          ]
@@ -196,7 +196,7 @@ const graphController = {
             const primaryLineEl = document.querySelector('.dynamic-tooltip-line.primary');
             const secondaryLineEl = document.querySelector('.dynamic-tooltip-line.secondary');
 
-            const OFFSET = 13.2;
+            const OFFSET = 13;
             primaryTooltipEl.style.opacity = 0;
             primaryLineEl.style.opacity = 0;
             secondaryTooltipEl.style.display = 'none';
@@ -224,7 +224,7 @@ const graphController = {
                 }
 
                 if (value2 !== undefined) {
-                    secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 0);
+                    secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 1);
                     secondaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset2Info.unity;
                     secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + OFFSET}px`;
                     secondaryLineEl.style.backgroundColor = '#ffA064';

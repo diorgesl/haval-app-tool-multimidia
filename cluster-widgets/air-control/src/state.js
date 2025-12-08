@@ -91,7 +91,7 @@ var stateManager = new StateManager({
     gasConsumption: 0.0,
     gasConsumptionMetric: 'Km/l',
     gasConsumptionIdle: 0.0,
-    gasConsumptionMetric: 'l/min',
+    gasConsumptionMetricIdle: 'L/hora',
     gasConsumptionMode: 'Running',
     carSpeed: 0
 });
