@@ -153,12 +153,34 @@ document.addEventListener('keydown', (e) => {
 let lastValue = 0;
 const smoothingFactor = 0.1;
 
+let timeToModeChange = 10;
+
 setInterval(() => {
-  const randomTarget = Math.floor(Math.random() * 101);
-  lastValue = (lastValue * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
-  setState('evConsumption', Math.round(lastValue) - 50);
-  setState('lastRegenValue', Math.round(lastValue));
-  setState('gasConsumption', Math.round(lastValue)/3);
-  setState('carSpeed', Math.round(lastValue));
+    const randomTarget = Math.floor(Math.random() * 101);
+    lastValue = (lastValue * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
+
+    timeToModeChange--;
+    if (timeToModeChange <= 0) {
+        const currentMode = stateManager.getState().gasConsumptionMode;
+        const newMode = (currentMode === 'Running') ? 'Idle' : 'Running';
+        setState('gasConsumptionMode', newMode);
+
+        timeToModeChange = Math.floor(Math.random() * 100) + 50;
+    }
+
+    const currentMode = stateManager.getState().gasConsumptionMode;
+
+    if (currentMode === 'Running') {
+        setState('gasConsumption', Math.round(lastValue) / 3);
+        setState('gasConsumptionIdle', 0);
+    } else {
+        setState('gasConsumption', 0);
+        setState('gasConsumptionIdle', Math.round(lastValue) / 20);
+    }
+
+    setState('evConsumption', Math.round(lastValue) - 50);
+    setState('lastRegenValue', Math.round(lastValue));
+    setState('carSpeed', Math.round(lastValue) * 3);
 
 }, 200);
+

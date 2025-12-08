@@ -27,6 +27,7 @@ data class SettingItem(
     val enabled: Boolean = true,
     val sliderValue: Int? = null,
     val sliderRange: IntRange? = null,
+    val sliderStep: Int? = null,
     val onSliderChange: ((Int) -> Unit)? = null,
     val sliderLabel: String? = null,
     val customContent: (@Composable () -> Unit)? = null
@@ -73,6 +74,7 @@ fun SettingCard(
     enabled: Boolean = true,
     sliderValue: Int? = null,
     sliderRange: IntRange? = null,
+    sliderStep: Int? = null,
     onSliderChange: ((Int) -> Unit)? = null,
     sliderLabel: String? = null,
     customContent: (@Composable () -> Unit)? = null
@@ -152,16 +154,11 @@ fun SettingCard(
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
-                    val steps = if (title.contains("volume", ignoreCase = true)) {
-                        sliderRange.last - sliderRange.first - 1
-                    } else {
-                        ((sliderRange.last - sliderRange.first) / 5) - 1
-                    }
-                    val roundedValue = if (title.contains("volume", ignoreCase = true)) {
-                        sliderValue.toFloat()
-                    } else {
-                        ((sliderValue / 5) * 5).toFloat()
-                    }
+                    val stepSize = sliderStep ?: if (title.contains("volume", ignoreCase = true)) 1 else 5
+                    val steps = ((sliderRange.last - sliderRange.first) / stepSize) - 1
+
+                    val roundedValue = ((sliderValue / stepSize) * stepSize).toFloat()
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -171,11 +168,7 @@ fun SettingCard(
                         Slider(
                             value = roundedValue,
                             onValueChange = { newValue ->
-                                val finalValue = if (title.contains("volume", ignoreCase = true)) {
-                                    newValue.toInt()
-                                } else {
-                                    ((newValue / 5).toInt() * 5)
-                                }
+                                val finalValue = ((newValue / stepSize).toInt() * stepSize)
                                 onSliderChange(finalValue)
                             },
                             valueRange = sliderRange.first.toFloat()..sliderRange.last.toFloat(),
@@ -249,6 +242,7 @@ fun TwoColumnSettingsLayout(
                                 enabled = setting.enabled,
                                 sliderValue = setting.sliderValue,
                                 sliderRange = setting.sliderRange,
+                                sliderStep = setting.sliderStep,
                                 onSliderChange = setting.onSliderChange,
                                 sliderLabel = setting.sliderLabel,
                                 customContent = setting.customContent
@@ -272,6 +266,7 @@ fun TwoColumnSettingsLayout(
                                 enabled = setting.enabled,
                                 sliderValue = setting.sliderValue,
                                 sliderRange = setting.sliderRange,
+                                sliderStep = setting.sliderStep,
                                 onSliderChange = setting.onSliderChange,
                                 sliderLabel = setting.sliderLabel,
                                 customContent = setting.customContent
@@ -305,6 +300,7 @@ fun TwoColumnSettingsLayout(
                             enabled = setting.enabled,
                             sliderValue = setting.sliderValue,
                             sliderRange = setting.sliderRange,
+                            sliderStep = setting.sliderStep,
                             onSliderChange = setting.onSliderChange,
                             sliderLabel = setting.sliderLabel,
                             customContent = setting.customContent
@@ -328,6 +324,7 @@ fun TwoColumnSettingsLayout(
                             enabled = setting.enabled,
                             sliderValue = setting.sliderValue,
                             sliderRange = setting.sliderRange,
+                            sliderStep = setting.sliderStep,
                             onSliderChange = setting.onSliderChange,
                             sliderLabel = setting.sliderLabel,
                             customContent = setting.customContent

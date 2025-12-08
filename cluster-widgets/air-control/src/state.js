@@ -90,6 +90,9 @@ var stateManager = new StateManager({
     evConsumption: 0,
     gasConsumption: 0.0,
     gasConsumptionMetric: 'Km/l',
+    gasConsumptionIdle: 0.0,
+    gasConsumptionMetric: 'l/min',
+    gasConsumptionMode: 'Running',
     carSpeed: 0
 });
 

@@ -319,6 +319,8 @@ fun BasicSettingsTab() {
     var closeSunroofOnSpeed by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.CLOSE_SUNROOF_ON_SPEED.key, false)) }
     var speedThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.SPEED_THRESHOLD.key, 15f)) }
     var closeSunroofSpeedThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.SUNROOF_SPEED_THRESHOLD.key, 15f)) }
+    var enableMaxAcOnUnlock by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.key, true)) }
+    var maxAcOnUnlockThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.key, 34f)) }
     var enableAutoBrightness by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_BRIGHTNESS.key, false)) }
     var nightStartHour by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.NIGHT_START_HOUR.key, 20)) }
     var nightStartMinute by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.NIGHT_START_MINUTE.key, 0)) }
@@ -427,6 +429,23 @@ fun BasicSettingsTab() {
                     prefs.edit { putFloat(SharedPreferencesKeys.SUNROOF_SPEED_THRESHOLD.key, newSpeed.toFloat()) }
                 },
                 sliderLabel = "Velocidade: ${closeSunroofSpeedThreshold.toInt()} km/h"
+            ),
+            SettingItem(
+                title = "A/C no máximo ao destravar",
+                description = SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.description,
+                checked = enableMaxAcOnUnlock,
+                onCheckedChange = {
+                    enableMaxAcOnUnlock = it
+                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.key, it) }
+                },
+                sliderValue = maxAcOnUnlockThreshold.toInt(),
+                sliderRange = 29..38,
+                sliderStep = 1,
+                onSliderChange = { newTemp ->
+                    maxAcOnUnlockThreshold = newTemp.toFloat()
+                    prefs.edit { putFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.key, newTemp.toFloat()) }
+                },
+                sliderLabel = "Temperatura de disparo: ${maxAcOnUnlockThreshold.toInt()}°C"
             ),
             SettingItem(
                 title = "Manter desativado monitoramento de distrações",
