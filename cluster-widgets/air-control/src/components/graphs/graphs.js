@@ -6,6 +6,8 @@ import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
 Chart.register(...registerables, streamingPlugin);
 
+const HISTORY_DURATION = 20000;
+
 export const graphList = [
      {
          id: 'evConsumption',
@@ -55,7 +57,7 @@ export const graphList = [
                  label: 'Consumo',
                  dataKey: 'gasConsumption',
                  unity: 'km/L',
-                 yAxisID: 'y'
+                 yAxisID: 'y1'
              }
          ]
      },
@@ -78,7 +80,7 @@ function startGlobalDataCollector() {
 
     setInterval(() => {
         const now = Date.now();
-        const DURATION = 20000;
+        const DURATION = HISTORY_DURATION;
 
         for (const dataKey in historicalData) {
             const value = getState(dataKey);
@@ -144,7 +146,11 @@ const graphController = {
                 scales: {
                     x: {
                         type: 'realtime',
-                        display: false
+                        display: false,
+                        realtime: {
+                            duration: HISTORY_DURATION,
+                            refresh: 250
+                        }
                     },
                     y: {
                         min: -20,
@@ -161,7 +167,7 @@ const graphController = {
                             drawOnChartArea: true,
                             drawTicks: false,
                             color: 'rgba(0,160,255,0.3)',
-                            zeroLineColor: 'rgba(100, 172, 255, 0.8)',
+                            zeroLineColor: 'rgba(100, 172, 255, 1)',
                             zeroLineWidth: 3
                         },
                     },
@@ -213,12 +219,13 @@ const graphController = {
                 const value2 = getState(dataset2Info.dataKey);
 
                 const yAxis = this.chartInstance.scales.y;
+                const y1Axis = this.chartInstance.scales.y1;
 
                 if (value1 !== undefined) {
                     primaryTooltipEl.querySelector('.tooltip-value').textContent = value1.toFixed(dataset1Info.decimalPlaces || 0);
                     primaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset1Info.unity;
                     primaryLineEl.style.top = `${yAxis.getPixelForValue(value1) + OFFSET}px`;
-                    primaryLineEl.style.backgroundColor = '#00c3ff';
+                    primaryLineEl.style.backgroundColor = '#00c3ff3f';
                     primaryTooltipEl.style.opacity = 1;
                     primaryLineEl.style.opacity = 1;
                 }
@@ -226,8 +233,8 @@ const graphController = {
                 if (value2 !== undefined) {
                     secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 1);
                     secondaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset2Info.unity;
-                    secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + OFFSET}px`;
-                    secondaryLineEl.style.backgroundColor = '#ffA064';
+                    secondaryLineEl.style.top = `${y1Axis.getPixelForValue(value2) + OFFSET}px`;
+                    secondaryLineEl.style.backgroundColor = '#ffA0643f';
                     secondaryTooltipEl.style.opacity = 1;
                     secondaryLineEl.style.opacity = 1;
                 }
@@ -259,7 +266,7 @@ const graphController = {
                     primaryTooltipEl.querySelector('.tooltip-value').textContent = activeValue.toFixed(graphInfo.decimalPlaces || 0);
                     primaryTooltipEl.querySelector('.tooltip-unity').textContent = activeUnity;
                     primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + OFFSET}px`;
-                    primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? '#00c3ff' : '#ffA064';
+                    primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? '#00c3ff3f' : '#ffA0643f';
                     primaryTooltipEl.style.opacity = 1;
                     primaryLineEl.style.opacity = 1;
                 }
@@ -312,7 +319,7 @@ const graphController = {
             scales.y.min = -50;
             scales.y.max = 200;
             scales.y.ticks.stepSize = 40;
-            scales.y1.min = -15;
+            scales.y1.min = -11.2;
             scales.y1.max = 45;
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = 'rgba(255, 160, 100, 0.7)';

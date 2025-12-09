@@ -391,6 +391,8 @@ public class ServiceManager {
                                 case 1028: key = Screen.Key.ENTER; break;
                                 case 1029: key = Screen.Key.HOME; break;
                                 case 1030: key = Screen.Key.BACK; break;
+                                case 1033: key = Screen.Key.UP_LONG; break;
+                                case 1034: key = Screen.Key.DOWN_LONG; break;
                                 case 1037: key = Screen.Key.ENTER_LONG; break;
                                 case 1039: key = Screen.Key.BACK_LONG; break;
                             }
@@ -502,13 +504,13 @@ public class ServiceManager {
             if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_BRIGHTNESS.getKey(), false)) {
                 AutoBrightnessManager.Companion.getInstance().setEnabled(true);
             }
-
             if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOKS.getKey(), false)) {
                 pendingTasks.add(this::initializeFrida);
             }
             if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false) && getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue()).equals("1")) {
                 updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_VENTILATION_LEVEL.getValue(), "3");
             }
+
             ensureSteeringWheelButtonIntegration();
             ensureSystemApps();
 
@@ -521,7 +523,6 @@ public class ServiceManager {
             }
 
             MainUiManager.getInstance().updateScreen();
-
 
             timeInitialized = SystemClock.uptimeMillis();
             Log.w(TAG, "Services initialized successfully");
@@ -983,13 +984,14 @@ public class ServiceManager {
                     if (disableBluetoothOnPowerOff && bluetoothStateOnPowerOff && !currentBluetoothState()) {
                         enableBluetooth();
                     }
+                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.getKey(), true)) {
+                        if (!isMaxAcActive) enableMaxAcOn();
+                    }
                 }
             } else if (key.equals(CarConstants.CAR_HVAC_POWER_MODE.getValue()) && value.equals("1") && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false)) {
                 updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_VENTILATION_LEVEL.getValue(), "3");
             } else if (key.equals(CarConstants.CAR_HVAC_POWER_MODE.getValue()) && value.equals("0") && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false)) {
                 updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_VENTILATION_LEVEL.getValue(), "0");
-            } else if (key.equals(CarConstants.CAR_DRIVE_SETTING_OUTSIDE_VIEW_MIRROR_FOLD_STATE.getValue()) && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.getKey(), true)) {
-                if (!isMaxAcActive) enableMaxAcOnUnlockLogic();
             } else if (key.equals(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue()) && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.getKey(), true)) {
                 if (isMaxAcActive) updateMaxAcSmoothing();
             }
@@ -1123,28 +1125,37 @@ public class ServiceManager {
     }
 
     public void abortMaxAcOnUnlockLogic() {
+        if (!isMaxAcActive) return;
         isMaxAcActive = false;
         previousAcState.clear();
+        dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 0);
+
     }
 
-    private void enableMaxAcOnUnlockLogic() {
+    public boolean isMaxAcActive() {
+        return isMaxAcActive;
+    }
+
+    private void enableMaxAcOn() {
         try {
             String tempStr = getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue());
             if (tempStr == null) return;
             float currentTemp = Float.parseFloat(tempStr);
-            float threshold = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.getKey(), 28.0f);
+            float threshold = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.getKey(), 35.0f);
 
-            if (currentTemp > threshold && !isMaxAcActive) {
+            if (currentTemp >= threshold && !isMaxAcActive) {
                 String prevPower = getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue());
+                String prevEnabled = getUpdatedData(CarConstants.CAR_HVAC_AC_ENABLE.getValue());
                 String prevFan = getUpdatedData(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
                 String prevDriverTemp = getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
                 String prevPassTemp = getUpdatedData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue());
                 String prevAuto = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
-                String prevAnion = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
-                String prevAQS = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
-                String prevSync = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
+                String prevAnion = getUpdatedData(CarConstants.CAR_HVAC_ANION_ENABLE.getValue());
+                String prevAQS = getUpdatedData(CarConstants.CAR_HVAC_AQS_ENABLE.getValue());
+                String prevSync = getUpdatedData(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue());
 
                 previousAcState.put(CarConstants.CAR_HVAC_POWER_MODE.getValue(), prevPower);
+                previousAcState.put(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), prevEnabled);
                 previousAcState.put(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), prevFan);
                 previousAcState.put(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), prevDriverTemp);
                 previousAcState.put(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue(), prevPassTemp);
@@ -1153,13 +1164,13 @@ public class ServiceManager {
                 previousAcState.put(CarConstants.CAR_HVAC_AQS_ENABLE.getValue(), prevAQS);
                 previousAcState.put(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue(), prevSync);
 
-
                 updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "1");
                 updateData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), "0");
                 updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), "7");
                 updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), "16.0");
                 updateData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue(), "16.0");
                 updateData(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue(), "1");
+                updateData(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), "1");
 
                 isMaxAcActive = true;
                 Log.w(TAG, "Max AC activated due to unlock/mirror and high temp: " + currentTemp);

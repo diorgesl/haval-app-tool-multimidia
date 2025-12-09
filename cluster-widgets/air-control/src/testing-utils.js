@@ -100,7 +100,7 @@ document.addEventListener('keydown', (e) => {
 
           case 'temp':
               const currentTemp = parseFloat(currentState.temp) || 21.0;
-              if (e.key === 'ArrowUp' && currentTemp < 26.0) {
+              if (e.key === 'ArrowUp' && currentTemp < 32.0) {
                   window.control('temp', (currentTemp + 0.5).toFixed(1));
               } else if (e.key === 'ArrowDown' && currentTemp > 16.0) {
                   window.control('temp', (currentTemp - 0.5).toFixed(1));

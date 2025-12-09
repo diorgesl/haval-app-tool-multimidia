@@ -254,6 +254,11 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('currentGraph','$screen')")
                     }
 
+                    ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED -> {
+                        val maxauto = args[0] as Int
+                        evaluateJsIfReady(webView, "control('maxauto', $maxauto)")
+                    }
+
                 }
             }
 

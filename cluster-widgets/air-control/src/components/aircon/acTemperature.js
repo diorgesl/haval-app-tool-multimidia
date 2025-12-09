@@ -43,7 +43,13 @@ export function createTemperatureElement() {
     });
 
     var unsubscribeTemp = subscribe('temp', function(newTemp) {
-        tempDisplay.textContent = newTemp + '°C';
+        if (newTemp == 16) {
+            tempDisplay.textContent = 'Low';
+        } else if (newTemp == 32) {
+            tempDisplay.textContent = 'High';
+        } else {
+            tempDisplay.textContent = newTemp + '°C';
+        }
         updateProgressRings();
     });
 
