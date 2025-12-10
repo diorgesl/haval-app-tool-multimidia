@@ -257,10 +257,10 @@ const graphController = {
                 }
 
                 const currentSpeed = getState('carSpeed') || 0;
+                const drivingMode = getState('drivingMode');
                 const accelerationSinceLastCheck = this.lastCarSpeed === 0 ? 0 : currentSpeed - this.lastCarSpeed;
                 const isAccelerating = accelerationSinceLastCheck > 1.5;
-
-                if (isAccelerating) {
+                if (isAccelerating && drivingMode === 'Sport') {
                     if (!this.videoElementIn.classList.contains('visible')) {
                         this.videoElementIn.classList.add('visible');
                         this.videoElementOut.classList.add('visible');
@@ -285,12 +285,11 @@ const graphController = {
                 const speedTimerTooltip = document.getElementById('timer-tooltip');
                 const speedTimerValue = document.getElementById('timer-tooltip-value');
 
-                if (this.lastCarSpeed === 0 && currentSpeed > 0 && !this.isSpeedTimerRunning) {
+                if (this.lastCarSpeed === 0 && currentSpeed > 0 && !this.isSpeedTimerRunning && drivingMode === 'Sport') {
                     this.isSpeedTimerRunning = true;
                     this.speedTimerStartTime = Date.now();
 
                     if (speedTimerTooltip && speedTimerValue) {
-                        // Clear pending hide timeout so we don't hide the new run
                         if (this.timerHideTimeoutId) {
                             clearTimeout(this.timerHideTimeoutId);
                             this.timerHideTimeoutId = null;
@@ -305,8 +304,13 @@ const graphController = {
 
                 if (this.isSpeedTimerRunning) {
 
-                    if (currentSpeed >= 100) {
-                        if (!this.last0To100Time) { // Calculate only once
+                    if (drivingMode !== 'Sport') {
+                        this.isSpeedTimerRunning = false;
+                        this.flashTriggered = false;
+                        if (speedTimerTooltip) speedTimerTooltip.classList.remove('visible');
+                    }
+                    else if (currentSpeed >= 100) {
+                        if (!this.last0To100Time) {
                             const endTime = Date.now();
                             const duration = (endTime - this.speedTimerStartTime) / 1000;
                             this.last0To100Time = duration.toFixed(1);
@@ -346,10 +350,8 @@ const graphController = {
                     if (this.isSpeedTimerRunning) {
                         this.isSpeedTimerRunning = false;
                         this.flashTriggered = false;
-                        // Do not hide immediately; let it be seen or timeout.
                         if (speedTimerTooltip) speedTimerTooltip.classList.remove('visible');
                     } else {
-                        // If stopped and timer is visible, set timeout to hide it
                         if (speedTimerTooltip && speedTimerTooltip.classList.contains('visible') && !this.timerHideTimeoutId) {
                             this.timerHideTimeoutId = setTimeout(() => {
                                 if (speedTimerTooltip) speedTimerTooltip.classList.remove('visible');
