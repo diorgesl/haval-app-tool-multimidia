@@ -969,7 +969,7 @@ canvas.regen-chart {
     text-align: right;
     font-size: 40px;
     font-weight: 300;
-    color: #ffA064;
+    color: #9affb5;
     font-size: 32px;
     font-weight: 300;
 }
@@ -977,7 +977,7 @@ canvas.regen-chart {
 .dynamic-tooltip.secondary .tooltip-unity {
     top: 62px;
     left: 226px;
-    color: #ffA064;
+    color: #9affb5;
     font-size: 18px;
     opacity: 0.8;
 }

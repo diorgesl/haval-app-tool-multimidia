@@ -97,6 +97,12 @@ function startGlobalDataCollector() {
 startGlobalDataCollector();
 
 const graphController = {
+
+    colors: {
+        primary: '#00c3ff',
+        secondary: '#9affb5'
+    },
+
     chartInstance: null,
     isInitialized: false,
     currentGraphId: null,
@@ -175,7 +181,7 @@ const graphController = {
                             padding: 10,
                             align: 'start',
                             stepSize: 2,
-                            color: 'rgba(255, 160, 100, 0.5)',
+                            color: 'rgba(0, 255, 187, 0.5)',
                         },
                         grid: {
                             drawOnChartArea: false,
@@ -218,7 +224,7 @@ const graphController = {
                     primaryTooltipEl.querySelector('.tooltip-value').textContent = value1.toFixed(dataset1Info.decimalPlaces || 0);
                     primaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset1Info.unity;
                     primaryLineEl.style.top = `${yAxis.getPixelForValue(value1) + OFFSET}px`;
-                    primaryLineEl.style.backgroundColor = '#00c3ff';
+                    primaryLineEl.style.backgroundColor = this.colors.primary;
                     primaryTooltipEl.style.opacity = 1;
                     primaryLineEl.style.opacity = 1;
                 }
@@ -227,7 +233,7 @@ const graphController = {
                     secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 1);
                     secondaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset2Info.unity;
                     secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + OFFSET}px`;
-                    secondaryLineEl.style.backgroundColor = '#ffA064';
+                    secondaryLineEl.style.backgroundColor = this.colors.secondary;
                     secondaryTooltipEl.style.opacity = 1;
                     secondaryLineEl.style.opacity = 1;
                 }
@@ -259,7 +265,7 @@ const graphController = {
                     primaryTooltipEl.querySelector('.tooltip-value').textContent = activeValue.toFixed(graphInfo.decimalPlaces || 0);
                     primaryTooltipEl.querySelector('.tooltip-unity').textContent = activeUnity;
                     primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + OFFSET}px`;
-                    primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? '#00c3ff' : '#ffA064';
+                    primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? this.colors.primary : this.colors.secondary;
                     primaryTooltipEl.style.opacity = 1;
                     primaryLineEl.style.opacity = 1;
                 }
@@ -303,11 +309,11 @@ const graphController = {
             scales.y.min = -15;
             scales.y.max = 45;
             scales.y.ticks.stepSize = 10;
-            scales.y.ticks.color = 'rgba(0, 195, 255, 0.7)';
+            scales.y.ticks.color = this.colors.primary + 'B3';
             scales.y1.min = -5;
             scales.y1.max = 15;
             scales.y1.ticks.stepSize = 3;
-            scales.y1.ticks.color = 'rgba(255, 160, 100, 0.7)';
+            scales.y1.ticks.color = this.colors.secondary + 'B3';
         } else if (graphId === 'carSpeed') {
             scales.y.min = -50;
             scales.y.max = 200;
@@ -315,7 +321,7 @@ const graphController = {
             scales.y1.min = -15;
             scales.y1.max = 45;
             scales.y1.ticks.stepSize = 10;
-            scales.y1.ticks.color = 'rgba(255, 160, 100, 0.7)';
+            scales.y1.ticks.color = this.colors.secondary + 'B3';
         } else if (graphId === 'evConsumption') {
             scales.y.min = -125;
             scales.y.max = 115;
@@ -323,7 +329,7 @@ const graphController = {
         }
 
         const newDatasets = [];
-        const datasetColors = ['#00c3ff', '#ffA064'];
+        const datasetColors = [this.colors.primary, this.colors.secondary];
 
         graphInfo.datasets.forEach((datasetInfo, index) => {
             if (datasetInfo.dataKey) {
@@ -332,7 +338,7 @@ const graphController = {
                     data: historicalData[datasetInfo.dataKey] || [],
                     yAxisID: datasetInfo.yAxisID,
                     borderColor: datasetColors[index],
-                    backgroundColor: index === 0 ? 'rgba(0, 120, 255, 0.15)' : 'rgba(255, 160, 100, 0.1)',
+                    backgroundColor: index === 0 ? this.colors.primary + '26': this.colors.secondary + '1A',
                     borderWidth: 2,
                     pointRadius: 0,
                     fill: true,
