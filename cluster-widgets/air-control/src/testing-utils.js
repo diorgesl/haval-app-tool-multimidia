@@ -159,32 +159,68 @@ const smoothingFactor = 0.1;
 
 let timeToModeChange = 10;
 
+
+let simulationPhase = 'idle';
+let currentSpeed = 0;
+let steadyTimeCounter = 0;
+const SIMULATION_INTERVAL = 100;
+
 setInterval(() => {
-    const randomTarget = Math.floor(Math.random() * 101);
-    lastValue = (lastValue * (1 - smoothingFactor)) + (randomTarget * smoothingFactor);
+    switch (simulationPhase) {
+        case 'accelerating':
+            if (currentSpeed < 120) {
+                currentSpeed += 2;
+            } else {
+                currentSpeed = 120;
+                simulationPhase = 'decelerating';
+            }
+            break;
 
-    timeToModeChange--;
-    if (timeToModeChange <= 0) {
-        const currentMode = stateManager.getState().gasConsumptionMode;
-        const newMode = (currentMode === 'Running') ? 'Idle' : 'Running';
-        setState('gasConsumptionMode', newMode);
+        case 'decelerating':
+            if (currentSpeed > 20) {
+                currentSpeed -= 3;
+            } else {
+                currentSpeed = 20;
+                simulationPhase = 'steady';
+                steadyTimeCounter = 0;
+            }
+            break;
 
-        timeToModeChange = Math.floor(Math.random() * 100) + 50;
+        case 'steady':
+            const STEADY_DURATION_MS = 5000;
+            if (steadyTimeCounter * SIMULATION_INTERVAL < STEADY_DURATION_MS) {
+                steadyTimeCounter++;
+            } else {
+                simulationPhase = 'stopping';
+            }
+            break;
+
+        case 'stopping':
+            if (currentSpeed > 0) {
+                currentSpeed -= 1;
+            } else {
+                currentSpeed = 0;
+                simulationPhase = 'idle';
+                setTimeout(() => {
+                    simulationPhase = 'accelerating';
+                }, 5000);
+            }
+            break;
+
+        case 'idle':
+        default:
+            break;
     }
 
-    const currentMode = stateManager.getState().gasConsumptionMode;
+    setState('carSpeed', Math.max(0, Math.round(currentSpeed)));
 
-    if (currentMode === 'Running') {
-        setState('gasConsumption', Math.round(lastValue) / 3);
-        setState('gasConsumptionIdle', 0);
-    } else {
-        setState('gasConsumption', 0);
-        setState('gasConsumptionIdle', Math.round(lastValue) / 20);
-    }
+    const baseValue = currentSpeed / 2;
+    setState('evConsumption', Math.round(baseValue) - 20);
+    setState('gasConsumption', simulationPhase === 'accelerating' ? baseValue / 3 : baseValue / 5);
+    setState('lastRegenValue', currentSpeed < 20 ? 40 - currentSpeed : 0);
 
-    setState('evConsumption', Math.round(lastValue) - 50);
-    setState('lastRegenValue', Math.round(lastValue));
-    setState('carSpeed', Math.round(lastValue) * 3);
+}, SIMULATION_INTERVAL);
 
-}, 200);
-
+setTimeout(() => {
+    simulationPhase = 'accelerating';
+}, 2000);

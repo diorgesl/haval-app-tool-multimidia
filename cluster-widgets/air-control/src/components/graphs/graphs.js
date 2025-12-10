@@ -1,5 +1,6 @@
-import {getState, subscribe} from '../../state.js';
-import {div, img, span} from '../../utils/createElement.js';
+import { getState, subscribe } from '../../state.js';
+import { div, img, span } from '../../utils/createElement.js';
+import fastVideo from 'url:../../media/fast.mp4';
 
 import { Chart, registerables } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
@@ -7,58 +8,58 @@ import 'chartjs-adapter-date-fns';
 Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
-     {
-         id: 'evConsumption',
-         displayLabel: 'Consumo EV',
-         decimalPlaces: 0,
-         datasets: [
-             {
-                 label: 'Consumo EV',
-                 dataKey: 'evConsumption',
-                 unity: '% de Energia',
-                 yAxisID: 'y'
-             },
-             { label: null, dataKey: null, yAxisID: 'y1' }
-         ]
-     },
-     {
-         id: 'gasConsumption',
-         displayLabel: 'Consumo Combustão',
-         decimalPlaces: 1,
-         datasets: [
-             {
-                 label: 'Consumo Instantâneo',
-                 dataKey: 'gasConsumption',
-                 unity: 'Km/L',
-                 yAxisID: 'y'
-             },
-             {
-                 label: 'Consumo em Idle',
-                 dataKey: 'gasConsumptionIdle',
-                 unity: 'L/hora',
-                 yAxisID: 'y1'
-             }
-         ]
-     },
-     {
-         id: 'carSpeed',
-         displayLabel: 'Velocidade',
-         decimalPlaces: 0,
-         datasets: [
-             {
-                 label: 'Velocidade',
-                 dataKey: 'carSpeed',
-                 unity: 'km/h',
-                 yAxisID: 'y'
-             },
-             {
-                 label: 'Consumo',
-                 dataKey: 'gasConsumption',
-                 unity: 'km/L',
-                 yAxisID: 'y'
-             }
-         ]
-     },
+    {
+        id: 'evConsumption',
+        displayLabel: 'Consumo EV',
+        decimalPlaces: 0,
+        datasets: [
+            {
+                label: 'Consumo EV',
+                dataKey: 'evConsumption',
+                unity: '% de Energia',
+                yAxisID: 'y'
+            },
+            { label: null, dataKey: null, yAxisID: 'y1' }
+        ]
+    },
+    {
+        id: 'gasConsumption',
+        displayLabel: 'Consumo Combustão',
+        decimalPlaces: 1,
+        datasets: [
+            {
+                label: 'Consumo Instantâneo',
+                dataKey: 'gasConsumption',
+                unity: 'Km/L',
+                yAxisID: 'y'
+            },
+            {
+                label: 'Consumo em Idle',
+                dataKey: 'gasConsumptionIdle',
+                unity: 'L/hora',
+                yAxisID: 'y1'
+            }
+        ]
+    },
+    {
+        id: 'carSpeed',
+        displayLabel: 'Velocidade',
+        decimalPlaces: 0,
+        datasets: [
+            {
+                label: 'Velocidade',
+                dataKey: 'carSpeed',
+                unity: 'km/h',
+                yAxisID: 'y'
+            },
+            {
+                label: 'Consumo',
+                dataKey: 'gasConsumption',
+                unity: 'km/L',
+                yAxisID: 'y'
+            }
+        ]
+    },
 ];
 
 const historicalData = {};
@@ -106,35 +107,52 @@ const graphController = {
     chartInstance: null,
     isInitialized: false,
     currentGraphId: null,
+    lastCarSpeed: 0,
+    videoElementIn: null,
+    videoElementOut: null,
+    isSpeedTimerRunning: false,
+    speedTimerStartTime: 0,
+    isSpeedTimerRunning: false,
+    speedTimerStartTime: 0,
+    timerHideTimeoutId: null,
+    last0To100Time: null,
+    flashTriggered: false,
 
     init(canvasContext) {
         if (this.isInitialized) return;
 
+        this.videoElementIn = document.querySelector('.graph-video-background-in');
+        this.videoElementOut = document.querySelector('.graph-video-background-out');
+
+        this.lastCarSpeed = getState('carSpeed') || 0; // Initialize with current speed
+
         this.chartInstance = new Chart(canvasContext, {
             type: 'line',
-            data: { datasets: [
-            {
-                label: '',
-                backgroundColor: 'rgba(0, 120, 255, 0.15)',
-                borderColor: '#00c3ff',
-                borderWidth: 2,
-                pointRadius: 0,
-                fill: true,
-                tension: 0.3,
-                shadowColor: 'rgba(0, 195, 255, 0.5)',
-                shadowBlur: 10,
+            data: {
+                datasets: [
+                    {
+                        label: '',
+                        backgroundColor: 'rgba(0, 120, 255, 0.15)',
+                        borderColor: '#00c3ff',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        tension: 0.3,
+                        shadowColor: 'rgba(0, 195, 255, 0.5)',
+                        shadowBlur: 10,
+                    },
+                    {
+                        label: '',
+                        backgroundColor: 'rgba(0, 120, 255, 0.15)',
+                        borderColor: '#00c3ff',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        tension: 0.3,
+                        shadowColor: 'rgba(0, 195, 255, 0.5)',
+                        shadowBlur: 10,
+                    }]
             },
-            {
-                label: '',
-                backgroundColor: 'rgba(0, 120, 255, 0.15)',
-                borderColor: '#00c3ff',
-                borderWidth: 2,
-                pointRadius: 0,
-                fill: true,
-                tension: 0.3,
-                shadowColor: 'rgba(0, 195, 255, 0.5)',
-                shadowBlur: 10,
-            }]},
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -238,8 +256,119 @@ const graphController = {
                     secondaryLineEl.style.opacity = 1;
                 }
 
+                const currentSpeed = getState('carSpeed') || 0;
+                const accelerationSinceLastCheck = this.lastCarSpeed === 0 ? 0 : currentSpeed - this.lastCarSpeed;
+                const isAccelerating = accelerationSinceLastCheck > 1.5;
+
+                if (isAccelerating) {
+                    if (!this.videoElementIn.classList.contains('visible')) {
+                        this.videoElementIn.classList.add('visible');
+                        this.videoElementOut.classList.add('visible');
+                        this.videoElementIn.play().catch(error => console.log("Autoplay do vídeo foi impedido:", error));
+                        this.videoElementOut.play().catch(error => console.log("Autoplay do vídeo foi impedido:", error));
+                    }
+                }
+                else {
+                    if (this.videoElementIn.classList.contains('visible')) {
+                        this.videoElementIn.classList.remove('visible');
+                        this.videoElementOut.classList.remove('visible');
+
+                        setTimeout(() => {
+                            if (!this.videoElementIn.classList.contains('visible')) {
+                                this.videoElementIn.pause();
+                                this.videoElementOut.pause();
+                            }
+                        }, 2000);
+                    }
+                }
+
+                const speedTimerTooltip = document.getElementById('timer-tooltip');
+                const speedTimerValue = document.getElementById('timer-tooltip-value');
+
+                if (this.lastCarSpeed === 0 && currentSpeed > 0 && !this.isSpeedTimerRunning) {
+                    this.isSpeedTimerRunning = true;
+                    this.speedTimerStartTime = Date.now();
+
+                    if (speedTimerTooltip && speedTimerValue) {
+                        // Clear pending hide timeout so we don't hide the new run
+                        if (this.timerHideTimeoutId) {
+                            clearTimeout(this.timerHideTimeoutId);
+                            this.timerHideTimeoutId = null;
+                        }
+
+                        speedTimerValue.textContent = '0.0s';
+                        speedTimerTooltip.classList.add('visible');
+                        this.last0To100Time = null;
+                        this.flashTriggered = false;
+                    }
+                }
+
+                if (this.isSpeedTimerRunning) {
+
+                    if (currentSpeed >= 100) {
+                        if (!this.last0To100Time) { // Calculate only once
+                            const endTime = Date.now();
+                            const duration = (endTime - this.speedTimerStartTime) / 1000;
+                            this.last0To100Time = duration.toFixed(1);
+                        }
+
+                        if (speedTimerValue) {
+                            speedTimerValue.textContent = `${this.last0To100Time}s`;
+                        }
+
+                        if (!this.flashTriggered) {
+                            const flashOverlay = document.querySelector('.graph-flash-overlay');
+                            if (flashOverlay) {
+                                this.flashTriggered = true;
+                                flashOverlay.classList.add('screen-flash-animation');
+
+                                const onAnimationEnd = () => {
+                                    flashOverlay.classList.remove('screen-flash-animation');
+                                    this.isSpeedTimerRunning = false;
+                                    flashOverlay.removeEventListener('animationend', onAnimationEnd);
+                                };
+
+                                flashOverlay.addEventListener('animationend', onAnimationEnd);
+                            } else {
+                                this.isSpeedTimerRunning = false;
+                            }
+                        }
+
+                    } else {
+                        const elapsedTime = (Date.now() - this.speedTimerStartTime) / 1000;
+                        if (speedTimerValue) {
+                            speedTimerValue.textContent = `${elapsedTime.toFixed(1)}s`;
+                        }
+                    }
+                }
+
+                if (currentSpeed === 0) {
+                    if (this.isSpeedTimerRunning) {
+                        this.isSpeedTimerRunning = false;
+                        this.flashTriggered = false;
+                        // Do not hide immediately; let it be seen or timeout.
+                        if (speedTimerTooltip) speedTimerTooltip.classList.remove('visible');
+                    } else {
+                        // If stopped and timer is visible, set timeout to hide it
+                        if (speedTimerTooltip && speedTimerTooltip.classList.contains('visible') && !this.timerHideTimeoutId) {
+                            this.timerHideTimeoutId = setTimeout(() => {
+                                if (speedTimerTooltip) speedTimerTooltip.classList.remove('visible');
+                                this.timerHideTimeoutId = null;
+                            }, 5000);
+                        }
+                    }
+                }
+                this.lastCarSpeed = currentSpeed;
+
             } else {
                 let activeValue, activeUnity, activeDatasetIndex;
+
+                if (this.videoElementIn && this.videoElementIn.classList.contains('visible')) {
+                    this.videoElementIn.classList.remove('visible');
+                    this.videoElementOut.classList.remove('visible');
+                    this.videoElementIn.pause();
+                    this.videoElementOut.pause();
+                }
 
                 if (graphInfo.id === 'gasConsumption') {
                     const runningValue = getState(graphInfo.datasets[0].dataKey);
@@ -338,7 +467,7 @@ const graphController = {
                     data: historicalData[datasetInfo.dataKey] || [],
                     yAxisID: datasetInfo.yAxisID,
                     borderColor: datasetColors[index],
-                    backgroundColor: index === 0 ? this.colors.primary + '26': this.colors.secondary + '1A',
+                    backgroundColor: index === 0 ? this.colors.primary + '26' : this.colors.secondary + '1A',
                     borderWidth: 2,
                     pointRadius: 0,
                     fill: true,
@@ -361,6 +490,10 @@ const graphController = {
             clearInterval(this.uiUpdateInterval);
             this.uiUpdateInterval = null;
         }
+        if (this.timerHideTimeoutId) {
+            clearTimeout(this.timerHideTimeoutId);
+            this.timerHideTimeoutId = null;
+        }
         if (this.chartInstance) {
             this.chartInstance.destroy();
             this.chartInstance = null;
@@ -373,18 +506,18 @@ const graphController = {
 
 export function createGraphScreen() {
 
-    var main = div({className: 'main-container'});
+    var main = div({ className: 'main-container' });
 
-    const container = div({className: 'graph-screen'});
+    const container = div({ className: 'graph-screen' });
 
-    const graphProgressRing = div({className: 'graph-progress-ring'});
+    const graphProgressRing = div({ className: 'graph-progress-ring' });
     graphProgressRing.id = 'graph-progress-ring';
     container.appendChild(graphProgressRing);
 
-    const divider = div({className: 'graph-selector-line'});
-    const outerRing = div({className: 'graph-outer-ring'});
-    const innerRingShadow = div({className: 'graph-inner-ring-shadow'});
-    const innerRing = div({className: 'graph-inner-ring'});
+    const divider = div({ className: 'graph-selector-line' });
+    const outerRing = div({ className: 'graph-outer-ring' });
+    const innerRingShadow = div({ className: 'graph-inner-ring-shadow' });
+    const innerRing = div({ className: 'graph-inner-ring' });
 
     const dynamicTooltip = div({ className: 'dynamic-tooltip primary' });
     const tooltipValue = span({ className: 'tooltip-value' });
@@ -406,6 +539,33 @@ export function createGraphScreen() {
     innerRing.appendChild(dynamicTooltipLine);
     innerRing.appendChild(secondaryTooltipLine);
 
+    const timerTooltip = div({ className: 'timer-tooltip', id: 'timer-tooltip' });
+    const timerTooltipValue = span({ className: 'timer-tooltip-value', id: 'timer-tooltip-value' });
+    const timerTooltipUnity = span({ className: 'timer-tooltip-unity' });
+    timerTooltip.appendChild(timerTooltipValue);
+    timerTooltip.appendChild(timerTooltipUnity);
+    timerTooltipValue.textContent = '--.-s';
+    timerTooltipUnity.textContent = '0-100km/h';
+
+    innerRing.appendChild(timerTooltip);
+
+    const videoBackgroundOut = document.createElement('video');
+    videoBackgroundOut.className = 'graph-video-background-out';
+    videoBackgroundOut.src = fastVideo;
+    videoBackgroundOut.loop = true;
+    videoBackgroundOut.muted = true;
+    videoBackgroundOut.playsInline = true;
+    outerRing.appendChild(videoBackgroundOut);
+
+    const videoBackgroundIn = document.createElement('video');
+    videoBackgroundIn.className = 'graph-video-background-in';
+    videoBackgroundIn.src = fastVideo;
+    videoBackgroundIn.loop = true;
+    videoBackgroundIn.muted = true;
+    videoBackgroundIn.playsInline = true;
+    videoBackgroundIn.playsInline = true;
+    innerRing.appendChild(videoBackgroundIn);
+
     const canvas = document.createElement('canvas');
     canvas.className = 'graph-chart';
     canvas.id = 'graph-chart';
@@ -414,6 +574,10 @@ export function createGraphScreen() {
     container.appendChild(outerRing);
     container.appendChild(innerRingShadow);
     container.appendChild(innerRing);
+
+    const flashOverlay = div({ className: 'graph-flash-overlay' });
+    container.appendChild(flashOverlay);
+
     main.appendChild(container);
 
     const bulletContainer = div({ className: 'graph-bullet-container' });
@@ -450,7 +614,7 @@ export function createGraphScreen() {
 
     }, 0);
 
-   main.cleanup = () => {
+    main.cleanup = () => {
         graphController.cleanup();
     };
 

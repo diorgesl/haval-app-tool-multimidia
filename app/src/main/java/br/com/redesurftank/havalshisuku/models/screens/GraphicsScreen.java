@@ -41,11 +41,13 @@ public class GraphicsScreen implements Screen {
     public void processKey(Key key) {
         switch (key) {
             case UP:
-                if (currentGraphIndex > 0) currentGraphIndex--;
+                currentGraphIndex--;
+                if (currentGraphIndex < 0) currentGraphIndex = GraphOptions.graphsValueMap.length - 1;
                 break;
             case ENTER:
             case DOWN:
-                if (currentGraphIndex < GraphOptions.graphsValueMap.length - 1) currentGraphIndex++;
+                currentGraphIndex++;
+                if (currentGraphIndex >= GraphOptions.graphsValueMap.length) currentGraphIndex = 0;
                 break;
             case BACK:
                 MainUiManager.getInstance().updateScreen(previousScreen);
