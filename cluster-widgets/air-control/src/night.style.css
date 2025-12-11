@@ -921,6 +921,10 @@ canvas.regen-chart {
   justify-content: center;
 }
 
+.graph-screen transparent {
+  background: transparent;
+}
+
 .graph-title-label {
   position: absolute;
   top: 65px;
@@ -987,7 +991,7 @@ canvas.regen-chart {
   -webkit-mask: radial-gradient(circle at center, transparent 196px, white 197px);
   mask: radial-gradient(circle at center, transparent 196px, white 197px);
 
-  z-index: 0;
+  z-index: 5;
 }
 
 .graph-inner-ring {
@@ -995,7 +999,7 @@ canvas.regen-chart {
   width: 392px;
   height: 392px;
   border-radius: 50%;
-  background: radial-gradient(circle, #0a2345 0%, #000000 90%);
+  background: transparent;
   overflow: hidden;
   z-index: 2;
 }
@@ -1101,6 +1105,27 @@ canvas.regen-chart {
   white-space: nowrap;
 }
 
+.warp-tunnel-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 452px;
+  height: 452px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  pointer-events: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.warp-tunnel-canvas.visible {
+  opacity: 1;
+}
+
+
+
 .dynamic-tooltip.secondary .tooltip-value {
   top: 57px;
   left: 45px;
@@ -1139,7 +1164,7 @@ canvas.regen-chart {
 }
 
 canvas.graph-chart {
-  background: transparent;
+  background: radial-gradient(circle, #006aff56 0%, #0000003a 90%);
 }
 
 
@@ -1245,11 +1270,9 @@ canvas.graph-chart {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 452px;
-  /* Set to match outer ring size */
   height: 452px;
   border-radius: 50%;
   z-index: 20;
-  /* Above all rings */
   pointer-events: none;
   background-color: transparent;
 }

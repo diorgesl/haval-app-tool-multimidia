@@ -1,10 +1,10 @@
 import { getState, subscribe } from '../../state.js';
 import { div, img, span } from '../../utils/createElement.js';
-import fastVideo from 'url:../../media/fast.mp4';
 
 import { Chart, registerables } from 'chart.js';
 import streamingPlugin from 'chartjs-plugin-streaming';
 import 'chartjs-adapter-date-fns';
+import { WarpTunnelAnimation } from './warpTunnel.js';
 Chart.register(...registerables, streamingPlugin);
 
 export const graphList = [
@@ -108,8 +108,8 @@ const graphController = {
     isInitialized: false,
     currentGraphId: null,
     lastCarSpeed: 0,
-    videoElementIn: null,
-    videoElementOut: null,
+    warpTunnel: null,
+    warpTunnelCanvas: null,
     isSpeedTimerRunning: false,
     speedTimerStartTime: 0,
     isSpeedTimerRunning: false,
@@ -121,10 +121,12 @@ const graphController = {
     init(canvasContext) {
         if (this.isInitialized) return;
 
-        this.videoElementIn = document.querySelector('.graph-video-background-in');
-        this.videoElementOut = document.querySelector('.graph-video-background-out');
+        this.warpTunnelCanvas = document.getElementById('warp-tunnel-canvas');
+        if (this.warpTunnelCanvas) {
+            this.warpTunnel = new WarpTunnelAnimation(this.warpTunnelCanvas);
+        }
 
-        this.lastCarSpeed = getState('carSpeed') || 0; // Initialize with current speed
+        this.lastCarSpeed = getState('carSpeed') || 0;
 
         this.chartInstance = new Chart(canvasContext, {
             type: 'line',
@@ -219,16 +221,16 @@ const graphController = {
             const secondaryTooltipEl = document.querySelector('.dynamic-tooltip.secondary');
             const primaryLineEl = document.querySelector('.dynamic-tooltip-line.primary');
             const secondaryLineEl = document.querySelector('.dynamic-tooltip-line.secondary');
+            const LINE_OFFSET = 13;
 
-            const OFFSET = 13;
-            primaryTooltipEl.style.opacity = 0;
-            primaryLineEl.style.opacity = 0;
-            secondaryTooltipEl.style.display = 'none';
-            secondaryLineEl.style.display = 'none';
+            if (primaryTooltipEl) primaryTooltipEl.style.opacity = 0;
+            if (primaryLineEl) primaryLineEl.style.opacity = 0;
+            if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'none';
+            if (secondaryLineEl) secondaryLineEl.style.display = 'none';
 
             if (graphInfo.id === 'carSpeed') {
-                secondaryTooltipEl.style.display = 'flex';
-                secondaryLineEl.style.display = 'block';
+                if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'flex';
+                if (secondaryLineEl) secondaryLineEl.style.display = 'block';
 
                 const dataset1Info = graphInfo.datasets[0];
                 const dataset2Info = graphInfo.datasets[1];
@@ -238,19 +240,19 @@ const graphController = {
 
                 const yAxis = this.chartInstance.scales.y;
 
-                if (value1 !== undefined) {
+                if (value1 !== undefined && primaryTooltipEl && primaryLineEl) {
                     primaryTooltipEl.querySelector('.tooltip-value').textContent = value1.toFixed(dataset1Info.decimalPlaces || 0);
                     primaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset1Info.unity;
-                    primaryLineEl.style.top = `${yAxis.getPixelForValue(value1) + OFFSET}px`;
+                    primaryLineEl.style.top = `${yAxis.getPixelForValue(value1) + LINE_OFFSET}px`;
                     primaryLineEl.style.backgroundColor = this.colors.primary;
                     primaryTooltipEl.style.opacity = 1;
                     primaryLineEl.style.opacity = 1;
                 }
 
-                if (value2 !== undefined) {
+                if (value2 !== undefined && secondaryTooltipEl && secondaryLineEl) {
                     secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 1);
                     secondaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset2Info.unity;
-                    secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + OFFSET}px`;
+                    secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + LINE_OFFSET}px`;
                     secondaryLineEl.style.backgroundColor = this.colors.secondary;
                     secondaryTooltipEl.style.opacity = 1;
                     secondaryLineEl.style.opacity = 1;
@@ -261,24 +263,23 @@ const graphController = {
                 const accelerationSinceLastCheck = this.lastCarSpeed === 0 ? 0 : currentSpeed - this.lastCarSpeed;
                 const isAccelerating = accelerationSinceLastCheck > 1.5;
                 if (isAccelerating && drivingMode === 'Sport') {
-                    if (!this.videoElementIn.classList.contains('visible')) {
-                        this.videoElementIn.classList.add('visible');
-                        this.videoElementOut.classList.add('visible');
-                        this.videoElementIn.play().catch(error => console.log("Autoplay do vídeo foi impedido:", error));
-                        this.videoElementOut.play().catch(error => console.log("Autoplay do vídeo foi impedido:", error));
+                    if (this.warpTunnel && !this.warpTunnelCanvas.classList.contains('visible')) {
+                        this.warpTunnelCanvas.classList.add('visible');
+                        this.warpTunnel.start();
+                    }
+                    if (this.warpTunnel) {
+                        this.warpTunnel.setSpeed(currentSpeed);
                     }
                 }
                 else {
-                    if (this.videoElementIn.classList.contains('visible')) {
-                        this.videoElementIn.classList.remove('visible');
-                        this.videoElementOut.classList.remove('visible');
+                    if (this.warpTunnel && this.warpTunnelCanvas.classList.contains('visible')) {
+                        this.warpTunnelCanvas.classList.remove('visible');
 
                         setTimeout(() => {
-                            if (!this.videoElementIn.classList.contains('visible')) {
-                                this.videoElementIn.pause();
-                                this.videoElementOut.pause();
+                            if (!this.warpTunnelCanvas.classList.contains('visible')) {
+                                this.warpTunnel.stop();
                             }
-                        }, 2000);
+                        }, 2000); // Wait for fade out
                     }
                 }
 
@@ -365,11 +366,9 @@ const graphController = {
             } else {
                 let activeValue, activeUnity, activeDatasetIndex;
 
-                if (this.videoElementIn && this.videoElementIn.classList.contains('visible')) {
-                    this.videoElementIn.classList.remove('visible');
-                    this.videoElementOut.classList.remove('visible');
-                    this.videoElementIn.pause();
-                    this.videoElementOut.pause();
+                if (this.warpTunnel && this.warpTunnelCanvas.classList.contains('visible')) {
+                    this.warpTunnelCanvas.classList.remove('visible');
+                    this.warpTunnel.stop();
                 }
 
                 if (graphInfo.id === 'gasConsumption') {
@@ -395,7 +394,7 @@ const graphController = {
                     const yAxis = activeDatasetIndex === 0 ? this.chartInstance.scales.y : this.chartInstance.scales.y1;
                     primaryTooltipEl.querySelector('.tooltip-value').textContent = activeValue.toFixed(graphInfo.decimalPlaces || 0);
                     primaryTooltipEl.querySelector('.tooltip-unity').textContent = activeUnity;
-                    primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + OFFSET}px`;
+                    primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + LINE_OFFSET}px`;
                     primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? this.colors.primary : this.colors.secondary;
                     primaryTooltipEl.style.opacity = 1;
                     primaryLineEl.style.opacity = 1;
@@ -492,6 +491,9 @@ const graphController = {
             clearInterval(this.uiUpdateInterval);
             this.uiUpdateInterval = null;
         }
+        if (this.warpTunnel) {
+            this.warpTunnel.stop();
+        }
         if (this.timerHideTimeoutId) {
             clearTimeout(this.timerHideTimeoutId);
             this.timerHideTimeoutId = null;
@@ -547,26 +549,16 @@ export function createGraphScreen() {
     timerTooltip.appendChild(timerTooltipValue);
     timerTooltip.appendChild(timerTooltipUnity);
     timerTooltipValue.textContent = '--.-s';
-    timerTooltipUnity.textContent = '0-100km/h';
+    timerTooltipUnity.textContent = '0 - 100 km/h';
 
     innerRing.appendChild(timerTooltip);
 
-    const videoBackgroundOut = document.createElement('video');
-    videoBackgroundOut.className = 'graph-video-background-out';
-    videoBackgroundOut.src = fastVideo;
-    videoBackgroundOut.loop = true;
-    videoBackgroundOut.muted = true;
-    videoBackgroundOut.playsInline = true;
-    outerRing.appendChild(videoBackgroundOut);
 
-    const videoBackgroundIn = document.createElement('video');
-    videoBackgroundIn.className = 'graph-video-background-in';
-    videoBackgroundIn.src = fastVideo;
-    videoBackgroundIn.loop = true;
-    videoBackgroundIn.muted = true;
-    videoBackgroundIn.playsInline = true;
-    videoBackgroundIn.playsInline = true;
-    innerRing.appendChild(videoBackgroundIn);
+
+    const warpCanvas = document.createElement('canvas');
+    warpCanvas.id = 'warp-tunnel-canvas';
+    warpCanvas.className = 'warp-tunnel-canvas';
+    container.appendChild(warpCanvas);
 
     const canvas = document.createElement('canvas');
     canvas.className = 'graph-chart';
