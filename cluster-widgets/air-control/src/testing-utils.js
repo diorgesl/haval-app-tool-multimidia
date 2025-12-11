@@ -139,17 +139,15 @@ document.addEventListener('keydown', (e) => {
       if ((e.key === 'Enter') || (e.key === 'ArrowDown')) {
           const controls = focusableAreas.graph;
           const currentIndex = controls.indexOf(currentGraph);
-          if (currentIndex < 2) {
-             const nextIndex = (currentIndex + 1) % controls.length;
-             window.control('currentGraph', controls[nextIndex]);
-          }
+          var nextIndex = currentIndex + 1;
+          if (nextIndex >= controls.length) nextIndex = 0;
+          window.control('currentGraph', controls[nextIndex]);
       } else if (e.key === 'ArrowUp') {
           const controls = focusableAreas.graph;
           const currentIndex = controls.indexOf(currentGraph);
-          if (currentIndex > 0) {
-             const nextIndex = (currentIndex - 1) % controls.length;
-             window.control('currentGraph', controls[nextIndex]);
-          }
+          var nextIndex = currentIndex - 1;
+          if (nextIndex < 0) nextIndex = controls.length - 1;
+          window.control('currentGraph', controls[nextIndex]);
       }
   }
 });

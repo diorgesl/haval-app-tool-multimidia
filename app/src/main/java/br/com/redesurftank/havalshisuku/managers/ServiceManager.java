@@ -1198,6 +1198,7 @@ public class ServiceManager {
                 }
                 isMaxAcActive = false;
                 previousAcState.clear();
+                dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 1);
                 Log.w(TAG, "Max AC deactivated, temperature reached target: " + targetTemp);
             } else if (currentTemp < startSmoothingTemp) {
                 float factor = (currentTemp - targetTemp) / smoothingRange;
