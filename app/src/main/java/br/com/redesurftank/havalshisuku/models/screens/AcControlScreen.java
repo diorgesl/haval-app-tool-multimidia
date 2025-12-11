@@ -15,6 +15,8 @@ public class AcControlScreen implements Screen {
     private ServiceManager serviceManager;
     private Screen previousScreen = this;
     private int steeringWheelAcControlTypeIndex = 0;
+    private boolean maxAutoStatus = false;
+
     private SteeringWheelAcControlType steeringWheelAcControlType = SteeringWheelAcControlType.TEMPERATURE;
 
     @Override
@@ -33,7 +35,9 @@ public class AcControlScreen implements Screen {
                 serviceManager.getSharedPreferences().edit().putString(SharedPreferencesKeys.LAST_CLUSTER_AC_CONFIG.getKey(), steeringWheelAcControlType.name()).apply();
                 break;
             case UP: // Up & Down
-            case DOWN: {
+            case DOWN:
+            case UP_LONG:
+            case DOWN_LONG: {
                 switch (steeringWheelAcControlType) {
                     case TEMPERATURE: {
                         var currentTemperature = serviceManager.getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
@@ -41,12 +45,16 @@ public class AcControlScreen implements Screen {
                             float temperature = Float.parseFloat(currentTemperature);
                             if (key == Key.UP) {
                                 temperature += 0.5f;
-                                if (temperature > 30.0f)
-                                    temperature = 30.0f;
-                            } else {
+                                if (temperature > 32.0f)
+                                    temperature = 32.0f;
+                            } else if (key == Key.DOWN) {
                                 temperature -= 0.5f;
                                 if (temperature < 16.0f)
                                     temperature = 16.0f;
+                            } else if (key == Key.UP_LONG) {
+                                temperature = 32.0f;
+                            } else if (key == Key.DOWN_LONG) {
+                                temperature = 16.0f;
                             }
                             serviceManager.updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), String.valueOf(temperature));
                             serviceManager.abortMaxAcOnUnlockLogic();
@@ -62,10 +70,14 @@ public class AcControlScreen implements Screen {
                                 speed++;
                                 if (speed > 7)
                                     speed = 7;
-                            } else {
+                            } else if (key == Key.DOWN) {
                                 speed--;
                                 if (speed < 0)
                                     speed = 0;
+                            } else if (key == Key.UP_LONG) {
+                                speed = 7;
+                            } else if (key == Key.DOWN_LONG) {
+                                speed = 1;
                             }
 
                             boolean powerMode = serviceManager.getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue()).equals("1");
@@ -120,6 +132,12 @@ public class AcControlScreen implements Screen {
 
         // Updates focus to latest focused item
         serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL, steeringWheelAcControlType);
+
+        // Checks if MAX AC is active to dispatch event
+        if (serviceManager.isMaxAcActive()) {
+            serviceManager.dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 1);
+        }
+
     }
 
 
@@ -127,6 +145,5 @@ public class AcControlScreen implements Screen {
     public void setReturnScreen(Screen previousScreen) {
         this.previousScreen = previousScreen;
     }
-
 
 }
