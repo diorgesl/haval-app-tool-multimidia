@@ -30,6 +30,7 @@ data class SettingItem(
     val sliderStep: Int? = null,
     val onSliderChange: ((Int) -> Unit)? = null,
     val sliderLabel: String? = null,
+    val hideSwitch: Boolean = false,
     val customContent: (@Composable () -> Unit)? = null
 )
 
@@ -77,6 +78,7 @@ fun SettingCard(
     sliderStep: Int? = null,
     onSliderChange: ((Int) -> Unit)? = null,
     sliderLabel: String? = null,
+    hideSwitch: Boolean = false,
     customContent: (@Composable () -> Unit)? = null
 ) {
     Card(
@@ -117,20 +119,22 @@ fun SettingCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Switch(
-                    checked = checked,
-                    onCheckedChange = if (sliderValue == null) null else onCheckedChange,
-                    enabled = enabled,
-                    modifier = Modifier.scale(0.9f),
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = AppColors.TextPrimary,
-                        checkedTrackColor = AppColors.Primary,
-                        uncheckedThumbColor = AppColors.TextSecondary,
-                        uncheckedTrackColor = AppColors.ButtonSecondary,
-                        uncheckedBorderColor = Color.Transparent,
-                        checkedBorderColor = Color.Transparent
+                if (!hideSwitch) {
+                    Switch(
+                        checked = checked,
+                        onCheckedChange = if (sliderValue == null) null else onCheckedChange,
+                        enabled = enabled,
+                        modifier = Modifier.scale(0.9f),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = AppColors.TextPrimary,
+                            checkedTrackColor = AppColors.Primary,
+                            uncheckedThumbColor = AppColors.TextSecondary,
+                            uncheckedTrackColor = AppColors.ButtonSecondary,
+                            uncheckedBorderColor = Color.Transparent,
+                            checkedBorderColor = Color.Transparent
+                        )
                     )
-                )
+                }
             }
             Spacer(modifier = Modifier.height(10.dp))
             Text(

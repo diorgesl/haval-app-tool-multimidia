@@ -51,6 +51,8 @@ enum class SharedPreferencesKeys(val key: String, val description: String) {
     LAST_CLUSTER_SCREEN("lastClusterScreen", "Última tela exibida no cluster"),
     LAST_CLUSTER_MENU_ITEM("lastClusterMenuItem", "Último item selecionado no menu principal do cluster"),
     ENABLE_MAX_AC_ON_UNLOCK("enableMaxAcOnUnlock", "Habilitar A/C no máximo ao ligar o veículo se temperatura acima do configurado"),
-    MAX_AC_ON_UNLOCK_THRESHOLD("maxAcOnUnlockThreshold", "Temperatura limite para ativar Max AC ao destravar")
+    MAX_AC_ON_UNLOCK_THRESHOLD("maxAcOnUnlockThreshold", "Temperatura limite para ativar Max AC ao destravar"),
+    MAX_AC_TARGET_TEMP("maxAcTargetTemp", "Temperatura alvo para o Max AC"),
+    MAX_AC_TIMEOUT("maxAcTimeout", "Tempo limite para desativar o Max AC (em minutos)")
 
 }

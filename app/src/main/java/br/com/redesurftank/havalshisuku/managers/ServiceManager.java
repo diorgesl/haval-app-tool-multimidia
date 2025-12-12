@@ -200,6 +200,7 @@ public class ServiceManager {
     private int clusterCardView = 0;
     private final Map<String, String> previousAcState = new HashMap<>();
     private boolean isMaxAcActive = false;
+    private Runnable maxAcTimeoutRunnable;
 
 
     private ServiceManager() {
@@ -1128,6 +1129,10 @@ public class ServiceManager {
         if (!isMaxAcActive) return;
         isMaxAcActive = false;
         previousAcState.clear();
+        if (maxAcTimeoutRunnable != null) {
+            backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+            maxAcTimeoutRunnable = null;
+        }
         dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 0);
 
     }
@@ -1173,6 +1178,20 @@ public class ServiceManager {
                 updateData(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), "1");
 
                 isMaxAcActive = true;
+                
+                int timeoutMinutes = sharedPreferences.getInt(SharedPreferencesKeys.MAX_AC_TIMEOUT.getKey(), 0);
+                 if (timeoutMinutes > 0) {
+                    if (maxAcTimeoutRunnable != null) {
+                        backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+                    }
+                    maxAcTimeoutRunnable = () -> {
+                         Log.w(TAG, "Max AC timeout reached, aborting");
+                         abortMaxAcOnUnlockLogic();
+                    };
+                    backgroundHandler.postDelayed(maxAcTimeoutRunnable, timeoutMinutes * 60 * 1000L);
+                    Log.w(TAG, "Max AC timeout scheduled for " + timeoutMinutes + " minutes");
+                }
+                
                 Log.w(TAG, "Max AC activated due to unlock/mirror and high temp: " + currentTemp);
             }
         } catch (Exception e) {
@@ -1186,7 +1205,7 @@ public class ServiceManager {
             String tempStr = getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue());
             if (tempStr == null) return;
             float currentTemp = Float.parseFloat(tempStr);
-            float targetTemp = 28.0f;
+            float targetTemp = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_TARGET_TEMP.getKey(), 28.0f);
             float smoothingRange = 2.0f;
             float startSmoothingTemp = targetTemp + smoothingRange;
 
@@ -1198,6 +1217,10 @@ public class ServiceManager {
                 }
                 isMaxAcActive = false;
                 previousAcState.clear();
+                if (maxAcTimeoutRunnable != null) {
+                    backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+                    maxAcTimeoutRunnable = null;
+                }
                 dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 1);
                 Log.w(TAG, "Max AC deactivated, temperature reached target: " + targetTemp);
             } else if (currentTemp < startSmoothingTemp) {
