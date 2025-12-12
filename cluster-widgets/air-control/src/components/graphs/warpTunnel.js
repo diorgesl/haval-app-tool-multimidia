@@ -71,7 +71,7 @@ export class WarpTunnelAnimation {
         this.normalizedSpeed = normalized;
 
         const minSpeed = 5;
-        const maxSpeed = 100;
+        const maxSpeed = 60;
         this.config.speed = minSpeed + (normalized * (maxSpeed - minSpeed));
         this.config.rotationSpeed = 0.001 + (normalized * 0.002);
         this.config.trail = Math.max(0.2, 0.3 - (normalized * 0.2));
@@ -218,7 +218,7 @@ class Square {
 
         ctx.save();
         ctx.translate(cx, cy);
-        ctx.rotate(globalRotation + (this.z * 0.001) - (Math.PI / 4));
+        ctx.rotate(globalRotation + (this.z * 0.001) - (Math.PI / 30));
 
         // -- Golden Portal Visuals --
         // Hue: 30 (Orange) -> 45 (Gold/Yellow)
