@@ -1191,7 +1191,7 @@ public class ServiceManager {
                     Log.w(TAG, "Max AC timeout scheduled for " + timeoutMinutes + " minutes");
                 }
                 
-                Log.w(TAG, "Max AC activated due to unlock/mirror and high temp: " + currentTemp);
+                Log.w(TAG, "Max AC activated power on and high temp: " + currentTemp);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in Max AC Activation logic", e);
@@ -1224,11 +1224,13 @@ public class ServiceManager {
                 int prevFan = (prevFanStr != null) ? Integer.parseInt(prevFanStr) : 3;
                 int maxFan = 7;
                 int newFan = prevFan + Math.round((maxFan - prevFan) * factor);
-                
+                newFan = Math.max(3, newFan);
+
                 String prevDriverKey = CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue();
                 float minTemp = 16.0f;
                 float prevDriverTemp = (previousAcState.get(prevDriverKey) != null) ? Float.parseFloat(previousAcState.get(prevDriverKey)) : 22.0f;
                 float newDriverTemp = prevDriverTemp - ((prevDriverTemp - minTemp) * factor);
+                newDriverTemp = Math.min(20, newDriverTemp);
 
                 updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(newFan));
                 updateData(prevDriverKey, String.format(java.util.Locale.US, "%.1f", newDriverTemp));
