@@ -117,6 +117,7 @@ public class ServiceManager {
             CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO,
             CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO,
             CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE,
+            CarConstants.CAR_BASIC_INSTANT_FUEL_CONSUMPTION,
     };
 
     private static final CarConstants[] KEYS_TO_SAVE = {
