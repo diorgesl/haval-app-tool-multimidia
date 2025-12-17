@@ -442,7 +442,7 @@ fun BasicSettingsTab() {
                     prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.key, it) }
                 },
                 sliderValue = maxAcOnUnlockThreshold.toInt(),
-                sliderRange = 29..38,
+                sliderRange = 20..38,
                 sliderStep = 1,
                 onSliderChange = { newTemp ->
                     maxAcOnUnlockThreshold = newTemp.toFloat()
