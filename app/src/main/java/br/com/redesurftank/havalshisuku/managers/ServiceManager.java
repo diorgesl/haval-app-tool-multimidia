@@ -61,8 +61,6 @@ import br.com.redesurftank.havalshisuku.models.MainUiManager;
 import br.com.redesurftank.havalshisuku.models.screens.Screen;
 import br.com.redesurftank.havalshisuku.utils.FridaUtils;
 import br.com.redesurftank.havalshisuku.utils.ShizukuUtils;
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuBinderWrapper;
 
@@ -1126,7 +1124,7 @@ public class ServiceManager {
         }
     }
 
-    public void abortMaxAcOnUnlockLogic() {
+    public void abortMaxAcMode() {
         if (!isMaxAcActive) return;
         isMaxAcActive = false;
         previousAcState.clear();
@@ -1187,7 +1185,7 @@ public class ServiceManager {
                     }
                     maxAcTimeoutRunnable = () -> {
                          Log.w(TAG, "Max AC timeout reached, aborting");
-                         abortMaxAcOnUnlockLogic();
+                         abortMaxAcMode();
                     };
                     backgroundHandler.postDelayed(maxAcTimeoutRunnable, timeoutMinutes * 60 * 1000L);
                     Log.w(TAG, "Max AC timeout scheduled for " + timeoutMinutes + " minutes");
@@ -1216,13 +1214,7 @@ public class ServiceManager {
                         updateData(entry.getKey(), entry.getValue());
                     }
                 }
-                isMaxAcActive = false;
-                previousAcState.clear();
-                if (maxAcTimeoutRunnable != null) {
-                    backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
-                    maxAcTimeoutRunnable = null;
-                }
-                dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 1);
+                abortMaxAcMode();
                 Log.w(TAG, "Max AC deactivated, temperature reached target: " + targetTemp);
             } else if (currentTemp < startSmoothingTemp) {
                 float factor = (currentTemp - targetTemp) / smoothingRange;

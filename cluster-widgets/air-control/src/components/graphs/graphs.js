@@ -9,7 +9,7 @@ Chart.register(...registerables, streamingPlugin);
 
 const HISTORY_DURATION = 20000; //ms
 const UI_UPDATE_INTERVAL = 100; //ms
-const ACCELERATION_THRESHOLD = 10; //s (ie 100km in 5s = 5, 100km in 10s = 10)
+const ACCELERATION_THRESHOLD = 10; //s (ie 100km/h in 5s = 5, 100km/h in 10s = 10)
 
 export const graphList = [
     {
