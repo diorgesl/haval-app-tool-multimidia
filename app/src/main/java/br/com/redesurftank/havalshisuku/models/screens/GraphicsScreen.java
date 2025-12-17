@@ -18,6 +18,11 @@ public class GraphicsScreen implements Screen {
         public static final String EV_CONSUMPTION = "evConsumption";
         public static final String GAS_CONSUMPTION = "gasConsumption";
         public static final String GAS_CONSUMPTION_METRIC = "gasConsumptionMetric";
+        public static final String GAS_CONSUMPTION_IDLE = "gasConsumptionIdle";
+        public static final String GAS_CONSUMPTION_METRIC_IDLE = "gasConsumptionMetricIdle";
+        public static final String GAS_CONSUMPTION_MODE = "gasConsumptionMode";
+        private static final String GAS_CONSUMPTION_MODE_RUNNING = "Running";
+        private static final String GAS_CONSUMPTION_MODE_IDLE = "Idle";
 
         public static final String CAR_SPEED = "carSpeed";
         private static final String[] graphsValueMap = {EV_CONSUMPTION, GAS_CONSUMPTION, CAR_SPEED};
@@ -36,11 +41,13 @@ public class GraphicsScreen implements Screen {
     public void processKey(Key key) {
         switch (key) {
             case UP:
-                if (currentGraphIndex > 0) currentGraphIndex--;
+                currentGraphIndex--;
+                if (currentGraphIndex < 0) currentGraphIndex = GraphOptions.graphsValueMap.length - 1;
                 break;
             case ENTER:
             case DOWN:
-                if (currentGraphIndex < GraphOptions.graphsValueMap.length - 1) currentGraphIndex++;
+                currentGraphIndex++;
+                if (currentGraphIndex >= GraphOptions.graphsValueMap.length) currentGraphIndex = 0;
                 break;
             case BACK:
                 MainUiManager.getInstance().updateScreen(previousScreen);

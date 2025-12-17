@@ -60,6 +60,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -319,6 +320,10 @@ fun BasicSettingsTab() {
     var closeSunroofOnSpeed by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.CLOSE_SUNROOF_ON_SPEED.key, false)) }
     var speedThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.SPEED_THRESHOLD.key, 15f)) }
     var closeSunroofSpeedThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.SUNROOF_SPEED_THRESHOLD.key, 15f)) }
+    var enableMaxAcOnUnlock by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.key, true)) }
+    var maxAcOnUnlockThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.key, 34f)) }
+    var maxAcTargetTemp by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.MAX_AC_TARGET_TEMP.key, 28f)) }
+    var maxAcTimeout by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.MAX_AC_TIMEOUT.key, 0)) }
     var enableAutoBrightness by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_BRIGHTNESS.key, false)) }
     var nightStartHour by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.NIGHT_START_HOUR.key, 20)) }
     var nightStartMinute by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.NIGHT_START_MINUTE.key, 0)) }
@@ -350,7 +355,7 @@ fun BasicSettingsTab() {
     }
 
     settingsList.addAll(
-        listOf(
+        listOfNotNull(
             SettingItem(
                 title = "Fechar janela ao desligar o veículo",
                 description = "Fecha automaticamente as janelas quando o motor é desligado",
@@ -427,6 +432,90 @@ fun BasicSettingsTab() {
                     prefs.edit { putFloat(SharedPreferencesKeys.SUNROOF_SPEED_THRESHOLD.key, newSpeed.toFloat()) }
                 },
                 sliderLabel = "Velocidade: ${closeSunroofSpeedThreshold.toInt()} km/h"
+            ),
+            SettingItem(
+                title = "A/C no máximo ao ligar o carro",
+                description = SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.description,
+                checked = enableMaxAcOnUnlock,
+                onCheckedChange = {
+                    enableMaxAcOnUnlock = it
+                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.key, it) }
+                },
+                sliderValue = maxAcOnUnlockThreshold.toInt(),
+                sliderRange = 29..38,
+                sliderStep = 1,
+                onSliderChange = { newTemp ->
+                    maxAcOnUnlockThreshold = newTemp.toFloat()
+                    prefs.edit { putFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.key, newTemp.toFloat()) }
+                },
+                sliderLabel = "Temperatura de disparo: ${maxAcOnUnlockThreshold.toInt()}°C",
+                customContent = if (enableMaxAcOnUnlock) {
+                    {
+                        val timeOptions = mapOf(0 to "Sem limite", 1 to "1 minuto", 3 to "3 minutos", 5 to "5 minutos")
+                        var expanded by remember { mutableStateOf(false) }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Column {
+                                Text(
+                                    text = "Temperatura alvo: ${maxAcTargetTemp.toInt()}°C",
+                                    fontSize = 14.sp,
+                                    color = Color.White
+                                )
+                                Slider(
+                                    value = maxAcTargetTemp,
+                                    onValueChange = { newTemp ->
+                                        maxAcTargetTemp = newTemp
+                                        prefs.edit { putFloat(SharedPreferencesKeys.MAX_AC_TARGET_TEMP.key, newTemp) }
+                                    },
+                                    valueRange = 18f..34f,
+                                    steps = 15,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = AppColors.Primary,
+                                        activeTrackColor = AppColors.Primary,
+                                        inactiveTrackColor = Color(0xFF2C3139),
+                                        activeTickColor = Color.Transparent,
+                                        inactiveTickColor = Color.Transparent
+                                    )
+                                )
+                            }
+                            Column {
+                                Text(
+                                    text = SharedPreferencesKeys.MAX_AC_TIMEOUT.description,
+                                    fontSize = 14.sp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box {
+                                    Text(
+                                        text = timeOptions[maxAcTimeout] ?: "Sem limite",
+                                        color = Color(0xFF4A9EFF),
+                                        fontSize = 16.sp,
+                                        modifier = Modifier
+                                            .background(Color(0xFF2A2F37), RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                                            .clickable { expanded = true }
+                                    )
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false },
+                                        modifier = Modifier.background(Color(0xFF2A2F37))
+                                    ) {
+                                        timeOptions.forEach { (value, label) ->
+                                            DropdownMenuItem(
+                                                text = { Text(label, color = Color.White) },
+                                                onClick = {
+                                                    maxAcTimeout = value
+                                                    prefs.edit { putInt(SharedPreferencesKeys.MAX_AC_TIMEOUT.key, value) }
+                                                    expanded = false
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else null
             ),
             SettingItem(
                 title = "Manter desativado monitoramento de distrações",

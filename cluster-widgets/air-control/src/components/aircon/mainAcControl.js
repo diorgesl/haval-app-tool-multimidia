@@ -139,7 +139,8 @@ export function updateProgressRings() {
     }
 
     const tempValues = 20;
-    const currentTempIndex = stateManager.get('temp') - 16;
+    const currentTemp = stateManager.get('temp');
+    const currentTempIndex = (currentTemp > 16 + (tempValues/2) ? 10 : currentTemp - 16);
     const tempAngle = 360 - (2 * (parseFloat(currentTempIndex) * 180 / tempValues));
     if (tempRing) {
         tempRing.style.setProperty('--progress-angle', `${tempAngle}deg`);

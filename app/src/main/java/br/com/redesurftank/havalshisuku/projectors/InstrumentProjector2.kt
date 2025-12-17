@@ -26,8 +26,6 @@ import br.com.redesurftank.havalshisuku.models.screens.GraphicsScreen
 import br.com.redesurftank.havalshisuku.models.screens.MainMenu
 import br.com.redesurftank.havalshisuku.models.screens.RegenScreen
 import br.com.redesurftank.havalshisuku.models.screens.Screen
-import androidx.core.content.edit
-import br.com.redesurftank.havalshisuku.MainScreen
 import kotlin.math.roundToInt
 
 class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjector(outerContext, display) {
@@ -153,8 +151,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         val stringValue = value.toString()
                         var metricValue = 0.0f
                         var consumptionValue = 0.0f
-                        var consumptionMetric = ""
+                        var consumptionMetric = "km/l"
+                        var consumptionMetricIdle = "l/h"
                         var adjustedValue = 0.0f
+                        var adjustedValueIdle = 0.0f
                         if (stringValue.startsWith("{") && stringValue.endsWith("}") && stringValue.contains(",")) {
                             try {
                                 val cleanedString = stringValue.substring(1, stringValue.length - 1)
@@ -170,21 +170,27 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                             }
                         }
                         if (metricValue == 4.0f) {
-                            // Commented out as graph is not ready to plot L/h information
-                            //
-                            // consumptionMetric = "L/h"
-                            // if (consumptionValue > 0.0f) {
-                            //     adjustedValue = kotlin.math.truncate(consumptionValue * 10) / 10
-                            // }
-                        } else {
-                            consumptionMetric = "km/l"
+                            if (consumptionValue > 0.0f) {
+                                adjustedValueIdle = kotlin.math.truncate(consumptionValue * 10) / 10
+                                adjustedValue = 0.0f
+                                evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})")
+                            } else {
+                                adjustedValueIdle = 0.0f
+                            }
+                        } else if (metricValue == 1.0f) {
                             if (consumptionValue > 0.0f) {
                                 adjustedValue = kotlin.math.truncate(10 * 100 / consumptionValue) / 10
+                                adjustedValueIdle = 0.0f
+                                evaluateJsIfReady(
+                                    webView,
+                                    "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})"
+                                )
+                            } else {
+                                adjustedValue = 0.0f
                             }
-                            evaluateJsIfReady(webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC}', '$consumptionMetric')")
-                            evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)")
                         }
-
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_IDLE}', $adjustedValueIdle)")
+                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)")
                     }
 
 
@@ -248,6 +254,11 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('currentGraph','$screen')")
                     }
 
+                    ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED -> {
+                        val maxauto = args[0] as Int
+                        evaluateJsIfReady(webView, "control('maxauto', $maxauto)")
+                    }
+
                 }
             }
 
@@ -308,6 +319,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         val espMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value)
         val insideTemp = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_INSIDE_TEMP.value).toFloat().roundToInt()
         val outsideTemp = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.value).toFloat().roundToInt()
+        val onePedal = ServiceManager.getInstance().getData(CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value) == "1"
 
         evaluateJsIfReady(webView, "control('temp', $currentTemp)")
         evaluateJsIfReady(webView, "control('fan', $currentFanSpeed)")
@@ -317,6 +329,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         evaluateJsIfReady(webView, "focus('fan')")
         evaluateJsIfReady(webView, "control('outside_temp', $outsideTemp)")
         evaluateJsIfReady(webView, "control('inside_temp', $insideTemp)")
+        evaluateJsIfReady(webView, "control('onepedal', $onePedal)")
 
         evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(currentEVMode)})")
         evaluateJsIfReady(webView, "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(currentDrivingMode)})")

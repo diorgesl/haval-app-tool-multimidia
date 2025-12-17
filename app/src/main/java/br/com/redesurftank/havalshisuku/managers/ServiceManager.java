@@ -73,6 +73,7 @@ public class ServiceManager {
             CarConstants.CAR_BASIC_ACCUMULATED_DIRVETIME,
             CarConstants.CAR_BASIC_GEAR_STATUS,
             CarConstants.CAR_BASIC_DOOR_STATUS,
+            CarConstants.CAR_BASIC_DOOR_LOCK_STATUS,
             CarConstants.CAR_BASIC_DRIVING_READY_STATE,
             CarConstants.CAR_BASIC_INSIDE_TEMP,
             CarConstants.CAR_BASIC_MAINTENANCE_WARNING,
@@ -116,6 +117,7 @@ public class ServiceManager {
             CarConstants.CAR_EV_INFO_FUEL_CONSUME_INFO,
             CarConstants.CAR_EV_INFO_CYCLE_FUEL_CONSUME_INFO,
             CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE,
+            CarConstants.CAR_BASIC_INSTANT_FUEL_CONSUMPTION,
     };
 
     private static final CarConstants[] KEYS_TO_SAVE = {
@@ -197,6 +199,9 @@ public class ServiceManager {
     private boolean isClusterHeartbeatRunning = false;
     private int clusterHeartBeatCount = 0;
     private int clusterCardView = 0;
+    private final Map<String, String> previousAcState = new HashMap<>();
+    private boolean isMaxAcActive = false;
+    private Runnable maxAcTimeoutRunnable;
 
 
     private ServiceManager() {
@@ -388,6 +393,8 @@ public class ServiceManager {
                                 case 1028: key = Screen.Key.ENTER; break;
                                 case 1029: key = Screen.Key.HOME; break;
                                 case 1030: key = Screen.Key.BACK; break;
+                                case 1033: key = Screen.Key.UP_LONG; break;
+                                case 1034: key = Screen.Key.DOWN_LONG; break;
                                 case 1037: key = Screen.Key.ENTER_LONG; break;
                                 case 1039: key = Screen.Key.BACK_LONG; break;
                             }
@@ -499,13 +506,13 @@ public class ServiceManager {
             if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_BRIGHTNESS.getKey(), false)) {
                 AutoBrightnessManager.Companion.getInstance().setEnabled(true);
             }
-
             if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOKS.getKey(), false)) {
                 pendingTasks.add(this::initializeFrida);
             }
             if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false) && getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue()).equals("1")) {
                 updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_VENTILATION_LEVEL.getValue(), "3");
             }
+
             ensureSteeringWheelButtonIntegration();
             ensureSystemApps();
 
@@ -518,7 +525,6 @@ public class ServiceManager {
             }
 
             MainUiManager.getInstance().updateScreen();
-
 
             timeInitialized = SystemClock.uptimeMillis();
             Log.w(TAG, "Services initialized successfully");
@@ -954,7 +960,7 @@ public class ServiceManager {
                     closeSunroofDueToeSpeed = false;
                 }
                 if (currentSpeed <= 0 & sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), false) && !getData(CarConstants.CAR_BASIC_GEAR_STATUS.getValue()).equals("4")) {
-                    if (value.equals("1") && !delayNextAVM) dvr.setAVM(0);
+                    if (!delayNextAVM) dvr.setAVM(0);
                 }
             } else if (key.equals(CarConstants.SYS_AVM_PREVIEW_STATUS.getValue()) && sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_AVM_CAR_STOPPED.getKey(), false) && Float.parseFloat(getData(CarConstants.CAR_BASIC_VEHICLE_SPEED.getValue())) <= 0f && !getData(CarConstants.CAR_BASIC_GEAR_STATUS.getValue()).equals("4")) {
                 if (value.equals("1")) {
@@ -980,11 +986,16 @@ public class ServiceManager {
                     if (disableBluetoothOnPowerOff && bluetoothStateOnPowerOff && !currentBluetoothState()) {
                         enableBluetooth();
                     }
+                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.getKey(), true)) {
+                        if (!isMaxAcActive) enableMaxAcOn();
+                    }
                 }
             } else if (key.equals(CarConstants.CAR_HVAC_POWER_MODE.getValue()) && value.equals("1") && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false)) {
                 updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_VENTILATION_LEVEL.getValue(), "3");
             } else if (key.equals(CarConstants.CAR_HVAC_POWER_MODE.getValue()) && value.equals("0") && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false)) {
                 updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_VENTILATION_LEVEL.getValue(), "0");
+            } else if (key.equals(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue()) && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.getKey(), true)) {
+                if (isMaxAcActive) updateMaxAcSmoothing();
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in OnDataChanged", e);
@@ -1112,6 +1123,128 @@ public class ServiceManager {
             connectivityManager.startTethering(0, receiver, false, "br.com.redesurftank.havalshisuku");
         } catch (Exception e) {
             Log.e(TAG, "Error enabling Wi-Fi", e);
+        }
+    }
+
+    public void abortMaxAcOnUnlockLogic() {
+        if (!isMaxAcActive) return;
+        isMaxAcActive = false;
+        previousAcState.clear();
+        if (maxAcTimeoutRunnable != null) {
+            backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+            maxAcTimeoutRunnable = null;
+        }
+        dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 0);
+
+    }
+
+    public boolean isMaxAcActive() {
+        return isMaxAcActive;
+    }
+
+    private void enableMaxAcOn() {
+        try {
+            String tempStr = getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue());
+            if (tempStr == null) return;
+            float currentTemp = Float.parseFloat(tempStr);
+            float threshold = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.getKey(), 35.0f);
+
+            if (currentTemp >= threshold && !isMaxAcActive) {
+                String prevPower = getUpdatedData(CarConstants.CAR_HVAC_POWER_MODE.getValue());
+                String prevEnabled = getUpdatedData(CarConstants.CAR_HVAC_AC_ENABLE.getValue());
+                String prevFan = getUpdatedData(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
+                String prevDriverTemp = getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
+                String prevPassTemp = getUpdatedData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue());
+                String prevAuto = getUpdatedData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue());
+                String prevAnion = getUpdatedData(CarConstants.CAR_HVAC_ANION_ENABLE.getValue());
+                String prevAQS = getUpdatedData(CarConstants.CAR_HVAC_AQS_ENABLE.getValue());
+                String prevSync = getUpdatedData(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue());
+
+                previousAcState.put(CarConstants.CAR_HVAC_POWER_MODE.getValue(), prevPower);
+                previousAcState.put(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), prevEnabled);
+                previousAcState.put(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), prevFan);
+                previousAcState.put(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), prevDriverTemp);
+                previousAcState.put(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue(), prevPassTemp);
+                previousAcState.put(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), prevAuto);
+                previousAcState.put(CarConstants.CAR_HVAC_ANION_ENABLE.getValue(), prevAnion);
+                previousAcState.put(CarConstants.CAR_HVAC_AQS_ENABLE.getValue(), prevAQS);
+                previousAcState.put(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue(), prevSync);
+
+                updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "1");
+                updateData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), "0");
+                updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), "7");
+                updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), "16.0");
+                updateData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue(), "16.0");
+                updateData(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue(), "1");
+                updateData(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), "1");
+
+                isMaxAcActive = true;
+                
+                int timeoutMinutes = sharedPreferences.getInt(SharedPreferencesKeys.MAX_AC_TIMEOUT.getKey(), 0);
+                 if (timeoutMinutes > 0) {
+                    if (maxAcTimeoutRunnable != null) {
+                        backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+                    }
+                    maxAcTimeoutRunnable = () -> {
+                         Log.w(TAG, "Max AC timeout reached, aborting");
+                         abortMaxAcOnUnlockLogic();
+                    };
+                    backgroundHandler.postDelayed(maxAcTimeoutRunnable, timeoutMinutes * 60 * 1000L);
+                    Log.w(TAG, "Max AC timeout scheduled for " + timeoutMinutes + " minutes");
+                }
+                
+                Log.w(TAG, "Max AC activated due to unlock/mirror and high temp: " + currentTemp);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in Max AC Activation logic", e);
+        }
+    }
+
+    private void updateMaxAcSmoothing() {
+        if (!isMaxAcActive) return;
+        try {
+            String tempStr = getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue());
+            if (tempStr == null) return;
+            float currentTemp = Float.parseFloat(tempStr);
+            float targetTemp = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_TARGET_TEMP.getKey(), 28.0f);
+            float smoothingRange = 2.0f;
+            float startSmoothingTemp = targetTemp + smoothingRange;
+
+            if (currentTemp <= targetTemp) {
+                for (Map.Entry<String, String> entry : previousAcState.entrySet()) {
+                    if (entry.getValue() != null) {
+                        updateData(entry.getKey(), entry.getValue());
+                    }
+                }
+                isMaxAcActive = false;
+                previousAcState.clear();
+                if (maxAcTimeoutRunnable != null) {
+                    backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+                    maxAcTimeoutRunnable = null;
+                }
+                dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 1);
+                Log.w(TAG, "Max AC deactivated, temperature reached target: " + targetTemp);
+            } else if (currentTemp < startSmoothingTemp) {
+                float factor = (currentTemp - targetTemp) / smoothingRange;
+                factor = Math.max(0f, Math.min(1f, factor));
+
+                String prevFanStr = previousAcState.get(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
+                int prevFan = (prevFanStr != null) ? Integer.parseInt(prevFanStr) : 3;
+                int maxFan = 7;
+                int newFan = prevFan + Math.round((maxFan - prevFan) * factor);
+                
+                String prevDriverKey = CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue();
+                float minTemp = 16.0f;
+                float prevDriverTemp = (previousAcState.get(prevDriverKey) != null) ? Float.parseFloat(previousAcState.get(prevDriverKey)) : 22.0f;
+                float newDriverTemp = prevDriverTemp - ((prevDriverTemp - minTemp) * factor);
+
+                updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(newFan));
+                updateData(prevDriverKey, String.format(java.util.Locale.US, "%.1f", newDriverTemp));
+
+                Log.d(TAG, "Max AC Smoothing: Temp=" + currentTemp + ", Factor=" + factor + ", Fan=" + newFan + ", DriverTemp=" + newDriverTemp);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in Max AC Smoothing logic", e);
         }
     }
 

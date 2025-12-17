@@ -77,6 +77,7 @@ var stateManager = new StateManager({
     auto: 1,
     recycle: 0,
     aion: 0,
+    maxauto: 0,
     outside_temp: '-',
     inside_temp: '-',
 
@@ -90,6 +91,9 @@ var stateManager = new StateManager({
     evConsumption: 0,
     gasConsumption: 0.0,
     gasConsumptionMetric: 'Km/l',
+    gasConsumptionIdle: 0.0,
+    gasConsumptionMetricIdle: 'L/hora',
+    gasConsumptionMode: 'Running',
     carSpeed: 0
 });
 
