@@ -57,7 +57,7 @@ public class AcControlScreen implements Screen {
                                 temperature = 16.0f;
                             }
                             serviceManager.updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), String.valueOf(temperature));
-                            serviceManager.abortMaxAcMode();
+                            serviceManager.cancelMaxAcMode();
 
                         }
                     }
@@ -87,7 +87,7 @@ public class AcControlScreen implements Screen {
                                 serviceManager.updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "1");
                             }
                             serviceManager.updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(speed));
-                            serviceManager.abortMaxAcMode();
+                            serviceManager.cancelMaxAcMode();
                         }
                     }
                     break;
@@ -113,7 +113,7 @@ public class AcControlScreen implements Screen {
                     boolean autoMode = currentAutoMode.equals("1");
                     autoMode = !autoMode;
                     serviceManager.updateData(CarConstants.CAR_HVAC_AUTO_ENABLE.getValue(), autoMode ? "1" : "0");
-                    serviceManager.abortMaxAcMode();
+                    serviceManager.cancelMaxAcMode();
                 }
                 break;
             }

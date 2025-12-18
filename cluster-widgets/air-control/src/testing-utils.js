@@ -166,10 +166,10 @@ if (window.simulationInterval) clearInterval(window.simulationInterval);
 window.simulationInterval = setInterval(() => {
     switch (simulationPhase) {
         case 'accelerating':
-            if (currentSpeed < 120) {
+            if (currentSpeed < 150) {
                 currentSpeed += 2.0;
             } else {
-                currentSpeed = 120;
+                currentSpeed = 150;
                 simulationPhase = 'decelerating';
             }
             break;

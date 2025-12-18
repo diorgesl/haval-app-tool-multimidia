@@ -9,30 +9,17 @@ export class WarpTunnelAnimation {
         this.animationId = null;
         this.isRunning = false;
 
-
-        /*         // Default Configuration
-                this.config = {
-                    squareCount: 30,      // Number of tunnel "ribs"
-                    speed: 15,            // Speed of the tunnel
-                    rotationSpeed: 0.02,  // How fast the tunnel spins
-                    focalLength: 300,     // FOV depth
-                    baseSize: 100,        // Initial size of squares
-                    trail: 0.2,           // Motion blur trail (lower is longer)
-                    rayCount: 50          // Number of "speed lines"
-                };
-         */
-
         // Configuration
         this.normalizedSpeed = 0;
         this.config = {
-            squareCount: 10,       // Number of tunnel "ribs"
-            speed: 5,             // Speed of the tunnel (dynamic)
+            squareCount: 3,       // Number of tunnel "ribs"
+            speed: 3,             // Speed of the tunnel (dynamic)
             rotationSpeed: 0.01,  // How fast the tunnel spins (dynamic)
             focalLength: 100,     // FOV depth
             baseSize: 50,         // Initial size of squares
-            trail: 0.2,           // Motion blur trail (dynamic)
-            rayCount: 500,        // Max rays
-            activeRays: 30        // Dynamic ray count
+            trail: 0.02,          // Motion blur trail (dynamic)
+            rayCount: 30,         // Max rays
+            activeRays: 5         // Dynamic ray count
         };
 
         this.squares = [];
@@ -70,8 +57,8 @@ export class WarpTunnelAnimation {
         const normalized = Math.min(Math.max(factor / 100, 0), 1.5);
         this.normalizedSpeed = normalized;
 
-        const minSpeed = 5;
-        const maxSpeed = 60;
+        const minSpeed = 1;
+        const maxSpeed = 40;
         this.config.speed = minSpeed + (normalized * (maxSpeed - minSpeed));
         this.config.rotationSpeed = 0.001 + (normalized * 0.002);
         this.config.trail = Math.max(0.2, 0.3 - (normalized * 0.2));
@@ -107,9 +94,9 @@ export class WarpTunnelAnimation {
         // We want a subtle glow that builds up.
 
         // Red component grows to create orange/red tint
-        let trailR = Math.min(this.normalizedSpeed * 80, 150);
+        let trailR = Math.min(this.normalizedSpeed * 80, 30);
         // Green component grows slower to keep it Orange/Gold (Less green = more orange)
-        let trailG = Math.min(this.normalizedSpeed * 20, 50);
+        let trailG = Math.min(this.normalizedSpeed * 20, 10);
         let trailB = 0;
 
         // At high speed, tint the background slightly light to simulate "whiteout"

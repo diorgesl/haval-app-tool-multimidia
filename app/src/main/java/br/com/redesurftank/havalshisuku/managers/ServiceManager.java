@@ -1124,8 +1124,15 @@ public class ServiceManager {
         }
     }
 
-    public void abortMaxAcMode() {
+    public void cancelMaxAcMode() {
+
         if (!isMaxAcActive) return;
+
+        for (Map.Entry<String, String> entry : previousAcState.entrySet()) {
+            if (entry.getValue() != null) {
+                updateData(entry.getKey(), entry.getValue());
+            }
+        }
         isMaxAcActive = false;
         previousAcState.clear();
         if (maxAcTimeoutRunnable != null) {
@@ -1185,7 +1192,7 @@ public class ServiceManager {
                     }
                     maxAcTimeoutRunnable = () -> {
                          Log.w(TAG, "Max AC timeout reached, aborting");
-                         abortMaxAcMode();
+                         cancelMaxAcMode();
                     };
                     backgroundHandler.postDelayed(maxAcTimeoutRunnable, timeoutMinutes * 60 * 1000L);
                     Log.w(TAG, "Max AC timeout scheduled for " + timeoutMinutes + " minutes");
@@ -1209,12 +1216,7 @@ public class ServiceManager {
             float startSmoothingTemp = targetTemp + smoothingRange;
 
             if (currentTemp <= targetTemp) {
-                for (Map.Entry<String, String> entry : previousAcState.entrySet()) {
-                    if (entry.getValue() != null) {
-                        updateData(entry.getKey(), entry.getValue());
-                    }
-                }
-                abortMaxAcMode();
+                cancelMaxAcMode();
                 Log.w(TAG, "Max AC deactivated, temperature reached target: " + targetTemp);
             } else if (currentTemp < startSmoothingTemp) {
                 float factor = (currentTemp - targetTemp) / smoothingRange;

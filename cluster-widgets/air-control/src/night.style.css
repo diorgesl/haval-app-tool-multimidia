@@ -1153,7 +1153,7 @@ canvas.regen-chart {
 }
 
 canvas.graph-chart {
-  background: radial-gradient(circle, #006aff56 0%, #0000003a 90%);
+  background: radial-gradient(circle, #006aff20 0%, #00000000 90%);
 }
 
 .timer-tooltip {
