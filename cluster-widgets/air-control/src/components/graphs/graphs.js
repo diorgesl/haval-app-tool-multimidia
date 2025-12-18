@@ -7,9 +7,10 @@ import 'chartjs-adapter-date-fns';
 import { WarpTunnelAnimation } from './warpTunnel.js';
 Chart.register(...registerables, streamingPlugin);
 
-const HISTORY_DURATION = 20000; //ms
+const HISTORY_DURATION = 30000; //ms
+const TIMER_HIDE_DELAY = 30000; //ms
 const UI_UPDATE_INTERVAL = 100; //ms
-const ACCELERATION_THRESHOLD = 10; //s (ie 100km in 5s = 5, 100km in 10s = 10)
+const ACCELERATION_THRESHOLD = 10; //s (ie 100km/h in 5s = 5, 100km/h in 10s = 10)
 
 export const graphList = [
     {
@@ -139,8 +140,10 @@ const graphController = {
     setWarpAnimation(visible) {
         if (!this.warpTunnel || !this.warpTunnelCanvas) return;
 
+        const graphContainer = document.querySelector('.graph-screen');
         if (visible) {
             if (!this.warpTunnelCanvas.classList.contains('visible')) {
+                if (graphContainer) graphContainer.classList.add('warp-active');
                 this.warpTunnelCanvas.classList.add('visible');
                 this.warpTunnel.start();
             }
@@ -149,6 +152,7 @@ const graphController = {
                 this.warpTunnelCanvas.classList.remove('visible');
                 setTimeout(() => {
                     if (!this.warpTunnelCanvas.classList.contains('visible')) {
+                        if (graphContainer) graphContainer.classList.remove('warp-active');
                         this.warpTunnel.stop();
                     }
                 }, 2000);
@@ -180,13 +184,13 @@ const graphController = {
                 if (tooltip) tooltip.classList.remove('visible');
                 break;
 
-            case 'success_hold': // Start 5s timeout to hide
+            case 'success_hold': // Start 10s timeout to hide
                 this.isSpeedTimerRunning = false;
                 if (!this.timerHideTimeoutId) {
                     this.timerHideTimeoutId = setTimeout(() => {
                         this.setChronometer('stop');
                         this.timerHideTimeoutId = null;
-                    }, 5000);
+                    }, TIMER_HIDE_DELAY);
                 }
                 break;
         }
@@ -362,7 +366,6 @@ const graphController = {
                             // Trigger Flash and hold results for few secs
                             this.triggerFlash('white');
                             this.setChronometer('success_hold');
-                            this.setWarpAnimation(false);
                         }
 
                         // 3. Reset if car has stopped
@@ -394,6 +397,8 @@ const graphController = {
                         this.setChronometer('start');
                         this.setWarpAnimation(true);
                         if (this.warpTunnel) this.warpTunnel.setSpeed(currentSpeed);
+                    } else if ((currentSpeed >= 100) && (currentSpeed < this.lastCarSpeed)) {
+                        this.setWarpAnimation(false);
                     }
 
                     this.lastCarSpeed = currentSpeed;

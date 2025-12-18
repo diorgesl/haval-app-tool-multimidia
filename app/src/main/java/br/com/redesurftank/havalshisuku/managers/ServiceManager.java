@@ -61,8 +61,6 @@ import br.com.redesurftank.havalshisuku.models.MainUiManager;
 import br.com.redesurftank.havalshisuku.models.screens.Screen;
 import br.com.redesurftank.havalshisuku.utils.FridaUtils;
 import br.com.redesurftank.havalshisuku.utils.ShizukuUtils;
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlow;
 import rikka.shizuku.Shizuku;
 import rikka.shizuku.ShizukuBinderWrapper;
 
@@ -1126,8 +1124,15 @@ public class ServiceManager {
         }
     }
 
-    public void abortMaxAcOnUnlockLogic() {
+    public void cancelMaxAcMode() {
+
         if (!isMaxAcActive) return;
+
+        for (Map.Entry<String, String> entry : previousAcState.entrySet()) {
+            if (entry.getValue() != null) {
+                updateData(entry.getKey(), entry.getValue());
+            }
+        }
         isMaxAcActive = false;
         previousAcState.clear();
         if (maxAcTimeoutRunnable != null) {
@@ -1187,13 +1192,13 @@ public class ServiceManager {
                     }
                     maxAcTimeoutRunnable = () -> {
                          Log.w(TAG, "Max AC timeout reached, aborting");
-                         abortMaxAcOnUnlockLogic();
+                         cancelMaxAcMode();
                     };
                     backgroundHandler.postDelayed(maxAcTimeoutRunnable, timeoutMinutes * 60 * 1000L);
                     Log.w(TAG, "Max AC timeout scheduled for " + timeoutMinutes + " minutes");
                 }
                 
-                Log.w(TAG, "Max AC activated due to unlock/mirror and high temp: " + currentTemp);
+                Log.w(TAG, "Max AC activated power on and high temp: " + currentTemp);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in Max AC Activation logic", e);
@@ -1211,18 +1216,7 @@ public class ServiceManager {
             float startSmoothingTemp = targetTemp + smoothingRange;
 
             if (currentTemp <= targetTemp) {
-                for (Map.Entry<String, String> entry : previousAcState.entrySet()) {
-                    if (entry.getValue() != null) {
-                        updateData(entry.getKey(), entry.getValue());
-                    }
-                }
-                isMaxAcActive = false;
-                previousAcState.clear();
-                if (maxAcTimeoutRunnable != null) {
-                    backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
-                    maxAcTimeoutRunnable = null;
-                }
-                dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 1);
+                cancelMaxAcMode();
                 Log.w(TAG, "Max AC deactivated, temperature reached target: " + targetTemp);
             } else if (currentTemp < startSmoothingTemp) {
                 float factor = (currentTemp - targetTemp) / smoothingRange;
@@ -1232,11 +1226,13 @@ public class ServiceManager {
                 int prevFan = (prevFanStr != null) ? Integer.parseInt(prevFanStr) : 3;
                 int maxFan = 7;
                 int newFan = prevFan + Math.round((maxFan - prevFan) * factor);
-                
+                newFan = Math.max(3, newFan);
+
                 String prevDriverKey = CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue();
                 float minTemp = 16.0f;
                 float prevDriverTemp = (previousAcState.get(prevDriverKey) != null) ? Float.parseFloat(previousAcState.get(prevDriverKey)) : 22.0f;
                 float newDriverTemp = prevDriverTemp - ((prevDriverTemp - minTemp) * factor);
+                newDriverTemp = Math.min(20, newDriverTemp);
 
                 updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(newFan));
                 updateData(prevDriverKey, String.format(java.util.Locale.US, "%.1f", newDriverTemp));
