@@ -1128,18 +1128,23 @@ public class ServiceManager {
     public void cancelMaxAcMode() {
 
         if (!isMaxAcActive) return;
+        isMaxAcActive = false;
+        if (maxAcTimeoutRunnable != null) {
+            backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
+            maxAcTimeoutRunnable = null;
+        }
 
+        // Force POWER as 1 (ON) to ensure it stays ON after MAX AC finishes
+        updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "1");
+        updateData(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), "1");
+
+        // Restores previous AC state
         for (Map.Entry<String, String> entry : previousAcState.entrySet()) {
             if (entry.getValue() != null) {
                 updateData(entry.getKey(), entry.getValue());
             }
         }
-        isMaxAcActive = false;
         previousAcState.clear();
-        if (maxAcTimeoutRunnable != null) {
-            backgroundHandler.removeCallbacks(maxAcTimeoutRunnable);
-            maxAcTimeoutRunnable = null;
-        }
         dispatchServiceManagerEvent(ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED, 0);
 
     }
@@ -1156,9 +1161,6 @@ public class ServiceManager {
             float threshold = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_ON_UNLOCK_THRESHOLD.getKey(), 35.0f);
 
             if (currentTemp >= threshold && !isMaxAcActive) {
-                // Force save POWER as 1 (ON) to ensure it stays ON after MAX AC finishes
-                String prevPower = "1";
-                String prevEnabled = getUpdatedData(CarConstants.CAR_HVAC_AC_ENABLE.getValue());
                 String prevFan = getUpdatedData(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
                 String prevDriverTemp = getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
                 String prevPassTemp = getUpdatedData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue());
@@ -1169,8 +1171,6 @@ public class ServiceManager {
                 String prevComfortCurve = getUpdatedData(CarConstants.CAR_HVAC_SETTING_COMFORT_CURVE.getValue());
                 String prevCycleMode = getUpdatedData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue());
 
-                previousAcState.put(CarConstants.CAR_HVAC_POWER_MODE.getValue(), prevPower);
-                previousAcState.put(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), prevEnabled);
                 previousAcState.put(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), prevFan);
                 previousAcState.put(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), prevDriverTemp);
                 previousAcState.put(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue(), prevPassTemp);
@@ -1187,7 +1187,6 @@ public class ServiceManager {
                 updateData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue(), "16.0");
                 updateData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue(), "16.0");
                 updateData(CarConstants.CAR_HVAC_SYNC_ENABLE.getValue(), "1");
-                updateData(CarConstants.CAR_HVAC_AC_ENABLE.getValue(), "1");
                 updateData(CarConstants.CAR_HVAC_SETTING_COMFORT_CURVE.getValue(), "2"); // Max Cold
 
                 isMaxAcActive = true;
@@ -1212,23 +1211,27 @@ public class ServiceManager {
         }
     }
 
+    private void setOptimalAcCycleMode() {
+        try {
+            String inTempStr = getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue());
+            String outTempStr = getUpdatedData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.getValue());
+            if (inTempStr == null || outTempStr == null) return;
+            float inTemp = Float.parseFloat(inTempStr);
+            float outTemp = Float.parseFloat(outTempStr);
+            String desiredMode = (inTemp < outTemp) ? "1" : "0";
+            updateData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue(), desiredMode);
+        } catch (Exception e) {
+            Log.d(TAG, "Error trying to set optimal cycle mode: " + e.getMessage());
+        }
+
+    }
+
     private void updateMaxAcSmoothing() {
         if (!isMaxAcActive) return;
         try {
             String tempStr = getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue());
             if (tempStr == null) return;
-            // Smart Recirculation Logic
-            String outTempStr = getUpdatedData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.getValue());
             float currentTemp = Float.parseFloat(tempStr);
-            if (outTempStr != null) {
-                float outTemp = Float.parseFloat(outTempStr);
-                // If inside is hotter than outside, FRESH AIR (0). Else RECIRC (1).
-                // Actually, if Inside > Outside, we want fresh air to bring in cooler air.
-                // If Inside < Outside, we want recirc to keep cool air in.
-                String desiredMode = (currentTemp > outTemp) ? "0" : "1";
-                updateData(CarConstants.CAR_HVAC_CYCLE_MODE.getValue(), desiredMode);
-            }
-
 
             float targetTemp = sharedPreferences.getFloat(SharedPreferencesKeys.MAX_AC_TARGET_TEMP.getKey(), 28.0f);
             float smoothingRange = 2.0f;
@@ -1262,6 +1265,8 @@ public class ServiceManager {
                 updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(newFan));
                 updateData(prevDriverKey, String.format(java.util.Locale.US, "%.1f", newDriverTemp));
                 updateData(prevPassKey, String.format(java.util.Locale.US, "%.1f", newPassTemp));
+
+                setOptimalAcCycleMode();
 
                 Log.d(TAG, "Max AC Smoothing: Temp=" + currentTemp + ", Factor=" + factor + ", Fan=" + newFan + ", DriverTemp=" + newDriverTemp);
             }
