@@ -43,6 +43,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -979,6 +980,9 @@ public class ServiceManager {
                     if (disableHotspotOnPowerOff) {
                         disableWifiTether();
                     }
+                    if (isMaxAcActive) {
+                        cancelMaxAcMode();
+                    }
                 } else {
                     boolean disableBluetoothOnPowerOff = sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_BLUETOOTH_ON_POWER_OFF.getKey(), false);
                     boolean bluetoothStateOnPowerOff = sharedPreferences.getBoolean(SharedPreferencesKeys.BLUETOOTH_STATE_ON_POWER_OFF.getKey(), false);
@@ -987,6 +991,9 @@ public class ServiceManager {
                     }
                     if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_MAX_AC_ON_UNLOCK.getKey(), false)) {
                         if (!isMaxAcActive) enableMaxAcOn();
+                    }
+                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_OPEN_SUNROOF_CURTAIN_ON_START.getKey(), false)) {
+                        autoOpenSunroofCurtain();
                     }
                 }
             } else if (key.equals(CarConstants.CAR_HVAC_POWER_MODE.getValue()) && value.equals("1") && sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false)) {
@@ -1039,6 +1046,66 @@ public class ServiceManager {
         } catch (Exception e) {
             Log.e(TAG, "Error closing shade screens", e);
         }
+    }
+
+    public void openSunRoofShade() {
+        try {
+            var sunRoofBlockStatus = vehicle.getShadeScreensLevel(0);
+            if (sunRoofBlockStatus != 100) {
+                vehicle.setShadeScreensLevel(100);
+                Log.w(TAG, "Opening sunroof curtain");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening shade screens", e);
+        }
+    }
+
+    private void autoOpenSunroofCurtain() {
+        Calendar now = Calendar.getInstance();
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = now.get(Calendar.MINUTE);
+        int currentTime = currentHour * 60 + currentMinute;
+
+        int startHour = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_START_HOUR.getKey(), 18);
+        int startMinute = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_START_MINUTE.getKey(), 0);
+        int startTime = startHour * 60 + startMinute;
+
+        int endHour = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_END_HOUR.getKey(), 9);
+        int endMinute = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_END_MINUTE.getKey(), 0);
+        int endTime = endHour * 60 + endMinute;
+
+        boolean isTimeInRange;
+        if (startTime < endTime) {
+            isTimeInRange = currentTime >= startTime && currentTime < endTime;
+        } else {
+            // Wraps around midnight
+            isTimeInRange = currentTime >= startTime || currentTime < endTime;
+        }
+
+        if (!isTimeInRange) {
+            Log.d(TAG, "Current time " + currentHour + ":" + currentMinute + " not in range for opening curtain");
+            return;
+        }
+
+        float maxTemp = sharedPreferences.getFloat(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_MAX_TEMP.getKey(), -1f);
+        if (maxTemp != -1f) {
+            String outsideTempStr = getUpdatedData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.getValue());
+            if (outsideTempStr != null) {
+                try {
+                    float outsideTemp = Float.parseFloat(outsideTempStr);
+                    if (outsideTemp > maxTemp) {
+                        Log.w(TAG, "Outside temp " + outsideTemp + " > max configured " + maxTemp + ", not opening curtain");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Error parsing outside temp for curtain check. Aborting curtain opening. ", e);
+                    return;
+                }
+            }
+        }
+
+        // Delay slightly to ensure services are fully ready or just triggering command
+        backgroundHandler.postDelayed(this::openSunRoofShade, 2000);
     }
 
     public boolean isTurnLightOn() {
@@ -1163,7 +1230,7 @@ public class ServiceManager {
             if (currentTemp >= threshold && !isMaxAcActive) {
 
                 tryRestoreMaxAcState();
-                if previousAcState.isEmpty() {
+                if (previousAcState.isEmpty()) {
                     String prevFan = getUpdatedData(CarConstants.CAR_HVAC_FAN_SPEED.getValue());
                     String prevDriverTemp = getUpdatedData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.getValue());
                     String prevPassTemp = getUpdatedData(CarConstants.CAR_HVAC_PASS_TEMPERATURE.getValue());
