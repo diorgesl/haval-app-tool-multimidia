@@ -461,6 +461,7 @@ const graphController = {
                      if (tertiaryTooltipEl && evVal !== undefined) {
                          tertiaryTooltipEl.querySelector('.tooltip-value').textContent = Number(evVal).toFixed(0);
                          tertiaryTooltipEl.querySelector('.tooltip-unity').textContent = '% EV';
+                         tertiaryTooltipEl.querySelector('.tooltip-unity').style.left = '78px';
                          tertiaryTooltipEl.style.opacity = 1;
                      }
  
