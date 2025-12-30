@@ -97,7 +97,8 @@ var stateManager = new StateManager({
     carSpeed: 0,
     avgGasConsumption: 0,
     avgEvConsumption: 0,
-    instantEvConsumption: 0
+    instantEvConsumption: 0,
+    batteryLevel: 0
 });
 
 // Convenience functions for easier usage

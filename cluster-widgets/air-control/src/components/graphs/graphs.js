@@ -49,6 +49,9 @@ export const graphList = [
     {
         id: 'hevConsumption',
         displayLabel: 'Consumo HEV',
+        subtitle: 'Bateria: --%',
+        subtitleDataKey: 'batteryLevel',
+        subtitleTemplate: 'Bateria: {value}%',
         decimalPlaces: 1,
         datasets: [
             {
@@ -339,6 +342,7 @@ const graphController = {
                 const tertiaryTooltipEl = document.querySelector('.dynamic-tooltip.tertiary');
                 const primaryLineEl = document.querySelector('.dynamic-tooltip-line.primary');
                 const secondaryLineEl = document.querySelector('.dynamic-tooltip-line.secondary');
+                const graphSubtitleLabel = document.querySelector('.graph-subtitle-label');
                 const speedTimerTooltip = document.getElementById('timer-tooltip');
                 const speedTimerValue = document.getElementById('timer-tooltip-value');
                 const LINE_OFFSET = 13;
@@ -348,6 +352,18 @@ const graphController = {
                 if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'none';
                 if (tertiaryTooltipEl) tertiaryTooltipEl.style.display = 'none';
                 if (secondaryLineEl) secondaryLineEl.style.display = 'none';
+
+                // Update Dynamic Subtitle
+                if (graphSubtitleLabel) {
+                    if (graphInfo.subtitleDataKey) {
+                        const val = getState(graphInfo.subtitleDataKey);
+                        if (val !== undefined) {
+                            graphSubtitleLabel.textContent = graphInfo.subtitleTemplate.replace('{value}', Number(val).toFixed(0));
+                        }
+                    } else {
+                        graphSubtitleLabel.textContent = graphInfo.subtitle || '';
+                    }
+                }
 
                 if (graphInfo.id === 'carSpeed') {
                     if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'flex';

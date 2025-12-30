@@ -239,6 +239,7 @@ window.simulationInterval = setInterval(() => {
     setState('avgGasConsumption', Math.round(lastValue) / 4);
     setState('avgEvConsumption', Math.round(lastValue) / 2);
     setState('instantEvConsumption', Math.round(lastValue) / 3);
+    setState('batteryLevel', 40 + (Math.round(lastValue) / 2));
 
 }, SIMULATION_INTERVAL);
 

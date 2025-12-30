@@ -198,6 +198,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.CAR_SPEED}',$value)")
                     }
 
+                    CarConstants.CAR_EV_INFO_CUR_BATTERY_POWER_PERCENTAGE.value -> {
+                        evaluateJsIfReady(webView, "control('batteryLevel', $value)")
+                    }
+
                     CarConstants.CAR_BASIC_AVG_FUEL_CONSUMPTION.value -> {
                         evaluateJsIfReady(webView, "control('avgGasConsumption', $value)")
                     }
@@ -332,6 +336,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         val insideTemp = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_INSIDE_TEMP.value).toFloat().roundToInt()
         val outsideTemp = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.value).toFloat().roundToInt()
         val onePedal = ServiceManager.getInstance().getData(CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value) == "1"
+        val batteryLevel = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_CUR_BATTERY_POWER_PERCENTAGE.value)
         val avgGas = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_AVG_FUEL_CONSUMPTION.value)
         val avgEv = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_AVG_ENERGY_CONSUME_INFO_SINCE_STARTUP.value)
         val instantEv = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_INSTANT_ENERGY_CONSUMPTION.value)
@@ -345,6 +350,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         evaluateJsIfReady(webView, "control('outside_temp', $outsideTemp)")
         evaluateJsIfReady(webView, "control('inside_temp', $insideTemp)")
         evaluateJsIfReady(webView, "control('onepedal', $onePedal)")
+        if (batteryLevel != null) evaluateJsIfReady(webView, "control('batteryLevel', $batteryLevel)")
         if (avgGas != null) evaluateJsIfReady(webView, "control('avgGasConsumption', $avgGas)")
         if (avgEv != null) evaluateJsIfReady(webView, "control('avgEvConsumption', $avgEv)")
         if (instantEv != null) evaluateJsIfReady(webView, "control('instantEvConsumption', $instantEv)")
