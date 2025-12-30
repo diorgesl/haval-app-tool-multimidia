@@ -1134,6 +1134,30 @@ canvas.regen-chart {
   opacity: 0.8;
 }
 
+.dynamic-tooltip.tertiary {
+  left: 15px;
+}
+
+.dynamic-tooltip.tertiary .tooltip-value {
+  top: 57px;
+  left: 50px;
+  text-align: left;
+  font-size: 40px;
+  font-weight: 300;
+  color: #00c3ff;
+  font-size: 32px;
+  font-weight: 300;
+}
+
+.dynamic-tooltip.tertiary .tooltip-unity {
+  top: 62px;
+  left: 78px;
+  color: #00c3ff;
+  font-size: 18px;
+  opacity: 0.8;
+  text-align: left;
+}
+
 .dynamic-tooltip-line {
   position: absolute;
   left: 38px;

@@ -47,6 +47,25 @@ export const graphList = [
         ]
     },
     {
+        id: 'hevConsumption',
+        displayLabel: 'Consumo HEV',
+        decimalPlaces: 1,
+        datasets: [
+            {
+                label: 'EV',
+                dataKey: 'evConsumption',
+                unity: '%',
+                yAxisID: 'y'
+            },
+            {
+                label: 'Combustão',
+                dataKey: 'gasConsumption',
+                unity: 'km/L',
+                yAxisID: 'y1'
+            }
+        ]
+    },
+    {
         id: 'carSpeed',
         displayLabel: 'Velocidade',
         decimalPlaces: 0,
@@ -296,6 +315,7 @@ const graphController = {
 
                 const primaryTooltipEl = document.querySelector('.dynamic-tooltip.primary');
                 const secondaryTooltipEl = document.querySelector('.dynamic-tooltip.secondary');
+                const tertiaryTooltipEl = document.querySelector('.dynamic-tooltip.tertiary');
                 const primaryLineEl = document.querySelector('.dynamic-tooltip-line.primary');
                 const secondaryLineEl = document.querySelector('.dynamic-tooltip-line.secondary');
                 const speedTimerTooltip = document.getElementById('timer-tooltip');
@@ -305,6 +325,7 @@ const graphController = {
                 if (primaryTooltipEl) primaryTooltipEl.style.opacity = 0;
                 if (primaryLineEl) primaryLineEl.style.opacity = 0;
                 if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'none';
+                if (tertiaryTooltipEl) tertiaryTooltipEl.style.display = 'none';
                 if (secondaryLineEl) secondaryLineEl.style.display = 'none';
 
                 if (graphInfo.id === 'carSpeed') {
@@ -403,6 +424,35 @@ const graphController = {
 
                     this.lastCarSpeed = currentSpeed;
 
+                } else if (graphInfo.id === 'hevConsumption') {
+                     // Hybrid Consumption Logic
+                     if (tertiaryTooltipEl) tertiaryTooltipEl.style.display = 'flex';
+                     if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'flex';
+ 
+                     // Center: Average Gas Consumption (km/L)
+                     const avgGasVal = getState('avgGasConsumption');
+                     if (primaryTooltipEl && avgGasVal !== undefined) {
+                         primaryTooltipEl.querySelector('.tooltip-value').textContent = avgGasVal.toFixed(1);
+                         primaryTooltipEl.querySelector('.tooltip-unity').textContent = 'km/L Médio';
+                         primaryTooltipEl.style.opacity = 1;
+                     }
+ 
+                     // Left: Instant EV Consumption (% EV)
+                     const evVal = getState('evConsumption');
+                     if (tertiaryTooltipEl && evVal !== undefined) {
+                         tertiaryTooltipEl.querySelector('.tooltip-value').textContent = Number(evVal).toFixed(0);
+                         tertiaryTooltipEl.querySelector('.tooltip-unity').textContent = '% EV';
+                         tertiaryTooltipEl.style.opacity = 1;
+                     }
+ 
+                     // Right: km/L (Instant)
+                     const gasVal = getState('gasConsumption');
+                     if (gasVal !== undefined && secondaryTooltipEl) {
+                         secondaryTooltipEl.querySelector('.tooltip-value').textContent = gasVal.toFixed(1);
+                         secondaryTooltipEl.querySelector('.tooltip-unity').textContent = 'km/L';
+                         secondaryTooltipEl.style.opacity = 1;
+                     }
+
                 } else {  // Other graphs
                     let activeValue, activeUnity, activeDatasetIndex;
 
@@ -498,6 +548,15 @@ const graphController = {
             scales.y.min = -125;
             scales.y.max = 115;
             scales.y.ticks.stepSize = 25;
+        } else if (graphId === 'hevConsumption') {
+            scales.y.min = -125;
+            scales.y.max = 115;
+            scales.y.ticks.stepSize = 25;
+
+            scales.y1.min = -15;
+            scales.y1.max = 45;
+            scales.y1.ticks.stepSize = 10;
+            scales.y1.ticks.color = this.colors.secondary + 'B3';
         }
 
         const newDatasets = [];
@@ -577,11 +636,18 @@ export function createGraphScreen() {
     secondaryTooltip.appendChild(secondaryTooltipValue);
     secondaryTooltip.appendChild(secondaryTooltipUnity);
 
+    const tertiaryTooltip = div({ className: 'dynamic-tooltip tertiary' });
+    const tertiaryTooltipValue = span({ className: 'tooltip-value' });
+    const tertiaryTooltipUnity = span({ className: 'tooltip-unity' });
+    tertiaryTooltip.appendChild(tertiaryTooltipValue);
+    tertiaryTooltip.appendChild(tertiaryTooltipUnity);
+
     const dynamicTooltipLine = div({ className: 'dynamic-tooltip-line primary' });
     const secondaryTooltipLine = div({ className: 'dynamic-tooltip-line secondary' });
 
     innerRing.appendChild(dynamicTooltip);
     innerRing.appendChild(secondaryTooltip);
+    innerRing.appendChild(tertiaryTooltip);
     innerRing.appendChild(dynamicTooltipLine);
     innerRing.appendChild(secondaryTooltipLine);
 
