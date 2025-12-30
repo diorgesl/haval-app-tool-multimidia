@@ -137,3 +137,22 @@ The graph will be selectable via the `currentGraph` state. Ensure the Android ap
 2.  **Build Web:** Run build scripts (likely `npm run build` or similar in `cluster-widgets`) to bundle assets.
 3.  **Sync:** The build process copies artifacts to `app/src/main/res/raw/`.
 4.  **Build Android:** Compile the Android app to see changes on the device/emulator.
+
+## Local Development (Web)
+
+To preview and develop the dashboard UI in a browser without needing the Android app:
+
+1.  **Navigate to the widget directory:**
+    ```bash
+    cd cluster-widgets/air-control
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install  # or bun install
+    ```
+3.  **Run the development server:**
+    *   **Night Mode (Default):** `npm run dev` (Accessible at `http://localhost:1234`)
+    *   **Light Mode:** `npm run dev:light`
+    *   **With Debug Controls:** `npm run dev-controls` (Includes UI buttons to simulate car data)
+
+**Note:** When running locally, `src/testing-utils.js` is automatically loaded in development mode. It simulates vehicle data (speed, consumption, etc.) so you can see animations and graphs working in real-time.
