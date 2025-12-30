@@ -34,4 +34,5 @@ google-services.json
 *.hprof
 
 .DS_Store
-REFACTORING_SUMMARY.md
+REFACTORING_SUMMARY.mdapp/src/main/res/raw/app-light.html
+app/src/main/res/raw/app-night.html
