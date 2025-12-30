@@ -5,7 +5,7 @@ const focusableAreas = {
     main_menu: menuItems.map(item => item.id),
     ac_control: ['fan', 'temp'],
     regen: ['Baixo', 'Normal', 'Alto'],
-    graph: ['evConsumption', 'gasConsumption', 'hevConsumption', 'carSpeed']
+    graph: ['evConsumption', 'gasConsumption', 'hevConsumption', 'energyEfficiency', 'carSpeed']
 };
 
 document.addEventListener('keydown', (e) => {
@@ -238,6 +238,7 @@ window.simulationInterval = setInterval(() => {
     setState('lastRegenValue', Math.round(lastValue));
     setState('avgGasConsumption', Math.round(lastValue) / 4);
     setState('avgEvConsumption', Math.round(lastValue) / 2);
+    setState('instantEvConsumption', Math.round(lastValue) / 3);
 
 }, SIMULATION_INTERVAL);
 

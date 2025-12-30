@@ -66,6 +66,25 @@ export const graphList = [
         ]
     },
     {
+        id: 'energyEfficiency',
+        displayLabel: 'Eficiência kWh/100km',
+        decimalPlaces: 1,
+        datasets: [
+            {
+                label: 'Energia',
+                dataKey: 'instantEvConsumption',
+                unity: 'instant',
+                yAxisID: 'y'
+            },
+            {
+                label: 'Combustão',
+                dataKey: 'gasConsumption',
+                unity: 'km/L',
+                yAxisID: 'y1'
+            }
+        ]
+    },
+    {
         id: 'carSpeed',
         displayLabel: 'Velocidade',
         decimalPlaces: 0,
@@ -437,7 +456,7 @@ const graphController = {
                          primaryTooltipEl.style.opacity = 1;
                      }
  
-                     // Left: Instant EV Consumption (% EV)
+                     // Left: Instant EV POTENCY (% EV)
                      const evVal = getState('evConsumption');
                      if (tertiaryTooltipEl && evVal !== undefined) {
                          tertiaryTooltipEl.querySelector('.tooltip-value').textContent = Number(evVal).toFixed(0);
@@ -452,6 +471,36 @@ const graphController = {
                          secondaryTooltipEl.querySelector('.tooltip-unity').textContent = 'km/L';
                          secondaryTooltipEl.style.opacity = 1;
                      }
+
+                } else if (graphInfo.id === 'energyEfficiency') {
+                    // Energy Efficiency Logic (New)
+                    if (tertiaryTooltipEl) tertiaryTooltipEl.style.display = 'flex';
+                    if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'flex';
+
+                    // Center: Average EV Consumption
+                    const avgEvVal = getState('avgEvConsumption');
+                    if (primaryTooltipEl && avgEvVal !== undefined) {
+                        primaryTooltipEl.querySelector('.tooltip-value').textContent = avgEvVal.toFixed(1);
+                        primaryTooltipEl.querySelector('.tooltip-unity').textContent = 'Médio';
+                        primaryTooltipEl.style.opacity = 1;
+                    }
+
+                    // Left: Instant EV Consumption
+                    const instantEvVal = getState('instantEvConsumption');
+                    if (tertiaryTooltipEl && instantEvVal !== undefined) {
+                        tertiaryTooltipEl.querySelector('.tooltip-value').textContent = Number(instantEvVal).toFixed(1);
+                        tertiaryTooltipEl.querySelector('.tooltip-unity').textContent = 'inst.';
+                        tertiaryTooltipEl.querySelector('.tooltip-unity').style.left = '95px';
+                        tertiaryTooltipEl.style.opacity = 1;
+                    }
+
+                    // Right: Instant Gas (Context)
+                    const gasVal = getState('gasConsumption');
+                    if (gasVal !== undefined && secondaryTooltipEl) {
+                        secondaryTooltipEl.querySelector('.tooltip-value').textContent = gasVal.toFixed(1);
+                        secondaryTooltipEl.querySelector('.tooltip-unity').textContent = 'km/L';
+                        secondaryTooltipEl.style.opacity = 1;
+                    }
 
                 } else {  // Other graphs
                     let activeValue, activeUnity, activeDatasetIndex;
@@ -552,6 +601,15 @@ const graphController = {
             scales.y.min = -125;
             scales.y.max = 115;
             scales.y.ticks.stepSize = 25;
+
+            scales.y1.min = -15;
+            scales.y1.max = 45;
+            scales.y1.ticks.stepSize = 10;
+            scales.y1.ticks.color = this.colors.secondary + 'B3';
+        } else if (graphId === 'energyEfficiency') {
+            scales.y.min = -10;
+            scales.y.max = 60;
+            scales.y.ticks.stepSize = 10;
 
             scales.y1.min = -15;
             scales.y1.max = 45;
