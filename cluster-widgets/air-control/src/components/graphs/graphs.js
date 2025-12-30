@@ -29,7 +29,7 @@ export const graphList = [
     },
     {
         id: 'gasConsumption',
-        displayLabel: 'Consumo Combustão',
+        displayLabel: 'Consumo ICE',
         decimalPlaces: 1,
         datasets: [
             {
@@ -67,7 +67,8 @@ export const graphList = [
     },
     {
         id: 'energyEfficiency',
-        displayLabel: 'Eficiência kWh/100km',
+        displayLabel: 'Eficiência',
+        subtitle: 'kWh/100km',
         decimalPlaces: 1,
         datasets: [
             {
@@ -87,6 +88,7 @@ export const graphList = [
     {
         id: 'carSpeed',
         displayLabel: 'Velocidade',
+        subtitle: null,
         decimalPlaces: 0,
         datasets: [
             {
@@ -759,6 +761,9 @@ export function createGraphScreen() {
     const graphTitleLabel = div({ className: 'graph-title-label' });
     container.appendChild(graphTitleLabel);
 
+    const graphSubtitleLabel = div({ className: 'graph-subtitle-label' });
+    container.appendChild(graphSubtitleLabel);
+
     setTimeout(() => {
         const ctx = document.getElementById('graph-chart');
         if (ctx) {
@@ -791,8 +796,10 @@ export function createGraphScreen() {
         const currentItem = graphList.find(item => item.id === currentGraphId);
         if (currentItem) {
             var currentLabel = currentItem.displayLabel;
+            var currentSubtitle = currentItem.subtitle || '';
         }
         graphTitleLabel.textContent = currentLabel;
+        graphSubtitleLabel.textContent = currentSubtitle;
     };
 
     return main;

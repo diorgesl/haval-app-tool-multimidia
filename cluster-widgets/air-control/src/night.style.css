@@ -1135,7 +1135,7 @@ canvas.regen-chart {
 }
 
 .dynamic-tooltip.tertiary {
-  left: 15px;
+  left: 20px;
 }
 
 .dynamic-tooltip.tertiary .tooltip-value {
@@ -1287,4 +1287,20 @@ canvas.graph-chart {
 
 .screen-flash-animation {
   animation: screen-flash 0.5s ease-in-out;
+}
+
+.graph-subtitle-label {
+  position: absolute;
+  top: 105px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+  color: #c2e3ffaa;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.3s ease-in-out;
+  z-index: 10;
 }
