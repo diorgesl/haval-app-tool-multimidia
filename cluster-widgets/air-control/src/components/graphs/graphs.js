@@ -73,7 +73,7 @@ export const graphList = [
             {
                 label: 'Energia',
                 dataKey: 'instantEvConsumption',
-                unity: 'instant',
+                unity: 'kWh/100km',
                 yAxisID: 'y'
             },
             {
