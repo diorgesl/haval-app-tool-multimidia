@@ -206,11 +206,11 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady(webView, "control('avgGasConsumption', $value)")
                     }
 
-                    CarConstants.CAR_EV_INFO_AVG_ENERGY_CONSUME_INFO_SINCE_STARTUP.value -> {
+                    CarConstants.CAR_EV_INFO_CYCLE_ENERGY_CONSUME_INFO.value -> {
                         evaluateJsIfReady(webView, "control('avgEvConsumption', $value)")
                     }
 
-                    CarConstants.CAR_EV_INFO_INSTANT_ENERGY_CONSUMPTION.value -> {
+                    CarConstants.CAR_EV_INFO_ENERGY_CONSUME_INFO.value -> {
                         evaluateJsIfReady(webView, "control('instantEvConsumption', $value)")
                     }
 
@@ -338,8 +338,8 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         val onePedal = ServiceManager.getInstance().getData(CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value) == "1"
         val batteryLevel = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_CUR_BATTERY_POWER_PERCENTAGE.value)
         val avgGas = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_CUR_JOURNEY_AVG_FUEL_CONSUME.value)
-        val avgEv = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_AVG_ENERGY_CONSUME_INFO_SINCE_STARTUP.value)
-        val instantEv = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_INSTANT_ENERGY_CONSUMPTION.value)
+        val avgEv = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_CYCLE_ENERGY_CONSUME_INFO.value)
+        val instantEv = ServiceManager.getInstance().getData(CarConstants.CAR_EV_INFO_ENERGY_CONSUME_INFO.value)
 
         evaluateJsIfReady(webView, "control('temp', $currentTemp)")
         evaluateJsIfReady(webView, "control('fan', $currentFanSpeed)")
