@@ -71,15 +71,16 @@ var stateManager = new StateManager({
 
     // Ac screen states
     focusArea: 'fan',
-    temp: 25,
-    fan: 1,
-    power: 1,
-    auto: 1,
+    temp: '--',
+    fan: '-',
+    power: 0,
+    auto: 0,
     recycle: 0,
     aion: 0,
-    maxauto: 0,
-    outside_temp: '-',
-    inside_temp: '-',
+    impulseauto: 0,
+    targetTemp: '--',
+    outside_temp: '--',
+    inside_temp: '--',
 
     // Regen screen states
     regenMode: 'Normal',

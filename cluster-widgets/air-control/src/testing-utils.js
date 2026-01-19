@@ -52,6 +52,11 @@ document.addEventListener('keydown', (e) => {
                 const newMode = modes[nextIndex];
                 setState('drivingMode', newMode);
             } else if (currentState.focusedMenuItem === 'option_4') {
+                setState('fan', 1);
+                setState('temp', 21.0);
+                setState('outside_temp', 28.5);
+                setState('inside_temp', 23.0);
+                setState('targetTemp', 21.0);
                 window.showScreen('aircon');
             } else if (currentState.focusedMenuItem === 'option_5') {
                 const modes = ['Normal', 'Conforto', 'Esportiva'];
@@ -74,18 +79,23 @@ document.addEventListener('keydown', (e) => {
         const focusedArea = currentState.focusArea;
 
         if (e.key === 'Enter') {
-            const controls = focusableAreas.ac_control;
-            const currentIndex = controls.indexOf(focusedArea);
-            const nextIndex = (currentIndex + 1) % controls.length;
-            window.focus(controls[nextIndex]);
+            if (currentState.impulseauto == 1) {
+                window.focus('temp');
+            } else {
+                const controls = focusableAreas.ac_control;
+                const currentIndex = controls.indexOf(focusedArea);
+                const nextIndex = (currentIndex + 1) % controls.length;
+                window.focus(controls[nextIndex]);
+            }
         } else if (e.key === ' ') {
             e.preventDefault();
             const newAutoModeState = (currentState.auto == 0 ? 1 : 0);
             setState('auto', newAutoModeState);
         } else if (e.key === 'a') {
             e.preventDefault();
-            const newMaxModeState = (currentState.maxauto == 0 ? 1 : 0);
-            setState('maxauto', newMaxModeState);
+            const newModeState = (currentState.impulseauto == 0 ? 1 : 0);
+            setState('impulseauto', newModeState);
+            window.focus('temp');
         }
 
         switch (focusedArea) {
@@ -99,11 +109,20 @@ document.addEventListener('keydown', (e) => {
                 break;
 
             case 'temp':
-                const currentTemp = parseFloat(currentState.temp) || 21.0;
-                if (e.key === 'ArrowUp' && currentTemp < 32.0) {
-                    window.control('temp', (currentTemp + 0.5).toFixed(1));
-                } else if (e.key === 'ArrowDown' && currentTemp > 16.0) {
-                    window.control('temp', (currentTemp - 0.5).toFixed(1));
+                if (currentState.impulseauto == 1) {
+                    const currentTargetTemp = parseFloat(currentState.targetTemp) || 21.0;
+                    if (e.key === 'ArrowUp' && currentTargetTemp < 32.0) {
+                        window.control('targetTemp', (currentTargetTemp + 0.5).toFixed(1));
+                    } else if (e.key === 'ArrowDown' && currentTargetTemp > 16.0) {
+                        window.control('targetTemp', (currentTargetTemp - 0.5).toFixed(1));
+                    }
+                } else {
+                    const currentTemp = parseFloat(currentState.temp) || 21.0;
+                    if (e.key === 'ArrowUp' && currentTemp < 32.0) {
+                        window.control('temp', (currentTemp + 0.5).toFixed(1));
+                    } else if (e.key === 'ArrowDown' && currentTemp > 16.0) {
+                        window.control('temp', (currentTemp - 0.5).toFixed(1));
+                    }
                 }
                 break;
 

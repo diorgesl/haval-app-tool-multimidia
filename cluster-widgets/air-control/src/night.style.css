@@ -412,7 +412,7 @@ button {
   z-index: 3;
 }
 
-.maxauto-icon-container {
+.impulse-auto-icon-container {
   z-index: 3;
   justify-content: space-between;
   align-items: center;
@@ -420,11 +420,14 @@ button {
   font-weight: 300;
   display: -webkit-box;
   position: absolute;
-  top: 0;
+  top: -5px;
   left: 50%;
   transform: translate(-50%, 365px);
-  font-size: 18px;
-  color: #3bf676;
+  font-size: 36px;
+  color: #9ac2ff;
+  max-width: 120px;
+  line-height: 36px;
+  text-align: center;
 }
 
 .temp-info-container {
@@ -579,6 +582,11 @@ button {
   line-height: 0.9;
 }
 
+.impulse-auto-value-display {
+  font-size: 40px;
+  line-height: 0.9;
+}
+
 .ac-fan-control-area {
   position: absolute;
   top: 0;
@@ -595,16 +603,108 @@ button {
 
 .ac-temp-control-area {
   position: absolute;
-  bottom: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 10px);
   display: flex;
-  transform: translateY(-88px);
   font-size: 80px;
   font-weight: 500;
   color: white;
   z-index: 3;
   border-radius: 20%;
   padding: 5px;
-  transition: box-shadow 0.3s ease, color 0.3s ease;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.impulse-auto-active .ac-temp-control-area {
+  transform: translate(-50%, -50%);
+  height: 135px;
+}
+
+.impulse-auto-active .ac-temp-control-area .temp-display-label {
+  font-size: 80px;
+  transition: font-size 0.5s ease;
+  transform: translateY(16px);
+}
+
+.impulse-auto-active .ac-fan-control-area {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.impulse-auto-active .ac-divider-line {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.impulse-auto-active .ac-labels-container {
+  opacity: 1;
+}
+
+.impulse-auto-active .impulse-auto-icon-container {
+  transform: translate(-50%, 320px);
+  transition: all 0.5s ease;
+}
+
+.impulse-auto-divider-top {
+  position: absolute;
+  width: 300px;
+  height: 2px;
+  background-color: #4d97ff6b;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -80px);
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.impulse-auto-divider-bottom {
+  position: absolute;
+  width: 300px;
+  height: 2px;
+  background-color: #4d97ff6b;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 80px);
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.impulse-auto-active .impulse-auto-divider-top,
+.impulse-auto-active .impulse-auto-divider-bottom {
+  opacity: 1;
+}
+
+.impulse-auto-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.impulse-auto-active .impulse-auto-container {
+  opacity: 1;
+}
+
+.impulse-auto-ac-fan {
+  position: absolute;
+  top: 105px;
+  right: 95px;
+  opacity: 0.5;
+}
+
+.impulse-auto-ac-temp {
+  position: absolute;
+  top: 105px;
+  left: 95px;
+  opacity: 0.5;
 }
 
 .progress-ring {

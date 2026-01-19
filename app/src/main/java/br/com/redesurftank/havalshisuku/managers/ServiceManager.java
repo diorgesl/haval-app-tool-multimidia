@@ -47,6 +47,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -1062,6 +1063,7 @@ public class ServiceManager {
 
     private void autoOpenSunroofCurtain() {
         Calendar now = Calendar.getInstance();
+        float outsideTemp = 99;
         int currentHour = now.get(Calendar.HOUR_OF_DAY);
         int currentMinute = now.get(Calendar.MINUTE);
         int currentTime = currentHour * 60 + currentMinute;
@@ -1074,7 +1076,7 @@ public class ServiceManager {
         int endMinute = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_END_MINUTE.getKey(), 0);
         int endTime = endHour * 60 + endMinute;
 
-        boolean isTimeInRange;
+        boolean isTimeInRange = false;
         if (startTime < endTime) {
             isTimeInRange = currentTime >= startTime && currentTime < endTime;
         } else {
@@ -1082,21 +1084,12 @@ public class ServiceManager {
             isTimeInRange = currentTime >= startTime || currentTime < endTime;
         }
 
-        if (!isTimeInRange) {
-            Log.d(TAG, "Current time " + currentHour + ":" + currentMinute + " not in range for opening curtain");
-            return;
-        }
-
         float maxTemp = sharedPreferences.getFloat(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_MAX_TEMP.getKey(), -1f);
         if (maxTemp != -1f) {
             String outsideTempStr = getUpdatedData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.getValue());
             if (outsideTempStr != null) {
                 try {
-                    float outsideTemp = Float.parseFloat(outsideTempStr);
-                    if (outsideTemp > maxTemp) {
-                        Log.w(TAG, "Outside temp " + outsideTemp + " > max configured " + maxTemp + ", not opening curtain");
-                        return;
-                    }
+                    outsideTemp = Float.parseFloat(outsideTempStr);
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "Error parsing outside temp for curtain check. Aborting curtain opening. ", e);
                     return;
@@ -1104,8 +1097,16 @@ public class ServiceManager {
             }
         }
 
-        // Delay slightly to ensure services are fully ready or just triggering command
-        backgroundHandler.postDelayed(this::openSunRoofShade, 2000);
+        if ((isTimeInRange) || (outsideTemp <= maxTemp)) {
+            // Delay slightly to ensure services are fully ready or just triggering command
+            backgroundHandler.postDelayed(this::openSunRoofShade, 2000);
+        } else {
+            if (!isTimeInRange) {
+                Log.d(TAG, "Current time " + currentHour + ":" + currentMinute + " not in range for opening curtain");
+            } else if (outsideTemp > maxTemp) {
+                Log.w(TAG, "Outside temp " + outsideTemp + " > max configured " + maxTemp + ", not opening curtain");
+            }
+        }
     }
 
     public boolean isTurnLightOn() {
@@ -1334,8 +1335,8 @@ public class ServiceManager {
                 newPassTemp = Math.min(20, newPassTemp);
 
                 updateData(CarConstants.CAR_HVAC_FAN_SPEED.getValue(), String.valueOf(newFan));
-                updateData(prevDriverKey, String.format(java.util.Locale.US, "%.1f", newDriverTemp));
-                updateData(prevPassKey, String.format(java.util.Locale.US, "%.1f", newPassTemp));
+                updateData(prevDriverKey, String.format(Locale.US, "%.1f", newDriverTemp));
+                updateData(prevPassKey, String.format(Locale.US, "%.1f", newPassTemp));
                 
                 // Enforce Power and AC Enable to ensure they stay ON during the process
                 updateData(CarConstants.CAR_HVAC_POWER_MODE.getValue(), "1");
@@ -1500,7 +1501,7 @@ public class ServiceManager {
         }
 
         Gson gson = new Gson();
-        JsonObject jsonObject = new com.google.gson.JsonObject();
+        JsonObject jsonObject = new JsonObject();
         for (Map.Entry<String, String> entry : settingsToSave.entrySet()) {
             jsonObject.addProperty(entry.getKey(), entry.getValue());
         }
