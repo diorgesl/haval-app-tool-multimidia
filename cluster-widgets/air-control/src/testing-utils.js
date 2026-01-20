@@ -92,10 +92,15 @@ document.addEventListener('keydown', (e) => {
             const newAutoModeState = (currentState.auto == 0 ? 1 : 0);
             setState('auto', newAutoModeState);
         } else if (e.key === 'a') {
+/* TODO: for future use with impulseauto. For now it triggers maxauto mode
             e.preventDefault();
             const newModeState = (currentState.impulseauto == 0 ? 1 : 0);
             setState('impulseauto', newModeState);
             window.focus('temp');
+*/
+            e.preventDefault();
+            const newModeState = (currentState.maxauto == 0 ? 1 : 0);
+            setState('maxauto', newModeState);
         }
 
         switch (focusedArea) {

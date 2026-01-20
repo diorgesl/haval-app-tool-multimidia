@@ -77,7 +77,8 @@ var stateManager = new StateManager({
     auto: 0,
     recycle: 0,
     aion: 0,
-    impulseauto: 0,
+    maxauto: 0,
+    impulseauto: 0, // TODO: for future implementation of AC automated control, should replace maxauto
     targetTemp: '--',
     outside_temp: '--',
     inside_temp: '--',
