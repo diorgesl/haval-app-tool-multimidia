@@ -1098,6 +1098,66 @@ canvas.regen-chart {
   z-index: 5;
 }
 
+.graph-power-rpm-ring {
+  position: absolute;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  z-index: 6;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.graph-power-rpm-ring::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+      transparent 0deg,
+      transparent var(--p-start, 0deg),
+      #4a90e2 var(--p-start, 0deg),
+      #4a90e2 var(--p-end, 0deg),
+      #ff8c00 var(--r-start, 0deg),
+      #ff8c00 var(--r-end, 0deg),
+      transparent var(--r-end, 0deg),
+      transparent 360deg);
+
+  -webkit-mask: radial-gradient(circle at center, transparent 0, transparent 216px, white 217px, white 219px, transparent 220px);
+  mask: radial-gradient(circle at center, transparent 0, transparent 216px, white 217px, white 219px, transparent 220px);
+}
+
+.graph-curved-labels {
+  pointer-events: none;
+  z-index: 10;
+  overflow: visible;
+  transition: opacity 0.3s ease;
+}
+
+.graph-curved-labels text {
+  font-family: 'Khand', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  fill-opacity: 1;
+}
+
+.curved-label-rpm {
+  fill: #ff8c00;
+  dominant-baseline: hanging;
+}
+
+.curved-label-power {
+  fill: #4a90e2;
+  dominant-baseline: hanging;
+}
+
+
+
 .graph-inner-ring {
   position: absolute;
   width: 392px;
@@ -1205,8 +1265,12 @@ canvas.regen-chart {
   font-family: 'Khand', sans-serif;
   font-weight: 100;
   pointer-events: none;
-  text-align: center;
+  text-align: left;
   white-space: nowrap;
+}
+
+.dynamic-tooltip.primary .tooltip-unity {
+  text-align: center;
 }
 
 .warp-tunnel-canvas {
@@ -1231,19 +1295,17 @@ canvas.regen-chart {
 
 
 .dynamic-tooltip.secondary .tooltip-value {
-  top: 57px;
-  left: 45px;
+  top: 54px;
+  left: 53px;
   text-align: right;
-  font-size: 40px;
-  font-weight: 300;
   color: #9affb5;
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 300;
 }
 
 .dynamic-tooltip.secondary .tooltip-unity {
   top: 62px;
-  left: 226px;
+  left: 255px;
   color: #9affb5;
   font-size: 18px;
   opacity: 0.8;

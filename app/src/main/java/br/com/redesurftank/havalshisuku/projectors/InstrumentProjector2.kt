@@ -198,6 +198,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.CAR_SPEED}',$value)")
                     }
 
+                    CarConstants.CAR_BASIC_ENGINE_SPEED.value -> {
+                        evaluateJsIfReady (webView, "control('engineRPM',$value)")
+                    }
+
                     else -> {}
                 }
             }

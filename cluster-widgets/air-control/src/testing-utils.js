@@ -251,14 +251,24 @@ window.simulationInterval = setInterval(() => {
     const currentMode = stateManager.getState().gasConsumptionMode;
 
     if (currentMode === 'Running') {
-        setState('gasConsumption', Math.round(lastValue) / 3);
+        const gasV = Math.round(lastValue) / 3;
+        setState('gasConsumption', gasV);
         setState('gasConsumptionIdle', 0);
+        // Simulate RPM: if running, it should be between 800 and 7000
+        // We can base it on car speed and some randomness
+        const simulatedRPM = currentSpeed > 0 ? 1000 + (currentSpeed * 40) + (Math.random() * 500) : 800;
+        setState('engineRPM', Math.min(Math.max(simulatedRPM, 0), 7000));
     } else {
         setState('gasConsumption', 0);
         setState('gasConsumptionIdle', Math.round(lastValue) / 20);
+        // If idle, RPM is usually around 800
+        setState('engineRPM', 800);
     }
 
-    setState('evConsumption', Math.round(lastValue) - 50);
+    // Simulate EV consumption: can be positive (accelerating) or negative (braking/regen)
+    // lastValue is 0..100
+    // Let's make it -100 to 100
+    setState('evConsumption', Math.round(lastValue * 2) - 100);
     setState('lastRegenValue', Math.round(lastValue));
 
 }, SIMULATION_INTERVAL);

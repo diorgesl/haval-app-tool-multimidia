@@ -1,7 +1,14 @@
 {
   "name": "cluster-air-ui",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.4",
+  "browserslist": [
+    "> 0.5%",
+    "last 5 versions",
+    "not dead",
+    "chrome 50",
+    "android 4.4"
+  ],
   "scripts": {
     "dev-controls": "parcel index.html",
     "dev": "parcel app-night.html",

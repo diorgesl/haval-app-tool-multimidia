@@ -1,4 +1,4 @@
-import { getState, subscribe } from '../../state.js';
+import { getState, setState, subscribe } from '../../state.js';
 import { div, img, span } from '../../utils/createElement.js';
 
 import { Chart, registerables } from 'chart.js';
@@ -7,7 +7,7 @@ import 'chartjs-adapter-date-fns';
 import { WarpTunnelAnimation } from './warpTunnel.js';
 Chart.register(...registerables, streamingPlugin);
 
-const HISTORY_DURATION = 30000; //ms
+const HISTORY_DURATION = 60000; //ms
 const TIMER_HIDE_DELAY = 30000; //ms
 const UI_UPDATE_INTERVAL = 100; //ms
 const ACCELERATION_THRESHOLD = 10; //s (ie 100km/h in 5s = 5, 100km/h in 10s = 10)
@@ -17,6 +17,7 @@ export const graphList = [
         id: 'evConsumption',
         displayLabel: 'Consumo EV',
         decimalPlaces: 0,
+        secondaryDecimalPlaces: 1,
         datasets: [
             {
                 label: 'Consumo EV',
@@ -24,24 +25,32 @@ export const graphList = [
                 unity: '% de Energia',
                 yAxisID: 'y'
             },
-            { label: null, dataKey: null, yAxisID: 'y1' }
+            {
+                label: 'Média',
+                dataKey: 'evConsumptionAvg',
+                unity: '% avg',
+                yAxisID: 'y'
+            }
         ]
     },
     {
         id: 'gasConsumption',
-        displayLabel: 'Consumo Combustão',
+        displayLabel: 'Consumo Misto',
         decimalPlaces: 1,
+        secondaryDecimalPlaces: 1,
         datasets: [
             {
                 label: 'Consumo Instantâneo',
-                dataKey: 'gasConsumption',
+                dataKey: 'gasConsumptionSmoothed',
                 unity: 'Km/L',
-                yAxisID: 'y'
+                yAxisID: 'y',
+                idleKey: 'gasConsumptionIdle',
+                idleUnity: 'L/100km',
             },
             {
-                label: 'Consumo em Idle',
-                dataKey: 'gasConsumptionIdle',
-                unity: 'L/hora',
+                label: 'Consumo Elétrico',
+                dataKey: 'evConsumption',
+                unity: '%',
                 yAxisID: 'y1'
             }
         ]
@@ -50,6 +59,7 @@ export const graphList = [
         id: 'carSpeed',
         displayLabel: 'Velocidade',
         decimalPlaces: 0,
+        secondaryDecimalPlaces: 1,
         datasets: [
             {
                 label: 'Velocidade',
@@ -59,7 +69,7 @@ export const graphList = [
             },
             {
                 label: 'Consumo',
-                dataKey: 'gasConsumption',
+                dataKey: 'gasConsumptionSmoothed',
                 unity: 'km/L',
                 yAxisID: 'y'
             }
@@ -82,11 +92,26 @@ function initializeGlobalDataStore() {
 function startGlobalDataCollector() {
     initializeGlobalDataStore();
 
+    let gasConsumptionSamples = 0;
     setInterval(() => {
         const now = Date.now();
         const DURATION = HISTORY_DURATION;
 
+        // Smooth Gas Consumption logic
+        const rawGas = getState('gasConsumption');
+        if (rawGas > 0) {
+            gasConsumptionSamples++;
+        } else {
+            gasConsumptionSamples = 0;
+        }
+        // Multiplier from 0 to 1 over 1 second (5 samples at 200ms)
+        const multiplier = Math.min(gasConsumptionSamples / 5, 1);
+        const smoothedGas = rawGas * multiplier;
+        setState('gasConsumptionSmoothed', smoothedGas);
+
         for (const dataKey in historicalData) {
+            if (dataKey === 'evConsumptionAvg') continue;
+
             const value = getState(dataKey);
             if (value !== undefined) {
                 historicalData[dataKey].push({ x: now, y: value });
@@ -94,6 +119,26 @@ function startGlobalDataCollector() {
                 const firstPoint = historicalData[dataKey][0];
                 if (firstPoint && now - firstPoint.x > DURATION) {
                     historicalData[dataKey].shift();
+                }
+            }
+        }
+
+        // Calculate Average for last 1 minute
+        if (historicalData['evConsumption']) {
+            const evData = historicalData['evConsumption'];
+            if (evData.length > 0) {
+                const sum = evData.reduce((acc, point) => acc + point.y, 0);
+                const avg = sum / evData.length;
+
+                // Update Global State for Tooltip/Label
+                setState('evConsumptionAvg', avg);
+
+                if (!historicalData['evConsumptionAvg']) historicalData['evConsumptionAvg'] = [];
+                historicalData['evConsumptionAvg'].push({ x: now, y: avg });
+
+                const firstPoint = historicalData['evConsumptionAvg'][0];
+                if (firstPoint && now - firstPoint.x > DURATION) {
+                    historicalData['evConsumptionAvg'].shift();
                 }
             }
         }
@@ -405,23 +450,38 @@ const graphController = {
 
                 } else {  // Other graphs
                     let activeValue, activeUnity, activeDatasetIndex;
+                    let secValue, secUnity;
 
                     // makes sure warp tunnel and speed timer are hidden
                     this.setWarpAnimation(false);
                     this.setChronometer('stop');
 
                     if (graphInfo.id === 'gasConsumption') {
-                        const runningValue = getState(graphInfo.datasets[0].dataKey);
-                        const idleValue = getState(graphInfo.datasets[1].dataKey);
+                        const runningValue = getState('gasConsumptionSmoothed');
+                        const idleValue = getState(graphInfo.datasets[0].idleKey);
                         if (runningValue > 0) {
                             activeValue = runningValue;
                             activeUnity = graphInfo.datasets[0].unity;
                             activeDatasetIndex = 0;
                         } else {
                             activeValue = idleValue;
-                            activeUnity = graphInfo.datasets[1].unity;
-                            activeDatasetIndex = 1;
+                            activeUnity = graphInfo.datasets[0].idleUnity;
+                            activeDatasetIndex = 0;
                         }
+
+                        // Second dataset for gasConsumption is evConsumption
+                        const evVal = getState('evConsumption');
+                        secValue = evVal;
+                        secUnity = graphInfo.datasets[1].unity;
+                    } else if (graphInfo.id === 'evConsumption') {
+                        const mainDatasetInfo = graphInfo.datasets[0];
+                        activeValue = getState(mainDatasetInfo.dataKey);
+                        activeUnity = mainDatasetInfo.unity;
+                        activeDatasetIndex = 0;
+
+                        // Second dataset for evConsumption is evConsumptionAvg
+                        secValue = getState('evConsumptionAvg');
+                        secUnity = graphInfo.datasets[1].unity;
                     } else {
                         const mainDatasetInfo = graphInfo.datasets[0];
                         activeValue = getState(mainDatasetInfo.dataKey);
@@ -436,10 +496,108 @@ const graphController = {
                         primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + LINE_OFFSET}px`;
                         primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? this.colors.primary : this.colors.secondary;
                         primaryTooltipEl.style.opacity = 1;
-                        primaryLineEl.style.opacity = 0.5;;
+                        primaryLineEl.style.opacity = 0.5;
+                    }
+
+                    if (secValue !== undefined && secondaryTooltipEl && secondaryLineEl) {
+                        const secDatasetInfo = graphInfo.datasets[1];
+                        const secAxis = (secDatasetInfo && secDatasetInfo.yAxisID === 'y1') ? this.chartInstance.scales.y1 : this.chartInstance.scales.y;
+
+                        secondaryTooltipEl.querySelector('.tooltip-value').textContent = secValue.toFixed(graphInfo.secondaryDecimalPlaces !== undefined ? graphInfo.secondaryDecimalPlaces : (graphInfo.decimalPlaces || 0));
+                        secondaryTooltipEl.querySelector('.tooltip-unity').textContent = secUnity;
+                        secondaryLineEl.style.top = `${secAxis.getPixelForValue(secValue) + LINE_OFFSET}px`;
+                        secondaryLineEl.style.backgroundColor = this.colors.secondary;
+                        secondaryTooltipEl.style.opacity = 1;
+                        secondaryLineEl.style.opacity = 0.5;
+                        secondaryTooltipEl.style.display = 'flex';
+                        secondaryLineEl.style.display = 'block';
                     }
                 }
                 this.chartInstance.update('quiet');
+
+                // Update Power/RPM Ring
+                const powerV = getState('evConsumption');
+                const rpmV = getState('engineRPM');
+
+                const powerBar = document.getElementById('graph-power-bar-svg');
+                const rpmBar = document.getElementById('graph-rpm-bar-svg');
+                const rpmPath = document.getElementById('graph-rpm-path');
+                const powerPath = document.getElementById('graph-power-path');
+
+                if (powerBar && rpmBar) {
+                    const wrapAngle = (a) => ((a % 360) + 360) % 360;
+
+                    // Scaling: Power 100 = 135 deg, RPM 7000 = 90 deg
+                    const powerAngleWidth = (powerV / 100) * 135;
+                    const rpmAngleWidth = (rpmV / 7000) * 90;
+
+                    const pStart = 270; // LEFT side
+                    const tipAngle = wrapAngle(pStart + powerAngleWidth);
+
+                    // Behavior: If power is negative, RPM starts at 270 (Left)
+                    const rStart = powerV >= 0 ? tipAngle : 270;
+                    const rEnd = wrapAngle(rStart + rpmAngleWidth);
+
+                    const radius = 218; // Bars further outside
+                    const cx = 250, cy = 250;
+                    const getCoords = (deg) => {
+                        const rad = (deg - 90) * Math.PI / 180;
+                        return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+                    };
+
+                    // Draw Power Bar (4.5px)
+                    const pS = getCoords(pStart);
+                    const pE = getCoords(tipAngle);
+                    const pLarge = Math.abs(powerAngleWidth) > 180 ? 1 : 0;
+                    const pSweep = powerV >= 0 ? 1 : 0;
+                    if (Math.abs(powerAngleWidth) > 0.1) {
+                        powerBar.setAttribute("d", `M ${pS.x} ${pS.y} A ${radius} ${radius} 0 ${pLarge} ${pSweep} ${pE.x} ${pE.y}`);
+                        powerBar.style.opacity = 1;
+                        powerBar.setAttribute("stroke-width", "4.5");
+                    } else {
+                        powerBar.style.opacity = 0;
+                    }
+
+                    // Draw RPM Bar (4.5px)
+                    const rS = getCoords(rStart);
+                    const rE = getCoords(rEnd);
+                    const rLarge = Math.abs(rpmAngleWidth) > 180 ? 1 : 0;
+                    if (rpmV > 1) {
+                        rpmBar.setAttribute("d", `M ${rS.x} ${rS.y} A ${radius} ${radius} 0 ${rLarge} 1 ${rE.x} ${rE.y}`);
+                        rpmBar.style.opacity = 1;
+                        rpmBar.setAttribute("stroke-width", "4.5");
+                    } else {
+                        rpmBar.style.opacity = 0;
+                    }
+
+                    // Update Curved Labels (RADIUS 210 - INSIDE)
+                    if (rpmPath) {
+                        const rpm = Math.round(rpmV);
+                        rpmPath.textContent = ` ${rpm} rpm`;
+                        rpmPath.parentElement.style.opacity = rpm > 0 ? 1 : 0;
+
+                        // RPM Label follows rStart (start of RPM bar)
+                        let rpmOffset = (rStart / 360) * 100;
+
+                        // Overlap protection from Power Label (fixed @ 270deg = 75%)
+                        if (powerV < 0) {
+                            // If regen, rStart is 270 (75%). Offset RPM text to e.g. 83%
+                            rpmOffset = 83;
+                        } else {
+                            // Avoid overlap on both sides of 75% if Power is near 0
+                            if (rpmOffset > 68 && rpmOffset < 75) rpmOffset = 68;
+                            if (rpmOffset < 83 && rpmOffset >= 75) rpmOffset = 83;
+                        }
+
+                        rpmPath.setAttribute('startOffset', `${rpmOffset}%`);
+                    }
+                    if (powerPath) {
+                        const pwr = Math.round(powerV);
+                        powerPath.textContent = `power ${pwr}% `;
+                        powerPath.parentElement.style.opacity = Math.abs(pwr) > 0 ? 1 : 0;
+                        powerPath.setAttribute('startOffset', `75%`); // Fixed at Left (270 deg)
+                    }
+                }
             } catch (error) {
                 console.error('Error: ', error);
             }
@@ -482,9 +640,9 @@ const graphController = {
             scales.y.max = 45;
             scales.y.ticks.stepSize = 10;
             scales.y.ticks.color = this.colors.primary + 'B3';
-            scales.y1.min = -5;
-            scales.y1.max = 15;
-            scales.y1.ticks.stepSize = 3;
+            scales.y1.min = -125;
+            scales.y1.max = 115;
+            scales.y1.ticks.stepSize = 25;
             scales.y1.ticks.color = this.colors.secondary + 'B3';
         } else if (graphId === 'carSpeed') {
             scales.y.min = -50;
@@ -495,9 +653,12 @@ const graphController = {
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = this.colors.secondary + 'B3';
         } else if (graphId === 'evConsumption') {
-            scales.y.min = -125;
+            scales.y.min = -125
             scales.y.max = 115;
             scales.y.ticks.stepSize = 25;
+            scales.y1.min = -125;
+            scales.y1.max = 115;
+            scales.y1.ticks.stepSize = 25;
         }
 
         const newDatasets = [];
@@ -559,6 +720,67 @@ export function createGraphScreen() {
     const graphProgressRing = div({ className: 'graph-progress-ring' });
     graphProgressRing.id = 'graph-progress-ring';
     container.appendChild(graphProgressRing);
+
+    const graphPowerRpmRing = div({ className: 'graph-power-rpm-ring' });
+    graphPowerRpmRing.id = 'graph-power-rpm-ring';
+    container.appendChild(graphPowerRpmRing);
+
+    // SVG for curved labels
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 500 500");
+    svg.classList.add("graph-curved-labels");
+    svg.style.position = "absolute";
+    svg.style.width = "500px";
+    svg.style.height = "500px";
+    svg.style.top = "50%";
+    svg.style.left = "50%";
+    svg.style.transform = "translate(-50%, -50%)";
+    svg.style.pointerEvents = "none";
+    svg.style.zIndex = "10";
+
+    const defs = document.createElementNS(svgNS, "defs");
+    const path = document.createElementNS(svgNS, "path");
+    path.setAttribute("id", "labelPath");
+    // Circle with radius ~210 to be close to bars but inside
+    path.setAttribute("d", "M 250, 40 a 210,210 0 1,1 0,420 a 210,210 0 1,1 0,-420");
+    path.setAttribute("fill", "none");
+    defs.appendChild(path);
+    svg.appendChild(defs);
+
+    const powerBar = document.createElementNS(svgNS, "path");
+    powerBar.setAttribute("id", "graph-power-bar-svg");
+    powerBar.setAttribute("fill", "none");
+    powerBar.setAttribute("stroke", "#4a90e2");
+    powerBar.setAttribute("stroke-width", "3");
+    svg.appendChild(powerBar);
+
+    const rpmBar = document.createElementNS(svgNS, "path");
+    rpmBar.setAttribute("id", "graph-rpm-bar-svg");
+    rpmBar.setAttribute("fill", "none");
+    rpmBar.setAttribute("stroke", "#ff8c00");
+    rpmBar.setAttribute("stroke-width", "3");
+    svg.appendChild(rpmBar);
+
+    const rpmText = document.createElementNS(svgNS, "text");
+    rpmText.setAttribute("text-anchor", "start");
+    const rpmPath = document.createElementNS(svgNS, "textPath");
+    rpmPath.setAttribute("id", "graph-rpm-path");
+    rpmPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#labelPath");
+    rpmPath.classList.add("curved-label-rpm");
+    rpmText.appendChild(rpmPath);
+    svg.appendChild(rpmText);
+
+    const powerText = document.createElementNS(svgNS, "text");
+    powerText.setAttribute("text-anchor", "start");
+    const powerPath = document.createElementNS(svgNS, "textPath");
+    powerPath.setAttribute("id", "graph-power-path");
+    powerPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#labelPath");
+    powerPath.classList.add("curved-label-power");
+    powerText.appendChild(powerPath);
+    svg.appendChild(powerText);
+
+    container.appendChild(svg);
 
     const divider = div({ className: 'graph-selector-line' });
     const outerRing = div({ className: 'graph-outer-ring' });
