@@ -119,6 +119,10 @@ public class ServiceManager {
             CarConstants.CAR_BASIC_AVG_FUEL_CONSUMPTION,
             CarConstants.CAR_EV_INFO_AVG_ENERGY_CONSUME_INFO_SINCE_STARTUP,
             CarConstants.CAR_BASIC_FRONT_WIPWER_STATUS,
+            CarConstants.CAR_BASIC_BATTERY_VOLTAGE,
+            CarConstants.CAR_BASIC_COOLANT_TEMP,
+            CarConstants.CAR_BASIC_SEAT_BELT_WARNING,
+            CarConstants.CAR_LIGHT_SETTING_AMBIENT_LIGHT_MULTICOLOR_COLOR_CONFIG,
     };
 
     private static final CarConstants[] KEYS_TO_SAVE = {
@@ -176,6 +180,10 @@ public class ServiceManager {
     private Boolean closeWindowDueToeSpeed = false;
     private Boolean closeSunroofDueToeSpeed = false;
     private Boolean closeDueToRain = false;
+    private Boolean lowBatteryAlerted = false;
+    private Boolean coolantAlerted = false;
+    private Boolean autoSeatHeatingActive = false;
+    private Boolean autoMassageActive = false;
     private HandlerThread handlerThread;
     private Handler backgroundHandler;
     private IListener.Stub listener;
@@ -952,6 +960,12 @@ public class ServiceManager {
         }
     }
 
+    public void setAmbientLightColor(int colorValue) {
+        updateData(CarConstants.CAR_LIGHT_SETTING_AMBIENT_LIGHT_MULTICOLOR_COLOR_CONFIG.getValue(),
+                String.valueOf(colorValue));
+        Log.w(TAG, "Ambient light color set to: " + colorValue);
+    }
+
     public Map<String, String> getAllCurrentCachedData() {
         return new HashMap<>(dataCache);
     }
@@ -1085,6 +1099,29 @@ public class ServiceManager {
                         if (!isMaxAcActive)
                             enableMaxAcOn();
                     }
+                    // Feature 2: Auto seat heating on cold start
+                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_SEAT_HEATING.getKey(), false)) {
+                        try {
+                            float insideTemp = Float
+                                    .parseFloat(getUpdatedData(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue()));
+                            float seatHeatThreshold = sharedPreferences
+                                    .getFloat(SharedPreferencesKeys.AUTO_SEAT_HEATING_THRESHOLD.getKey(), 15f);
+                            if (insideTemp < seatHeatThreshold) {
+                                updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_HEATING_LEVEL.getValue(), "3");
+                                autoSeatHeatingActive = true;
+                                Log.w(TAG, "Auto seat heating activated, inside temp: " + insideTemp);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error checking temp for auto seat heating", e);
+                        }
+                    }
+                    // Feature 3: Auto fragrance on start
+                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_FRAGRANCE.getKey(), false)) {
+                        updateData(CarConstants.CAR_BASIC_FRAGRANCE_STATUS.getValue(), "1");
+                        Log.w(TAG, "Auto fragrance activated on vehicle start");
+                    }
+                    // Reset massage flag on new drive
+                    autoMassageActive = false;
                 }
             } else if (key.equals(CarConstants.CAR_HVAC_POWER_MODE.getValue()) && value.equals("1") && sharedPreferences
                     .getBoolean(SharedPreferencesKeys.ENABLE_SEAT_VENTILATION_ON_AC_ON.getKey(), false)) {
@@ -1106,6 +1143,94 @@ public class ServiceManager {
                     } else {
                         closeDueToRain = false;
                     }
+                }
+            }
+            // Feature 1: Low battery voltage alert
+            if (key.equals(CarConstants.CAR_BASIC_BATTERY_VOLTAGE.getValue())) {
+                if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_LOW_BATTERY_ALERT.getKey(), false)) {
+                    try {
+                        float voltage = Float.parseFloat(value);
+                        float threshold = sharedPreferences
+                                .getFloat(SharedPreferencesKeys.LOW_BATTERY_THRESHOLD.getKey(), 11.8f);
+                        if (voltage < threshold && !lowBatteryAlerted) {
+                            lowBatteryAlerted = true;
+                            Log.w(TAG, "LOW BATTERY ALERT: " + voltage + "V (threshold: " + threshold + "V)");
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                android.widget.Toast.makeText(App.getContext(),
+                                        "⚠️ Bateria 12V baixa: " + voltage + "V", android.widget.Toast.LENGTH_LONG)
+                                        .show();
+                            });
+                        } else if (voltage >= threshold) {
+                            lowBatteryAlerted = false;
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing battery voltage", e);
+                    }
+                }
+            }
+            // Feature 4: Coolant temperature alert
+            if (key.equals(CarConstants.CAR_BASIC_COOLANT_TEMP.getValue())) {
+                if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_COOLANT_TEMP_ALERT.getKey(), false)) {
+                    try {
+                        float coolantTemp = Float.parseFloat(value);
+                        float coolantThreshold = sharedPreferences
+                                .getFloat(SharedPreferencesKeys.COOLANT_TEMP_THRESHOLD.getKey(), 105f);
+                        if (coolantTemp > coolantThreshold && !coolantAlerted) {
+                            coolantAlerted = true;
+                            Log.w(TAG, "COOLANT TEMP ALERT: " + coolantTemp + "°C (threshold: " + coolantThreshold
+                                    + "°C)");
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                android.widget.Toast.makeText(App.getContext(),
+                                        "🌡️ Temperatura do arrefecimento alta: " + coolantTemp + "°C",
+                                        android.widget.Toast.LENGTH_LONG).show();
+                            });
+                        } else if (coolantTemp <= coolantThreshold) {
+                            coolantAlerted = false;
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing coolant temp", e);
+                    }
+                }
+            }
+            // Feature 5: Auto massage on long drives
+            if (key.equals(CarConstants.CAR_BASIC_ACCUMULATED_DIRVETIME.getValue())) {
+                if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_MASSAGE.getKey(), false)
+                        && !autoMassageActive) {
+                    try {
+                        float driveTimeMinutes = Float.parseFloat(value);
+                        int massageThreshold = sharedPreferences
+                                .getInt(SharedPreferencesKeys.AUTO_MASSAGE_MINUTES.getKey(), 60);
+                        if (driveTimeMinutes >= massageThreshold) {
+                            updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_MESSAGE_ENABLE.getValue(), "1");
+                            updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_MESSAGE_LEVEL.getValue(), "2");
+                            autoMassageActive = true;
+                            Log.w(TAG, "Auto massage activated after " + driveTimeMinutes + " minutes of driving");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing drive time for massage", e);
+                    }
+                }
+            }
+            // Feature 6: Disable seat belt warning
+            if (key.equals(CarConstants.CAR_BASIC_SEAT_BELT_WARNING.getValue()) && value.equals("1")) {
+                if (sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_SEAT_BELT_WARNING.getKey(), false)) {
+                    updateData(CarConstants.CAR_COMFORT_SETTING_REDUCE_SEAT_BELT_SLACK.getValue(), "0");
+                    Log.w(TAG, "Seat belt warning suppressed by user preference");
+                }
+            }
+            // Feature 2 continued: Turn off seat heating when temp rises
+            if (key.equals(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue()) && autoSeatHeatingActive) {
+                try {
+                    float insideTemp = Float.parseFloat(value);
+                    float seatHeatThreshold = sharedPreferences
+                            .getFloat(SharedPreferencesKeys.AUTO_SEAT_HEATING_THRESHOLD.getKey(), 15f);
+                    if (insideTemp >= seatHeatThreshold + 3) {
+                        updateData(CarConstants.CAR_COMFORT_SETTING_DRIVER_SEAT_HEATING_LEVEL.getValue(), "0");
+                        autoSeatHeatingActive = false;
+                        Log.w(TAG, "Auto seat heating deactivated, inside temp: " + insideTemp);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error checking temp for seat heating off", e);
                 }
             }
         } catch (Exception e) {

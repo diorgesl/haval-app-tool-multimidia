@@ -54,5 +54,16 @@ enum class SharedPreferencesKeys(val key: String, val description: String) {
     MAX_AC_ON_UNLOCK_THRESHOLD("maxAcOnUnlockThreshold", "Temperatura limite para ativar Max AC ao destravar"),
     MAX_AC_TARGET_TEMP("maxAcTargetTemp", "Temperatura alvo para o Max AC"),
     MAX_AC_TIMEOUT("maxAcTimeout", "Tempo limite para desativar o Max AC (em minutos)"),
-    CLOSE_WINDOW_ON_RAIN("closeWindowOnRain", "Fechar vidros e teto solar ao detectar chuva")
+    CLOSE_WINDOW_ON_RAIN("closeWindowOnRain", "Fechar vidros e teto solar ao detectar chuva"),
+    ENABLE_LOW_BATTERY_ALERT("enableLowBatteryAlert", "Alerta de bateria 12V baixa"),
+    LOW_BATTERY_THRESHOLD("lowBatteryThreshold", "Limite de voltagem para alerta de bateria baixa"),
+    ENABLE_AUTO_SEAT_HEATING("enableAutoSeatHeating", "Aquecimento automático do banco no frio"),
+    AUTO_SEAT_HEATING_THRESHOLD("autoSeatHeatingThreshold", "Temperatura limite para aquecimento do banco"),
+    ENABLE_AUTO_FRAGRANCE("enableAutoFragrance", "Ativar fragrância automaticamente ao ligar"),
+    ENABLE_COOLANT_TEMP_ALERT("enableCoolantTempAlert", "Alerta de temperatura do arrefecimento"),
+    COOLANT_TEMP_THRESHOLD("coolantTempThreshold", "Limite de temperatura do arrefecimento"),
+    ENABLE_AUTO_MASSAGE("enableAutoMassage", "Massagem automática em viagens longas"),
+    AUTO_MASSAGE_MINUTES("autoMassageMinutes", "Tempo de direção para ativar massagem (minutos)"),
+    DISABLE_SEAT_BELT_WARNING("disableSeatBeltWarning", "Desativar alerta de cinto de segurança"),
+    AMBIENT_LIGHT_CUSTOM_COLOR("ambientLightCustomColor", "Cor personalizada da luz ambiente")
 }
