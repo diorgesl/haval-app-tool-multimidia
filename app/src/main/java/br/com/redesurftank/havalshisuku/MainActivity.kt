@@ -1656,7 +1656,7 @@ fun InstallAppsTab() {
     LaunchedEffect(Unit) {
         scope.launch(Dispatchers.IO) {
             try {
-                val url = URL("https://raw.githubusercontent.com/bobaoapae/haval-impulse-static-files/refs/heads/main/apps.json?rnd=${System.currentTimeMillis()}")
+                val url = URL("https://raw.githubusercontent.com/diorgesl/haval-impulse-static-files/refs/heads/main/apps.json?rnd=${System.currentTimeMillis()}")
                 val conn = url.openConnection() as HttpURLConnection
                 if (conn.responseCode == 200) {
                     val reader = BufferedReader(InputStreamReader(conn.inputStream))
