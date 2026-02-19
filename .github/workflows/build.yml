@@ -16,6 +16,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: Haval
     steps:
       - uses: actions/checkout@v4
         with:
