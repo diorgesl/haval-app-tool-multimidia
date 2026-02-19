@@ -2169,9 +2169,9 @@ fun InformacoesTab() {
         return withContext(Dispatchers.IO) {
             try {
                 val endpoint = if (isPreview)
-                    "https://api.github.com/repos/rafaeldl/haval-app-tool-multimidia/releases"
+                    "https://api.github.com/repos/diorgesl/haval-app-tool-multimidia/releases"
                 else
-                    "https://api.github.com/repos/rafaeldl/haval-app-tool-multimidia/releases/latest"
+                    "https://api.github.com/repos/diorgesl/haval-app-tool-multimidia/releases/latest"
 
                 val url = URL(endpoint)
                 val conn = url.openConnection() as HttpURLConnection
