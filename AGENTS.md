@@ -36,6 +36,11 @@ The Android app controls the dashboard via a specific global API exposed in `src
 
 ## Data Flow & Integration Guide
 
+See detailed guides:
+- [Checklist: Add Constant](file:///Users/diorgera/Projetos/haval/haval-app-tool-multimidia/docs/ai/checklist_add_constant.md)
+- [Checklist: Add Graph](file:///Users/diorgera/Projetos/haval/haval-app-tool-multimidia/docs/ai/checklist_add_graph.md)
+- [Reference: Bridge Conventions](file:///Users/diorgera/Projetos/haval/haval-app-tool-multimidia/docs/ai/bridge_conventions.md)
+
 ### 1. Source (Vehicle -> Android)
 *   **`ServiceManager.java`**: Connects to the vehicle's `IntelligentVehicleControlService`.
 *   **`CarConstants.java`**: Defines the mapping between internal string keys (e.g., `"car.basic.vehicle_speed"`) and the vehicle properties.

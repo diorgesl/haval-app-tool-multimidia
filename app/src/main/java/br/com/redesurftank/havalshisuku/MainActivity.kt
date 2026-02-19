@@ -313,6 +313,7 @@ fun BasicSettingsTab() {
     var closeSunroofOnPowerOff by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.CLOSE_SUNROOF_ON_POWER_OFF.key, false)) }
     var closeSunroofOnFoldMirror by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.CLOSE_SUNROOF_ON_FOLD_MIRROR.key, false)) }
     var closeSunroofSunShadeOnCloseSunroof by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.CLOSE_SUNROOF_SUN_SHADE_ON_CLOSE_SUNROOF.key, false)) }
+    var closeWindowOnRain by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.CLOSE_WINDOW_ON_RAIN.key, false)) }
     var enableCustomMenu by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_CUSTOM_MENU.key, false)) }
     var setStartupVolume by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.SET_STARTUP_VOLUME.key, false)) }
     var volume by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.STARTUP_VOLUME.key, 1)) }
@@ -399,6 +400,15 @@ fun BasicSettingsTab() {
                 onCheckedChange = {
                     closeSunroofSunShadeOnCloseSunroof = it
                     prefs.edit { putBoolean(SharedPreferencesKeys.CLOSE_SUNROOF_SUN_SHADE_ON_CLOSE_SUNROOF.key, it) }
+                }
+            ),
+            SettingItem(
+                title = "Fechar vidros ao detectar chuva",
+                description = "Fecha automaticamente as janelas e o teto solar quando os limpadores de para-brisa são ativados",
+                checked = closeWindowOnRain,
+                onCheckedChange = {
+                    closeWindowOnRain = it
+                    prefs.edit { putBoolean(SharedPreferencesKeys.CLOSE_WINDOW_ON_RAIN.key, it) }
                 }
             ),
             SettingItem(
@@ -2249,64 +2259,6 @@ fun InformacoesTab() {
                         Text("Abrir Configurações do Android", color = Color.White)
                     }
                 }
-            }
-        }
-
-        // Seção de Contribuição
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF13151A)
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "Contribua para o Desenvolvimento",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-
-                HorizontalDivider(color = Color(0xFF1D2430))
-
-                Text(
-                    "Ajude a manter este projeto ativo! Sua contribuição é muito importante para o desenvolvimento contínuo do app.",
-                    fontSize = 14.sp,
-                    color = Color(0xFFB0B8C4),
-                    textAlign = TextAlign.Center,
-                    lineHeight = 20.sp
-                )
-
-                // QR Code
-                Image(
-                    painter = painterResource(id = R.drawable.qrcode),
-                    contentDescription = "QR Code para contribuição",
-                    modifier = Modifier
-                        .size(200.dp)
-                        .padding(8.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                Text(
-                    "Escaneie o QR Code ou use a chave PIX: joaovitorbor@gmail.com",
-                    fontSize = 16.sp,
-                    color = Color(0xFFB0B8C4),
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    "Obrigado pelo seu apoio! 🙏",
-                    fontSize = 14.sp,
-                    color = Color(0xFF4ADE80),
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
