@@ -66,6 +66,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -625,7 +626,7 @@ fun BasicSettingsTab() {
                                     label = { Text("Tipo de Ação") },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded1) },
                                     colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                                    modifier = Modifier.menuAnchor()
+                                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
                                 )
                                 ExposedDropdownMenu(
                                     expanded = expanded1,
@@ -677,7 +678,7 @@ fun BasicSettingsTab() {
                                     label = { Text("Tipo de Ação") },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded2) },
                                     colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                                    modifier = Modifier.menuAnchor()
+                                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
                                 )
                                 ExposedDropdownMenu(
                                     expanded = expanded2,
@@ -1472,7 +1473,7 @@ fun InstallAppsTab() {
                     val appList = mutableListOf<AppInfo>()
                     for (i in 0 until jsonArray.length()) {
                         val obj = jsonArray.getJSONObject(i)
-                        val iconUrl = obj.optString("appIcon", null)
+                        val iconUrl = if (obj.isNull("appIcon")) null else obj.getString("appIcon")
                         appList.add(
                             AppInfo(
                                 obj.getString("appName"),
