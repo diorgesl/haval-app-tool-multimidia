@@ -958,7 +958,7 @@ fun BasicSettingsTab() {
             ),
             SettingItem(
                 title = "Desativar alerta de cinto de segurança",
-                description = "Suprime o alerta sonoro de cinto de segurança",
+                description = "Tenta suprimir o alerta de cinto de segurança (pode não funcionar em todos os modelos)",
                 checked = disableSeatBeltWarning,
                 onCheckedChange = {
                     disableSeatBeltWarning = it
@@ -994,6 +994,11 @@ fun BasicSettingsTab() {
                         text = "Controle a cor das luzes ambiente do veículo",
                         fontSize = 13.sp,
                         color = Color(0xFFB0B8C4)
+                    )
+                    Text(
+                        text = "⚠️ Recurso disponível apenas em modelos com LED RGB. Alguns veículos possuem LED de cor fixa e esta configuração não terá efeito.",
+                        fontSize = 12.sp,
+                        color = Color(0xFFFFD43B)
                     )
 
                     // Color preview
