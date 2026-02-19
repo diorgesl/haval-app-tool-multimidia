@@ -104,6 +104,6 @@ jobs:
 
       - name: Upload APK to release
         run: |
-          gh release upload v${{ steps.version.outputs.new_version }} app/build/outputs/apk/release/haval.apk
+          gh release upload v${{ steps.version.outputs.new_version }} app/build/outputs/apk/release/app-release.apk
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
