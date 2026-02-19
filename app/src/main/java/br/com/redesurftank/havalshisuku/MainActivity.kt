@@ -968,103 +968,108 @@ fun BasicSettingsTab() {
         )
     )
 
-    // Feature 7: Ambient light RGB color picker section
-    Spacer(modifier = Modifier.height(16.dp))
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2228)),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "🌈 Cor da Luz Ambiente",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Text(
-                text = "Controle a cor das luzes ambiente do veículo",
-                fontSize = 13.sp,
-                color = Color(0xFFB0B8C4)
-            )
-
-            // Color preview
-            Box(
+    TwoColumnSettingsLayout(
+        settingsList = settingsList,
+        bottomContent = {
+            // Feature 7: Ambient light RGB color picker section
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .background(
-                        Color(ambientRed.toInt() / 255f, ambientGreen.toInt() / 255f, ambientBlue.toInt() / 255f),
-                        RoundedCornerShape(8.dp)
-                    )
-            )
-
-            // Red slider
-            Column {
-                Text("Vermelho: ${ambientRed.toInt()}", color = Color(0xFFFF6B6B), fontSize = 14.sp)
-                Slider(
-                    value = ambientRed,
-                    onValueChange = { ambientRed = it },
-                    valueRange = 0f..255f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color(0xFFFF6B6B),
-                        activeTrackColor = Color(0xFFFF6B6B),
-                        inactiveTrackColor = Color(0xFF2C3139)
-                    )
-                )
-            }
-
-            // Green slider
-            Column {
-                Text("Verde: ${ambientGreen.toInt()}", color = Color(0xFF51CF66), fontSize = 14.sp)
-                Slider(
-                    value = ambientGreen,
-                    onValueChange = { ambientGreen = it },
-                    valueRange = 0f..255f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color(0xFF51CF66),
-                        activeTrackColor = Color(0xFF51CF66),
-                        inactiveTrackColor = Color(0xFF2C3139)
-                    )
-                )
-            }
-
-            // Blue slider
-            Column {
-                Text("Azul: ${ambientBlue.toInt()}", color = Color(0xFF339AF0), fontSize = 14.sp)
-                Slider(
-                    value = ambientBlue,
-                    onValueChange = { ambientBlue = it },
-                    valueRange = 0f..255f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color(0xFF339AF0),
-                        activeTrackColor = Color(0xFF339AF0),
-                        inactiveTrackColor = Color(0xFF2C3139)
-                    )
-                )
-            }
-
-            // Apply button
-            Button(
-                onClick = {
-                    val colorValue = (ambientRed.toInt() shl 16) or (ambientGreen.toInt() shl 8) or ambientBlue.toInt()
-                    ambientLightColor = colorValue
-                    prefs.edit { putInt(SharedPreferencesKeys.AMBIENT_LIGHT_CUSTOM_COLOR.key, colorValue) }
-                    ServiceManager.getInstance().setAmbientLightColor(colorValue)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = AppColors.Primary),
-                shape = RoundedCornerShape(8.dp)
+                    .padding(horizontal = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2228)),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Aplicar Cor", color = Color.White, fontWeight = FontWeight.Bold)
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "🌈 Cor da Luz Ambiente",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Controle a cor das luzes ambiente do veículo",
+                        fontSize = 13.sp,
+                        color = Color(0xFFB0B8C4)
+                    )
+
+                    // Color preview
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .background(
+                                Color(ambientRed.toInt() / 255f, ambientGreen.toInt() / 255f, ambientBlue.toInt() / 255f),
+                                RoundedCornerShape(8.dp)
+                            )
+                    )
+
+                    // Red slider
+                    Column {
+                        Text("Vermelho: ${ambientRed.toInt()}", color = Color(0xFFFF6B6B), fontSize = 14.sp)
+                        Slider(
+                            value = ambientRed,
+                            onValueChange = { ambientRed = it },
+                            valueRange = 0f..255f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = Color(0xFFFF6B6B),
+                                activeTrackColor = Color(0xFFFF6B6B),
+                                inactiveTrackColor = Color(0xFF2C3139)
+                            )
+                        )
+                    }
+
+                    // Green slider
+                    Column {
+                        Text("Verde: ${ambientGreen.toInt()}", color = Color(0xFF51CF66), fontSize = 14.sp)
+                        Slider(
+                            value = ambientGreen,
+                            onValueChange = { ambientGreen = it },
+                            valueRange = 0f..255f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = Color(0xFF51CF66),
+                                activeTrackColor = Color(0xFF51CF66),
+                                inactiveTrackColor = Color(0xFF2C3139)
+                            )
+                        )
+                    }
+
+                    // Blue slider
+                    Column {
+                        Text("Azul: ${ambientBlue.toInt()}", color = Color(0xFF339AF0), fontSize = 14.sp)
+                        Slider(
+                            value = ambientBlue,
+                            onValueChange = { ambientBlue = it },
+                            valueRange = 0f..255f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = Color(0xFF339AF0),
+                                activeTrackColor = Color(0xFF339AF0),
+                                inactiveTrackColor = Color(0xFF2C3139)
+                            )
+                        )
+                    }
+
+                    // Apply button
+                    Button(
+                        onClick = {
+                            val colorValue = (ambientRed.toInt() shl 16) or (ambientGreen.toInt() shl 8) or ambientBlue.toInt()
+                            ambientLightColor = colorValue
+                            prefs.edit { putInt(SharedPreferencesKeys.AMBIENT_LIGHT_CUSTOM_COLOR.key, colorValue) }
+                            ServiceManager.getInstance().setAmbientLightColor(colorValue)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = AppColors.Primary),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Aplicar Cor", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
-    }
-
-    TwoColumnSettingsLayout(settingsList = settingsList)
+    )
 
     if (showStartPicker) {
         LaunchedEffect(Unit) {
