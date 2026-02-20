@@ -92,6 +92,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -192,8 +193,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .width(AppDimensions.MenuWidth)
                 .fillMaxHeight(),
-            color = Color(0xFF13151A),
-            shadowElevation = 4.dp
+            color = Color(0xFF0C0E14),
+            shadowElevation = 8.dp
         ) {
             Column(
                 modifier = Modifier
@@ -203,7 +204,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     val animatedWidth by animateFloatAsState(
                         targetValue = if (selectedItem == index) 1f else 0f,
                         animationSpec = tween(
-                            durationMillis = 200,
+                            durationMillis = 250,
                             easing = FastOutSlowInEasing
                         ),
                         label = "backgroundWidth"
@@ -211,10 +212,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
                     val borderAlpha by animateFloatAsState(
                         targetValue = if (selectedItem == index) 1f else 0f,
-                        animationSpec = tween(
-                            durationMillis = 0,
-                            delayMillis = 0
-                        ),
+                        animationSpec = tween(durationMillis = 200),
                         label = "borderAlpha"
                     )
 
@@ -225,7 +223,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             .clickable { selectedItem = index },
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        // Animated background
+                        // Animated background with deeper gradient
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(animatedWidth)
@@ -233,17 +231,18 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                 .background(
                                     Brush.horizontalGradient(
                                         colors = listOf(
-                                            Color(0xFF152031),
-                                            Color(0xFF13151A)
+                                            Color(0xFF121830),
+                                            Color(0xFF0C0E14)
                                         )
                                     )
                                 )
                                 .drawBehind {
-                                    drawLine(
-                                        color = Color(0xFF0B84FF).copy(alpha = borderAlpha),
-                                        start = Offset(0f, 0f),
-                                        end = Offset(0f, size.height),
-                                        strokeWidth = 10.dp.toPx()
+                                    // Left accent bar
+                                    drawRoundRect(
+                                        color = Color(0xFF3B82F6).copy(alpha = borderAlpha),
+                                        topLeft = Offset(0f, size.height * 0.15f),
+                                        size = androidx.compose.ui.geometry.Size(4.dp.toPx(), size.height * 0.7f),
+                                        cornerRadius = CornerRadius(2.dp.toPx())
                                     )
                                 }
                         )
@@ -262,10 +261,21 @@ fun MainScreen(modifier: Modifier = Modifier) {
                             Text(
                                 item.title,
                                 color = if (selectedItem == index) AppColors.TextPrimary else AppColors.MenuUnselectedText,
-                                fontSize = 20.sp,
-                                fontWeight = if (selectedItem == index) FontWeight.Medium else FontWeight.Normal
+                                fontSize = 18.sp,
+                                fontWeight = if (selectedItem == index) FontWeight.SemiBold else FontWeight.Normal,
+                                letterSpacing = 0.3.sp
                             )
                         }
+                    }
+                    // Subtle divider between items
+                    if (index < menuItems.size - 1) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .padding(horizontal = 20.dp)
+                                .background(AppColors.DividerColor)
+                        )
                     }
                 }
             }

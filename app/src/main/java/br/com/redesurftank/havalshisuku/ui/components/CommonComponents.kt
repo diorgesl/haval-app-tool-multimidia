@@ -1,5 +1,8 @@
 package br.com.redesurftank.havalshisuku.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,9 +12,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,37 +44,44 @@ data class SettingItem(
     val customContent: (@Composable () -> Unit)? = null
 )
 
-// Cores do tema
+// Cores do tema — modernizado
 object AppColors {
-    val Background = Color(0xFF0A0A0A)
-    val CardBackground = Color(0xFF13151A)
-    val BorderColor = Color(0xFF1D2430)
+    val Background = Color(0xFF0A0C10)
+    val CardBackground = Color(0xFF12161E)
+    val CardBackgroundActive = Color(0xFF141C2A)
+    val BorderColor = Color(0xFF1E2740)
+    val BorderActiveColor = Color(0xFF2563EB)
+    val GlowBlue = Color(0xFF3B82F6)
     val Primary = Color(0xFF4A9EFF)
+    val PrimaryDim = Color(0xFF2563EB)
     val TextPrimary = Color.White
-    val TextSecondary = Color(0xFFB0B8C4)
-    val TextDisabled = Color(0xFF808080)
-    val SurfaceVariant = Color(0xFF2A2F37)
-    val ButtonSecondary = Color(0xFF3A3F47)
+    val TextSecondary = Color(0xFF8896B0)
+    val TextDisabled = Color(0xFF505868)
+    val SurfaceVariant = Color(0xFF1C2232)
+    val ButtonSecondary = Color(0xFF2A3142)
     val MenuSelectedIcon = Color(0xFF4A9EFF)
-    val MenuUnselectedIcon = Color(0xFF8A93A6)
-    val MenuUnselectedText = Color(0xFFB0B8C4)
+    val MenuUnselectedIcon = Color(0xFF626E84)
+    val MenuUnselectedText = Color(0xFF8896B0)
+    val SwitchActive = Color(0xFF3B82F6)
+    val SwitchInactive = Color(0xFF2A3142)
+    val DividerColor = Color(0xFF1A1E28)
 }
 
 // Dimensões padrão
 object AppDimensions {
-    val CardPadding = 20.dp
-    val CardSpacing = 8.dp
+    val CardPadding = 18.dp
+    val CardSpacing = 6.dp
     val BorderWidth = 1.dp
-    val CardCornerRadius = 12.dp
-    val BorderCornerRadius = 8.dp
-    val ButtonCornerRadius = 8.dp
-    val IconSize = 26.dp
-    val MenuWidth = 280.dp
-    val MenuItemHeight = 90.dp
+    val CardCornerRadius = 14.dp
+    val BorderCornerRadius = 14.dp
+    val ButtonCornerRadius = 10.dp
+    val IconSize = 24.dp
+    val MenuWidth = 270.dp
+    val MenuItemHeight = 80.dp
     val ContentPadding = 16.dp
 }
 
-// Componente de Card reutilizável
+// Componente de Card reutilizável — modernizado com glow e gradientes
 @Composable
 fun SettingCard(
     title: String,
@@ -81,25 +98,66 @@ fun SettingCard(
     hideSwitch: Boolean = false,
     customContent: (@Composable () -> Unit)? = null
 ) {
+    val animatedBg by animateColorAsState(
+        targetValue = if (checked && enabled) AppColors.CardBackgroundActive else AppColors.CardBackground,
+        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        label = "cardBg"
+    )
+
+    val animatedBorder by animateColorAsState(
+        targetValue = if (checked && enabled) AppColors.BorderActiveColor.copy(alpha = 0.5f) else AppColors.BorderColor,
+        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        label = "cardBorder"
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .then(
-                if (checked && sliderValue != null) Modifier else Modifier.heightIn(min = 110.dp)
+                if (checked && sliderValue != null) Modifier else Modifier.heightIn(min = 100.dp)
             )
             .padding(vertical = AppDimensions.CardSpacing, horizontal = AppDimensions.CardSpacing)
+            .then(
+                if (checked && enabled) {
+                    Modifier.shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(AppDimensions.CardCornerRadius),
+                        ambientColor = AppColors.GlowBlue.copy(alpha = 0.15f),
+                        spotColor = AppColors.GlowBlue.copy(alpha = 0.2f)
+                    )
+                } else Modifier
+            )
             .border(
                 width = AppDimensions.BorderWidth,
-                color = AppColors.BorderColor,
+                color = animatedBorder,
                 shape = RoundedCornerShape(AppDimensions.BorderCornerRadius)
             )
             .clickable(enabled = enabled && sliderValue == null) { onCheckedChange(!checked) },
         colors = CardDefaults.cardColors(
-            containerColor = AppColors.CardBackground
+            containerColor = animatedBg
         ),
         shape = RoundedCornerShape(AppDimensions.CardCornerRadius),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
+        // Subtle top gradient line when active
+        if (checked && enabled) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                AppColors.GlowBlue.copy(alpha = 0.6f),
+                                AppColors.Primary.copy(alpha = 0.4f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -108,54 +166,67 @@ fun SettingCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (enabled) AppColors.TextPrimary else AppColors.TextDisabled,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (enabled) {
+                        if (checked) AppColors.TextPrimary else AppColors.TextSecondary
+                    } else AppColors.TextDisabled,
                     modifier = Modifier.weight(1f).padding(end = 12.dp),
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    letterSpacing = 0.3.sp
                 )
                 if (!hideSwitch) {
                     Switch(
                         checked = checked,
                         onCheckedChange = if (sliderValue == null) null else onCheckedChange,
                         enabled = enabled,
-                        modifier = Modifier.scale(0.9f),
+                        modifier = Modifier.scale(0.8f),
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = AppColors.TextPrimary,
-                            checkedTrackColor = AppColors.Primary,
-                            uncheckedThumbColor = AppColors.TextSecondary,
-                            uncheckedTrackColor = AppColors.ButtonSecondary,
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = AppColors.SwitchActive,
+                            uncheckedThumbColor = Color(0xFF626E84),
+                            uncheckedTrackColor = AppColors.SwitchInactive,
                             uncheckedBorderColor = Color.Transparent,
                             checkedBorderColor = Color.Transparent
                         )
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = description,
                 fontSize = 12.sp,
-                color = if (enabled) AppColors.TextSecondary else Color(0xFF606060),
-                lineHeight = 14.sp,
+                color = if (enabled) AppColors.TextSecondary.copy(alpha = 0.7f) else Color(0xFF404858),
+                lineHeight = 16.sp,
                 maxLines = 3,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                letterSpacing = 0.2.sp
             )
-            
+
             // Mostrar slider se a opção estiver ativada e tiver valores de slider
             if (checked && sliderValue != null && sliderRange != null && onSliderChange != null) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+                // Divider line
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(AppColors.BorderColor.copy(alpha = 0.5f))
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 Column {
                     if (sliderLabel != null) {
                         Text(
                             text = sliderLabel,
-                            fontSize = 14.sp,
-                            color = AppColors.TextPrimary,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            fontSize = 13.sp,
+                            color = AppColors.Primary,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 6.dp)
                         )
                     }
                     val stepSize = sliderStep ?: if (title.contains("volume", ignoreCase = true)) 1 else 5
@@ -166,7 +237,7 @@ fun SettingCard(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(40.dp),
+                            .height(36.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Slider(
@@ -179,23 +250,30 @@ fun SettingCard(
                             steps = steps,
                             modifier = Modifier.fillMaxWidth(),
                             colors = SliderDefaults.colors(
-                                thumbColor = AppColors.Primary,
-                                activeTrackColor = AppColors.Primary,
-                                inactiveTrackColor = Color(0xFF2C3139),
+                                thumbColor = Color.White,
+                                activeTrackColor = AppColors.GlowBlue,
+                                inactiveTrackColor = Color(0xFF1E2740),
                                 activeTickColor = Color.Transparent,
                                 inactiveTickColor = Color.Transparent,
                                 disabledThumbColor = AppColors.Primary,
                                 disabledActiveTrackColor = AppColors.Primary,
-                                disabledInactiveTrackColor = Color(0xFF2C3139)
+                                disabledInactiveTrackColor = Color(0xFF1E2740)
                             )
                         )
                     }
                 }
             }
-            
+
             // Mostrar conteúdo customizado se estiver ativado
             if (checked && customContent != null) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(AppColors.BorderColor.copy(alpha = 0.5f))
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 customContent()
             }
         }
@@ -213,14 +291,12 @@ fun TwoColumnSettingsLayout(
     val midPoint = (settingsList.size + 1) / 2
     val leftColumnItems = settingsList.take(midPoint)
     val rightColumnItems = settingsList.drop(midPoint)
-    
-    // Usa um scroll único com colunas que permitem alturas independentes
+
     Box(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         val scrollState = rememberScrollState()
-        
+
         if (bottomContent != null) {
             Column(
                 modifier = Modifier
@@ -230,11 +306,8 @@ fun TwoColumnSettingsLayout(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    // Coluna esquerda
                     Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                         verticalArrangement = Arrangement.Top
                     ) {
                         leftColumnItems.forEach { setting ->
@@ -253,12 +326,9 @@ fun TwoColumnSettingsLayout(
                             )
                         }
                     }
-                    
-                    // Coluna direita
+
                     Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                         verticalArrangement = Arrangement.Top
                     ) {
                         rightColumnItems.forEach { setting ->
@@ -278,7 +348,7 @@ fun TwoColumnSettingsLayout(
                         }
                     }
                 }
-                
+
                 bottomContent()
             }
         } else {
@@ -288,11 +358,8 @@ fun TwoColumnSettingsLayout(
                     .verticalScroll(scrollState),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Coluna esquerda
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
                     verticalArrangement = Arrangement.Top
                 ) {
                     leftColumnItems.forEach { setting ->
@@ -311,12 +378,9 @@ fun TwoColumnSettingsLayout(
                         )
                     }
                 }
-                
-                // Coluna direita
+
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
                     verticalArrangement = Arrangement.Top
                 ) {
                     rightColumnItems.forEach { setting ->
@@ -340,7 +404,7 @@ fun TwoColumnSettingsLayout(
     }
 }
 
-// Card estilizado padrão
+// Card estilizado padrão — com glassmorphism
 @Composable
 fun StyledCard(
     modifier: Modifier = Modifier,
@@ -352,16 +416,38 @@ fun StyledCard(
             .padding(vertical = AppDimensions.CardSpacing, horizontal = AppDimensions.CardSpacing)
             .border(
                 width = AppDimensions.BorderWidth,
-                color = AppColors.BorderColor,
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        AppColors.BorderActiveColor.copy(alpha = 0.4f),
+                        AppColors.BorderColor,
+                        AppColors.BorderActiveColor.copy(alpha = 0.2f)
+                    )
+                ),
                 shape = RoundedCornerShape(AppDimensions.BorderCornerRadius)
             ),
         colors = CardDefaults.cardColors(
-            containerColor = AppColors.CardBackground
+            containerColor = AppColors.CardBackgroundActive
         ),
         shape = RoundedCornerShape(AppDimensions.CardCornerRadius),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        content = content
-    )
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        // Top accent line
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            AppColors.GlowBlue.copy(alpha = 0.3f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        content()
+    }
 }
 
 // Botão primário estilizado
@@ -377,11 +463,11 @@ fun PrimaryButton(
         modifier = modifier,
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = AppColors.Primary
+            containerColor = AppColors.PrimaryDim
         ),
         shape = RoundedCornerShape(AppDimensions.ButtonCornerRadius)
     ) {
-        Text(text, color = AppColors.TextPrimary)
+        Text(text, color = AppColors.TextPrimary, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -402,7 +488,7 @@ fun SecondaryButton(
         ),
         shape = RoundedCornerShape(AppDimensions.ButtonCornerRadius)
     ) {
-        Text(text, color = AppColors.TextPrimary)
+        Text(text, color = AppColors.TextSecondary)
     }
 }
 
@@ -428,7 +514,7 @@ fun StyledTextField(
             unfocusedContainerColor = AppColors.SurfaceVariant,
             focusedTextColor = AppColors.TextPrimary,
             unfocusedTextColor = AppColors.TextSecondary,
-            focusedIndicatorColor = AppColors.Primary,
+            focusedIndicatorColor = AppColors.GlowBlue,
             unfocusedIndicatorColor = AppColors.ButtonSecondary,
             focusedLabelColor = AppColors.Primary,
             unfocusedLabelColor = AppColors.TextSecondary
