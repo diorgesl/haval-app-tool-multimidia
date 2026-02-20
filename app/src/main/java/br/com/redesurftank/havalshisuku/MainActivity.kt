@@ -1241,8 +1241,8 @@ fun TelasTab() {
     var enableTemperature by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TEMPERATURE.key, false)) }
     var enableTripOdometer by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TRIP_ODOMETER.key, false)) }
     var revisionMode by remember { mutableStateOf(prefs.getString(SharedPreferencesKeys.INSTRUMENT_REVISION_MODE.key, "auto") ?: "auto") }
-    var revisionInterval by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 0)) }
-    var nextKmText by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, 0).toString()) }
+    var revisionInterval by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 12000)) }
+    var nextKmText by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_COUNT.key, 0).toString()) }
     var nextDateMillis by remember { mutableLongStateOf(prefs.getLong(SharedPreferencesKeys.INSTRUMENT_REVISION_NEXT_DATE.key, 0L)) }
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -1402,14 +1402,22 @@ fun TelasTab() {
                                 )
                                 val totalOdo = ServiceManager.getInstance().totalOdometer
                                 val interval = if (revisionInterval > 0) revisionInterval else 0
-                                val serviceNum = totalOdo / interval
-                                val nextKm = (serviceNum + 1) * interval
-                                val remaining = nextKm - totalOdo
-                                Text(
-                                    "Revisão #${serviceNum + 1} • Restam $remaining km",
-                                    color = Color(0xFFB0B8C4),
-                                    fontSize = 14.sp
-                                )
+                                if (interval > 0) {
+                                    val serviceNum = totalOdo / interval
+                                    val nextKm = (serviceNum + 1) * interval
+                                    val remaining = nextKm - totalOdo
+                                    Text(
+                                        "Revisão #${serviceNum + 1} • Restam $remaining km",
+                                        color = Color(0xFFB0B8C4),
+                                        fontSize = 14.sp
+                                    )
+                                } else {
+                                    Text(
+                                        "Defina o intervalo no slider acima",
+                                        color = Color(0xFFFF9800),
+                                        fontSize = 14.sp
+                                    )
+                                }
                             }
                         } else {
                             // Manual mode: ask how many services done
@@ -1433,7 +1441,10 @@ fun TelasTab() {
                                             val count = (nextKmText.toIntOrNull() ?: 0) - 1
                                             if (count >= 0) {
                                                 nextKmText = count.toString()
-                                                prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, (count + 1) * interval) }
+                                                prefs.edit {
+                                                    putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_COUNT.key, count)
+                                                    putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, (count + 1) * interval)
+                                                }
                                             }
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2F37)),
@@ -1453,7 +1464,10 @@ fun TelasTab() {
                                         onClick = {
                                             val count = (nextKmText.toIntOrNull() ?: 0) + 1
                                             nextKmText = count.toString()
-                                            prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, (count + 1) * interval) }
+                                            prefs.edit {
+                                                putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_COUNT.key, count)
+                                                putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, (count + 1) * interval)
+                                            }
                                         },
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2F37)),
                                         modifier = Modifier.size(48.dp)
@@ -1462,11 +1476,19 @@ fun TelasTab() {
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    "Próxima revisão: ${nextServiceKm} km (restam $remaining km)",
-                                    color = Color(0xFFB0B8C4),
-                                    fontSize = 14.sp
-                                )
+                                if (interval > 0) {
+                                    Text(
+                                        "Próxima revisão: ${nextServiceKm} km (restam $remaining km)",
+                                        color = Color(0xFFB0B8C4),
+                                        fontSize = 14.sp
+                                    )
+                                } else {
+                                    Text(
+                                        "Defina o intervalo no modo automático primeiro",
+                                        color = Color(0xFFFF9800),
+                                        fontSize = 14.sp
+                                    )
+                                }
                             }
                         }
 

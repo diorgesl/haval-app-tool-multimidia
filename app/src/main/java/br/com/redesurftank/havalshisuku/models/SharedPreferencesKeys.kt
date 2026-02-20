@@ -70,5 +70,6 @@ enum class SharedPreferencesKeys(val key: String, val description: String) {
     INSTRUMENT_REVISION_MODE("instrumentRevisionMode", "Modo de aviso de revisão (auto/manual)"),
     ENABLE_INSTRUMENT_AVG_CONSUME("enableInstrumentAvgConsume", "Mostrar consumo médio no painel"),
     ENABLE_INSTRUMENT_TEMPERATURE("enableInstrumentTemperature", "Mostrar temperatura no painel"),
-    ENABLE_INSTRUMENT_TRIP_ODOMETER("enableInstrumentTripOdometer", "Mostrar odômetro da viagem no painel")
+    ENABLE_INSTRUMENT_TRIP_ODOMETER("enableInstrumentTripOdometer", "Mostrar odômetro da viagem no painel"),
+    INSTRUMENT_REVISION_COUNT("instrumentRevisionCount", "Quantidade de revisões já realizadas")
 }
