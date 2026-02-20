@@ -1560,8 +1560,8 @@ canvas.graph-chart {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-90deg);
-  width: 340px;
-  height: 340px;
+  width: 370px;
+  height: 370px;
   border-radius: 50%;
   z-index: 3;
   --battery-angle: 0deg;
@@ -1579,8 +1579,8 @@ canvas.graph-chart {
   background: conic-gradient(var(--battery-color) 0deg var(--battery-angle),
       transparent var(--battery-angle) 360deg);
   filter: drop-shadow(0 0 8px var(--battery-color));
-  -webkit-mask: radial-gradient(transparent 0, transparent calc(50% - 20px), white calc(50% - 20px), white 50%);
-  mask: radial-gradient(transparent 0, transparent calc(50% - 20px), white calc(50% - 20px), white 50%);
+  -webkit-mask: radial-gradient(transparent 0, transparent calc(50% - 14px), white calc(50% - 14px), white 50%);
+  mask: radial-gradient(transparent 0, transparent calc(50% - 14px), white calc(50% - 14px), white 50%);
 }
 
 /* Drive state indicator */
@@ -1627,10 +1627,11 @@ canvas.graph-chart {
 }
 
 .ev-battery-text {
-  z-index: 4;
+  z-index: 5;
   text-align: center;
-  margin-top: -10px;
+  margin-top: -5px;
   margin-bottom: 0;
+  position: relative;
 }
 
 .ev-battery-value {
