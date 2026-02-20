@@ -38,8 +38,6 @@ class InstrumentProjector(outerContext: Context, display: Display) : BaseProject
     private var activeInfoItems = mutableListOf<InfoItem>()
 
     // Cached car data
-    private var evRangeKm: Int = 0
-    private var fuelRangeKm: Int = 0
     private var avgFuelConsume: Float = 0f
     private var outsideTemp: Float = 0f
     private var insideTemp: Float = 0f
@@ -220,14 +218,6 @@ class InstrumentProjector(outerContext: Context, display: Display) : BaseProject
         when (key) {
             CarConstants.CAR_BASIC_TOTAL_ODOMETER.value -> {
                 currentKm = value.toIntOrNull() ?: currentKm
-            }
-            CarConstants.CAR_EV_INFO_ELECTRIC_MODE_REMAIN_ODOMETER.value -> {
-                evRangeKm = value.toIntOrNull() ?: 0
-                ensureUi { rebuildInfoItems(); updateView() }
-            }
-            CarConstants.CAR_EV_INFO_FUEL_MODE_REMAIN_ODOMETER.value -> {
-                fuelRangeKm = value.toIntOrNull() ?: 0
-                ensureUi { rebuildInfoItems(); updateView() }
             }
             CarConstants.CAR_BASIC_CUR_JOURNEY_AVG_FUEL_CONSUME.value -> {
                 avgFuelConsume = value.toFloatOrNull() ?: 0f
