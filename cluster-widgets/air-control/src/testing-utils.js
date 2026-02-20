@@ -64,6 +64,14 @@ document.addEventListener('keydown', (e) => {
                 window.showScreen('regen');
             } else if (currentState.focusedMenuItem === 'option_7') {
                 window.showScreen('graph');
+            } else if (currentState.focusedMenuItem === 'option_8') {
+                window.showScreen('vehicle');
+            } else if (currentState.focusedMenuItem === 'option_9') {
+                window.showScreen('evdash');
+            } else if (currentState.focusedMenuItem === 'option_10') {
+                window.showScreen('tpms');
+            } else if (currentState.focusedMenuItem === 'option_11') {
+                window.showScreen('maintenance');
             }
 
 
@@ -240,6 +248,38 @@ window.simulationInterval = setInterval(() => {
     setState('avgEvConsumption', Math.round(lastValue) / 2);
     setState('instantEvConsumption', Math.round(lastValue) / 3);
     setState('batteryLevel', 40 + (Math.round(lastValue) / 2));
+
+    // EV Dashboard simulation
+    setState('batteryPercent', 20 + (Math.round(lastValue) * 0.6));
+    setState('batteryVoltage', 11.5 + (Math.round(lastValue) / 80));
+
+    // Energy consumption simulation
+    const evRatio = 0.3 + (Math.random() * 0.5);
+    setState('cycleEnergyConsume', Math.round(lastValue) * evRatio);
+    setState('cycleFuelConsume', Math.round(lastValue) * (1 - evRatio));
+    setState('energyRecovery', (Math.random() * 3).toFixed(1));
+
+    // Drive state cycling based on speed
+    if (currentSpeed > 80) setState('energyDriveState', 'ice');
+    else if (currentSpeed > 30) setState('energyDriveState', 'hybrid');
+    else if (currentSpeed > 0) setState('energyDriveState', 'ev');
+    else setState('energyDriveState', 'regen');
+
+    // TPMS simulation (slight fluctuation)
+    setState('tpmsFL', 2.2 + (Math.random() * 0.3));
+    setState('tpmsFR', 2.2 + (Math.random() * 0.3));
+    setState('tpmsRL', 2.1 + (Math.random() * 0.3));
+    setState('tpmsRR', 2.1 + (Math.random() * 0.3));
+
+    // Maintenance simulation
+    const totalOdo = 15000 + Math.round(lastValue) * 100;
+    setState('totalOdometer', totalOdo);
+    setState('tripOdometer', Math.round(lastValue) * 3.2);
+    setState('maintenanceKm', 12000 - (totalOdo % 12000));
+
+    // EV/Fuel range
+    setState('evRangeKm', 20 + Math.round(lastValue * 0.4));
+    setState('fuelRangeKm', 300 + Math.round(lastValue * 2));
 
 }, SIMULATION_INTERVAL);
 

@@ -1304,3 +1304,919 @@ canvas.graph-chart {
   transition: opacity 0.3s ease-in-out;
   z-index: 10;
 }
+
+
+/* ============================================= */
+/*           VEHICLE STATUS SCREEN               */
+/* ============================================= */
+
+.vehicle-screen {
+  position: relative;
+  width: 452px;
+  height: 452px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.vehicle-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  z-index: 0;
+}
+
+.vehicle-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.vehicle-inner-ring {
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border: 3px solid #053477;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.vehicle-lock-status {
+  position: absolute;
+  top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 5;
+}
+
+.vehicle-lock-icon {
+  font-size: 24px;
+}
+
+.vehicle-lock-text {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 22px;
+  color: #4d97ff;
+  letter-spacing: 2px;
+}
+
+.vehicle-car-body {
+  position: relative;
+  width: 140px;
+  height: 220px;
+  border: 2px solid #3b82f6;
+  border-radius: 30px 30px 20px 20px;
+  background: rgba(10, 35, 69, 0.6);
+  margin-top: 10px;
+}
+
+.vehicle-door {
+  position: absolute;
+  width: 30px;
+  height: 60px;
+  border: 2px solid #2563eb;
+  background: transparent;
+  transition: all 0.4s ease;
+}
+
+.vehicle-door.door-fl {
+  top: 30px;
+  left: -32px;
+  border-radius: 8px 0 0 8px;
+  transform-origin: right center;
+}
+
+.vehicle-door.door-fr {
+  top: 30px;
+  right: -32px;
+  border-radius: 0 8px 8px 0;
+  transform-origin: left center;
+}
+
+.vehicle-door.door-rl {
+  top: 110px;
+  left: -32px;
+  border-radius: 8px 0 0 8px;
+  transform-origin: right center;
+}
+
+.vehicle-door.door-rr {
+  top: 110px;
+  right: -32px;
+  border-radius: 0 8px 8px 0;
+  transform-origin: left center;
+}
+
+.vehicle-door.open {
+  background: rgba(255, 165, 0, 0.3);
+  border-color: #ff9800;
+}
+
+.vehicle-door.door-fl.open {
+  transform: rotate(30deg);
+}
+
+.vehicle-door.door-fr.open {
+  transform: rotate(-30deg);
+}
+
+.vehicle-door.door-rl.open {
+  transform: rotate(30deg);
+}
+
+.vehicle-door.door-rr.open {
+  transform: rotate(-30deg);
+}
+
+.vehicle-sunroof {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.vehicle-sunroof.closed {
+  background: transparent;
+  opacity: 0.4;
+}
+
+.vehicle-sunroof.open {
+  background: rgba(255, 235, 59, 0.2);
+  border-color: #ffc107;
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.vehicle-window-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  z-index: 5;
+}
+
+.vehicle-window-indicator {
+  width: 50px;
+  height: 30px;
+  border: 2px solid #2563eb;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Khand', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  transition: all 0.3s ease;
+}
+
+.vehicle-window-indicator.closed {
+  background: rgba(59, 130, 246, 0.2);
+  color: #4d97ff;
+}
+
+.vehicle-window-indicator.open {
+  background: rgba(255, 165, 0, 0.3);
+  border-color: #ff9800;
+  color: #ff9800;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+}
+
+
+/* ============================================= */
+/*            EV DASHBOARD SCREEN                */
+/* ============================================= */
+
+.ev-screen {
+  position: relative;
+  width: 452px;
+  height: 452px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ev-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  z-index: 0;
+}
+
+.ev-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.ev-inner-ring {
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border: 3px solid #053477;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ev-battery-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  z-index: 3;
+  --battery-angle: 0deg;
+  --battery-color: #4CAF50;
+}
+
+.ev-battery-ring::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(var(--battery-color) 0deg var(--battery-angle),
+      transparent var(--battery-angle) 360deg);
+  filter: drop-shadow(0 0 8px var(--battery-color));
+  -webkit-mask: radial-gradient(transparent 0, transparent calc(50% - 20px), white calc(50% - 20px), white 50%);
+  mask: radial-gradient(transparent 0, transparent calc(50% - 20px), white calc(50% - 20px), white 50%);
+}
+
+/* Drive state indicator */
+.ev-drive-state {
+  position: absolute;
+  top: 35px;
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+  letter-spacing: 1px;
+  z-index: 4;
+  padding: 2px 14px;
+  border-radius: 20px;
+  border: 1px solid;
+  transition: all 0.4s ease;
+}
+
+.ev-drive-state-ev {
+  color: #4CAF50;
+  border-color: #4CAF5066;
+  background: rgba(76, 175, 80, 0.1);
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.ev-drive-state-ice {
+  color: #FF9800;
+  border-color: #FF980066;
+  background: rgba(255, 152, 0, 0.1);
+  text-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+}
+
+.ev-drive-state-hybrid {
+  color: #00beff;
+  border-color: #00beff66;
+  background: rgba(0, 190, 255, 0.1);
+  text-shadow: 0 0 8px rgba(0, 190, 255, 0.5);
+}
+
+.ev-drive-state-regen {
+  color: #8BC34A;
+  border-color: #8BC34A66;
+  background: rgba(139, 195, 74, 0.1);
+  text-shadow: 0 0 8px rgba(139, 195, 74, 0.5);
+}
+
+.ev-battery-text {
+  z-index: 4;
+  text-align: center;
+  margin-top: -10px;
+  margin-bottom: 0;
+}
+
+.ev-battery-value {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 64px;
+  line-height: 0.9;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 190, 255, 0.6);
+}
+
+.ev-battery-unit {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 28px;
+  color: #4d97ff;
+}
+
+.ev-voltage {
+  z-index: 4;
+  text-align: center;
+  margin-top: -5px;
+}
+
+.ev-voltage-value {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 28px;
+  color: #afd3ff;
+}
+
+.ev-voltage-unit {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 16px;
+  color: #4d97ff;
+  margin-left: 2px;
+}
+
+/* Stats panel with bars */
+.ev-stats-panel {
+  z-index: 4;
+  width: 260px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ev-bars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ev-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ev-bar-label {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  width: 52px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.ev-color {
+  color: #4CAF50;
+}
+
+.fuel-color {
+  color: #FF9800;
+}
+
+.ev-bar-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.ev-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+
+.ev-fill {
+  background: linear-gradient(90deg, #2E7D32, #4CAF50);
+  box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
+}
+
+.fuel-fill {
+  background: linear-gradient(90deg, #E65100, #FF9800);
+  box-shadow: 0 0 6px rgba(255, 152, 0, 0.5);
+}
+
+.ev-bar-pct {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  color: #8899aa;
+  width: 36px;
+  text-align: left;
+}
+
+/* Recovery */
+.ev-recovery {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.ev-recovery-label {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 14px;
+  color: #8BC34A;
+}
+
+.ev-recovery-value {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  color: #8BC34A;
+  text-shadow: 0 0 5px rgba(139, 195, 74, 0.4);
+}
+
+.ev-recovery-unit {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 12px;
+  color: #689F38;
+}
+
+.ev-charging {
+  position: absolute;
+  bottom: 30px;
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  color: #4CAF50;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 4;
+}
+
+.ev-charging.active {
+  opacity: 1;
+  animation: charge-pulse 1.5s infinite;
+}
+
+@keyframes charge-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+
+/* ============================================= */
+/*              TPMS SCREEN                      */
+/* ============================================= */
+
+.tpms-screen {
+  position: relative;
+  width: 452px;
+  height: 452px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tpms-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  z-index: 0;
+}
+
+.tpms-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.tpms-inner-ring {
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border: 3px solid #053477;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tpms-title {
+  position: absolute;
+  top: 30px;
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 28px;
+  color: #4d97ff;
+  letter-spacing: 4px;
+  z-index: 5;
+}
+
+.tpms-car-outline {
+  width: 100px;
+  height: 160px;
+  border: 2px solid #2563eb44;
+  border-radius: 20px 20px 16px 16px;
+  background: transparent;
+  z-index: 3;
+}
+
+.tpms-row {
+  display: flex;
+  gap: 80px;
+  z-index: 5;
+}
+
+.tpms-front {
+  position: absolute;
+  top: 75px;
+}
+
+.tpms-rear {
+  position: absolute;
+  bottom: 75px;
+}
+
+.tpms-tire {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 2px solid;
+}
+
+.tpms-tire.ok {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.tpms-tire.warning {
+  border-color: #FF9800;
+  background: rgba(255, 152, 0, 0.15);
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
+}
+
+.tpms-tire.critical {
+  border-color: #F44336;
+  background: rgba(244, 67, 54, 0.15);
+  box-shadow: 0 0 12px rgba(244, 67, 54, 0.5);
+  animation: tire-critical-pulse 1s infinite;
+}
+
+@keyframes tire-critical-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(244, 67, 54, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.8);
+  }
+}
+
+.tpms-tire-label {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 14px;
+  color: #8899aa;
+}
+
+.tpms-tire-value {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(0, 190, 255, 0.4);
+}
+
+.tpms-tire-unit {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 12px;
+  color: #6688aa;
+}
+
+.tpms-warning {
+  position: absolute;
+  bottom: 35px;
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #FF9800;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+
+.tpms-warning.active {
+  opacity: 1;
+}
+
+
+/* ============================================= */
+/*         EV RANGE DISPLAY (in EV Dash)         */
+/* ============================================= */
+
+.ev-range-display {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 4px;
+}
+
+.ev-range-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ev-range-icon {
+  font-size: 14px;
+}
+
+.ev-range-value {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.ev-range-ev .ev-range-value {
+  color: #4CAF50;
+}
+
+.ev-range-fuel .ev-range-value {
+  color: #FF9800;
+}
+
+.ev-range-unit {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 12px;
+  color: #6688aa;
+}
+
+
+/* ============================================= */
+/*        MAINTENANCE DASHBOARD SCREEN           */
+/* ============================================= */
+
+.maint-screen {
+  position: relative;
+  width: 452px;
+  height: 452px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.maint-outer-ring {
+  position: absolute;
+  width: 452px;
+  height: 452px;
+  border: 3px solid #1d4ed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(29, 78, 216, 0.7);
+  z-index: 0;
+}
+
+.maint-inner-ring-shadow {
+  box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.maint-inner-ring {
+  position: absolute;
+  width: 392px;
+  height: 392px;
+  border: 3px solid #053477;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.maint-title {
+  position: absolute;
+  top: 30px;
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 24px;
+  color: #4d97ff;
+  letter-spacing: 4px;
+  z-index: 5;
+}
+
+.maint-progress-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  z-index: 3;
+  --maint-angle: 0deg;
+  --maint-color: #4CAF50;
+}
+
+.maint-progress-ring::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(var(--maint-color) 0deg var(--maint-angle),
+      transparent var(--maint-angle) 360deg);
+  filter: drop-shadow(0 0 8px var(--maint-color));
+  -webkit-mask: radial-gradient(transparent 0, transparent calc(50% - 18px), white calc(50% - 18px), white 50%);
+  mask: radial-gradient(transparent 0, transparent calc(50% - 18px), white calc(50% - 18px), white 50%);
+}
+
+.maint-km-display {
+  z-index: 4;
+  text-align: center;
+  margin-top: -20px;
+}
+
+.maint-km-value {
+  display: block;
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 56px;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(0, 190, 255, 0.6);
+}
+
+.maint-km-unit {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 16px;
+  color: #4d97ff;
+  letter-spacing: 1px;
+}
+
+.maint-odo {
+  z-index: 4;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.maint-odo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.maint-odo-label {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 16px;
+  color: #6688aa;
+  width: 70px;
+  text-align: right;
+}
+
+.maint-odo-value {
+  font-family: 'Khand', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  color: #afd3ff;
+}
+
+.maint-alert-grid {
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  gap: 16px;
+  z-index: 5;
+}
+
+.maint-alert {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+
+.maint-alert.inactive {
+  border-color: #2563eb33;
+  background: transparent;
+  opacity: 0.4;
+}
+
+.maint-alert.active {
+  border-color: #FF9800;
+  background: rgba(255, 152, 0, 0.15);
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.4);
+  animation: maint-alert-pulse 1.5s infinite;
+}
+
+@keyframes maint-alert-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.maint-alert-icon {
+  font-size: 20px;
+}
+
+.maint-alert-label {
+  font-family: 'Khand', sans-serif;
+  font-weight: 100;
+  font-size: 12px;
+  color: #8899aa;
+}
+
+.maint-alert.active .maint-alert-label {
+  color: #FF9800;
+}
+
+.hidden {
+  display: none !important;
+}

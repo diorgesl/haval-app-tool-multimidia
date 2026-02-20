@@ -1115,11 +1115,6 @@ public class ServiceManager {
                             Log.e(TAG, "Error checking temp for auto seat heating", e);
                         }
                     }
-                    // Feature 3: Auto fragrance on start
-                    if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_FRAGRANCE.getKey(), false)) {
-                        updateData(CarConstants.CAR_BASIC_FRAGRANCE_STATUS.getValue(), "1");
-                        Log.w(TAG, "Auto fragrance activated on vehicle start");
-                    }
                     // Reset massage flag on new drive
                     autoMassageActive = false;
                 }

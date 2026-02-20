@@ -65,5 +65,10 @@ enum class SharedPreferencesKeys(val key: String, val description: String) {
     ENABLE_AUTO_MASSAGE("enableAutoMassage", "Massagem automática em viagens longas"),
     AUTO_MASSAGE_MINUTES("autoMassageMinutes", "Tempo de direção para ativar massagem (minutos)"),
     DISABLE_SEAT_BELT_WARNING("disableSeatBeltWarning", "Desativar alerta de cinto de segurança"),
-    AMBIENT_LIGHT_CUSTOM_COLOR("ambientLightCustomColor", "Cor personalizada da luz ambiente")
+    AMBIENT_LIGHT_CUSTOM_COLOR("ambientLightCustomColor", "Cor personalizada da luz ambiente"),
+    INSTRUMENT_REVISION_INTERVAL("instrumentRevisionInterval", "Intervalo entre revisões (km)"),
+    INSTRUMENT_REVISION_MODE("instrumentRevisionMode", "Modo de aviso de revisão (auto/manual)"),
+    ENABLE_INSTRUMENT_AVG_CONSUME("enableInstrumentAvgConsume", "Mostrar consumo médio no painel"),
+    ENABLE_INSTRUMENT_TEMPERATURE("enableInstrumentTemperature", "Mostrar temperatura no painel"),
+    ENABLE_INSTRUMENT_TRIP_ODOMETER("enableInstrumentTripOdometer", "Mostrar odômetro da viagem no painel")
 }

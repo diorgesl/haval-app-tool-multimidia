@@ -1,5 +1,5 @@
-import {getState, subscribe} from '../state.js';
-import {div, img, span} from '../utils/createElement.js';
+import { getState, subscribe } from '../state.js';
+import { div, img, span } from '../utils/createElement.js';
 
 
 const iconESP = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAADMklEQVR4nO1XS0hUURj+KKKCirKkVr2fix6rtEW5CXpQVqYFPXcFrYJqmQq1qCCtbGNRRkiLFkEbE2bOf9VME+xBtA0i0agWmW0yiC/+/547dxgfzIzjzg8uc+bc/5zz/c/zX2AK+SDBhWjjRjjuRZJ7bKxzk4oEV8KxFo7vIByGYx8cu/3T5+feQlhjsgVDB4shbIDjEIQPkeR+dHH2CDmdcyw3mVD2jq2dEBLcBsevED6G47Ks1wVcDsdmOA4gYGl+hztWQTiIgCfy28D2OOX3qMxH859Icnveh8ckdthewpLsFnSw2Mw+Ec1Hkjjp3bFodAHhDSR5yI8bzOeFRhgTt2ysZzleD1+0cB4cfyPgap9qQzkFXG6BOYR2rkAb19i4k3NV46Nw7PQsay2NJguOTRBW21jYZYEO4T04XvaT7xFwn417OQPCZ3BMpD2tSHApnnI6hBcgbEm9E54x7VQmlr9v8jGBcitW4Vk1EDbqoMfKqZZSrWZRkXnJBRDSWEaP+q6FMyE8B8cPcDyWeqdmDbgTwk9pa+6mDoyL1V+0ssgUdexWVj/guA4Bt0D4OSUcERgNwgdwvDhiPiTQm/Z/PoT/zJqxFb4gyU0IuB7Cb7rZMJJcbFYwRhkEHK+lPVeNfWjK7xDWQXgFwrIUAU3hSF7YAeHzjDh4jYC7EXAJhH9iAjqpL7MhEFqhzB9eZ2T0jhhJ4CwCzsqwXg+Eu2ICzrvAcbOZJxsXZMLxkrkl0wWjy/bZ9d3GDZELeuxezyUIE1ybmhMeh/Cj13Z8AulBqBZz6nJNwyg3NWLVv2On4QtLK025OP1akOR51HCaLzZhSo+GgAdTBMOa06iDIxC+8v6psWIxWXB8lKasNjJVymoOhL8sj8NCMmSaFBrR3uHvqrgUKxxvwrHCj2/bxVFoCJ9AWO/PqLAzx7mOB6yZKBSEpyHsz75xDVhqTYQ2E4VqSJLcmtvCgJXWTmkzMTHNByE8nO8GJd4dzTkFpgZa6PP+3DXPhLZR2smEjUqT1Ymx2nLhAS+jbXl9YT9W2k2ragjfWDXL/DDROX2nMio7qWhlkdVzvUGjT7PokpoCcsN/QF4Tpoju0DMAAAAASUVORK5CYII=";
@@ -11,21 +11,25 @@ const iconRegen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEEAAABBCAYAAAC
 const iconEV = "data:image/png;base64,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";
 
 export const menuItems = [
-    {id: 'option_1', label: 'ESP',         stateKey: 'espStatus',   iconSrc: iconESP},
-    {id: 'option_2', label: '',            stateKey: 'evMode',      iconSrc: iconEV},
-    {id: 'option_3', label: 'Modo',        stateKey: 'drivingMode', iconSrc: iconMode},
-    {id: 'option_4', label: 'Menu A/C',                             iconSrc: iconAC},
-    {id: 'option_5', label: 'Modo',        stateKey: 'steerMode',   iconSrc: iconSteer},
-    {id: 'option_6', label: 'Regeneração',                          iconSrc: iconRegen},
-    {id: 'option_7', label: 'Gráficos',                             iconSrc: iconProfiles},
+    { id: 'option_1', label: 'ESP', stateKey: 'espStatus', iconSrc: iconESP },
+    { id: 'option_2', label: '', stateKey: 'evMode', iconSrc: iconEV },
+    { id: 'option_3', label: 'Modo', stateKey: 'drivingMode', iconSrc: iconMode },
+    { id: 'option_4', label: 'Menu A/C', iconSrc: iconAC },
+    { id: 'option_5', label: 'Modo', stateKey: 'steerMode', iconSrc: iconSteer },
+    { id: 'option_6', label: 'Regeneração', iconSrc: iconRegen },
+    { id: 'option_7', label: 'Gráficos', iconSrc: iconProfiles },
+    { id: 'option_8', label: 'Veículo', iconSrc: iconESP },
+    { id: 'option_9', label: 'Bateria', iconSrc: iconEV },
+    { id: 'option_10', label: 'Pneus', iconSrc: iconRegen },
+    { id: 'option_11', label: 'Manutenção', iconSrc: iconMode },
 ];
 
 export function createMainMenu() {
 
     var main = document.createElement('main');
 
-    const container = div({className: 'main-menu-container'});
-    const carousel = div({className: 'menu-carousel'});
+    const container = div({ className: 'main-menu-container' });
+    const carousel = div({ className: 'menu-carousel' });
     container.appendChild(carousel);
     main.appendChild(container);
     const focusedItemId = getState('focusedMenuItem');

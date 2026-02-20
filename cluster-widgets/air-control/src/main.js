@@ -1,8 +1,12 @@
-import {getState as get, setState, subscribe} from './state.js';
-import {createMainMenu} from './components/mainMenu.js';
-import {createAcControlScreen, updateProgressRings as updateProgressRingsAC} from "./components/aircon/mainAcControl.js";
-import {createRegenScreen, updateProgressRings as updateProgressRingsRegen } from "./components/regen/regenControl.js";
-import {createGraphScreen } from "./components/graphs/graphs.js";
+import { getState as get, setState, subscribe } from './state.js';
+import { createMainMenu } from './components/mainMenu.js';
+import { createAcControlScreen, updateProgressRings as updateProgressRingsAC } from "./components/aircon/mainAcControl.js";
+import { createRegenScreen, updateProgressRings as updateProgressRingsRegen } from "./components/regen/regenControl.js";
+import { createGraphScreen } from "./components/graphs/graphs.js";
+import { createVehicleScreen } from "./components/vehicle/vehicleStatus.js";
+import { createEvDashScreen } from "./components/ev/evDashboard.js";
+import { createTpmsScreen } from "./components/tpms/tpmsStatus.js";
+import { createMaintenanceScreen } from "./components/maintenance/maintenanceDash.js";
 import { div } from './utils/createElement.js';
 
 if (process.env.NODE_ENV === 'development') {
@@ -31,6 +35,14 @@ function render() {
         currentComponent = createRegenScreen();
     } else if (screen === 'graph') {
         currentComponent = createGraphScreen();
+    } else if (screen === 'vehicle') {
+        currentComponent = createVehicleScreen();
+    } else if (screen === 'evdash') {
+        currentComponent = createEvDashScreen();
+    } else if (screen === 'tpms') {
+        currentComponent = createTpmsScreen();
+    } else if (screen === 'maintenance') {
+        currentComponent = createMaintenanceScreen();
     }
 
     if (currentComponent) {
@@ -49,12 +61,13 @@ subscribe('screen', render);
 render();
 
 
+
 // Functions used by Kotlin to trigger interactions
-window.showScreen = function(screenName) {
+window.showScreen = function (screenName) {
     setState('screen', screenName);
 };
 
-window.focus = function(item) {
+window.focus = function (item) {
     const screen = get('screen');
     if (screen === 'main_menu') {
         setState('focusedMenuItem', item);
@@ -63,11 +76,11 @@ window.focus = function(item) {
     }
 };
 
-window.control = function(key, value) {
+window.control = function (key, value) {
     setState(key, value);
 };
 
-window.cleanup = function() {
+window.cleanup = function () {
     if (currentComponent && currentComponent.cleanup) {
         currentComponent.cleanup();
     }

@@ -343,7 +343,6 @@ fun BasicSettingsTab() {
     var lowBatteryThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.LOW_BATTERY_THRESHOLD.key, 11.8f)) }
     var enableAutoSeatHeating by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_SEAT_HEATING.key, false)) }
     var autoSeatHeatingThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.AUTO_SEAT_HEATING_THRESHOLD.key, 15f)) }
-    var enableAutoFragrance by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_FRAGRANCE.key, false)) }
     var enableCoolantTempAlert by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_COOLANT_TEMP_ALERT.key, false)) }
     var coolantTempThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.COOLANT_TEMP_THRESHOLD.key, 105f)) }
     var enableAutoMassage by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_MASSAGE.key, false)) }
@@ -916,15 +915,6 @@ fun BasicSettingsTab() {
                 sliderLabel = "Temperatura: ${autoSeatHeatingThreshold.toInt()}°C"
             ),
             SettingItem(
-                title = "Fragrância automática ao ligar",
-                description = "Ativa o aromatizador automaticamente quando o veículo é ligado",
-                checked = enableAutoFragrance,
-                onCheckedChange = {
-                    enableAutoFragrance = it
-                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_AUTO_FRAGRANCE.key, it) }
-                }
-            ),
-            SettingItem(
                 title = "Alerta de temperatura do arrefecimento",
                 description = "Notifica quando a temperatura do líquido de arrefecimento está alta",
                 checked = enableCoolantTempAlert,
@@ -1237,6 +1227,11 @@ fun TelasTab() {
     var enableProjector by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, false)) }
     var enableWarning by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_REVISION_WARNING.key, false)) }
     var enableCustomIntegration by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false)) }
+    var enableAvgConsume by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_AVG_CONSUME.key, false)) }
+    var enableTemperature by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TEMPERATURE.key, false)) }
+    var enableTripOdometer by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TRIP_ODOMETER.key, false)) }
+    var revisionMode by remember { mutableStateOf(prefs.getString(SharedPreferencesKeys.INSTRUMENT_REVISION_MODE.key, "auto") ?: "auto") }
+    var revisionInterval by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 12000)) }
     var nextKmText by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, 12000).toString()) }
     var nextDateMillis by remember { mutableLongStateOf(prefs.getLong(SharedPreferencesKeys.INSTRUMENT_REVISION_NEXT_DATE.key, 0L)) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -1297,6 +1292,36 @@ fun TelasTab() {
                 }
             },
             enabled = enableProjector
+        ),
+        SettingItem(
+            title = "📊 Consumo médio",
+            description = SharedPreferencesKeys.ENABLE_INSTRUMENT_AVG_CONSUME.description,
+            checked = enableAvgConsume,
+            onCheckedChange = {
+                enableAvgConsume = it
+                prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_AVG_CONSUME.key, it) }
+            },
+            enabled = enableProjector
+        ),
+        SettingItem(
+            title = "🌡 Temperatura ext/int",
+            description = SharedPreferencesKeys.ENABLE_INSTRUMENT_TEMPERATURE.description,
+            checked = enableTemperature,
+            onCheckedChange = {
+                enableTemperature = it
+                prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TEMPERATURE.key, it) }
+            },
+            enabled = enableProjector
+        ),
+        SettingItem(
+            title = "🛣 Odômetro da viagem",
+            description = SharedPreferencesKeys.ENABLE_INSTRUMENT_TRIP_ODOMETER.description,
+            checked = enableTripOdometer,
+            onCheckedChange = {
+                enableTripOdometer = it
+                prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TRIP_ODOMETER.key, it) }
+            },
+            enabled = enableProjector
         )
     )
 
@@ -1311,53 +1336,131 @@ fun TelasTab() {
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Column {
-                            Text(
-                                "Próxima KM:",
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row {
-                                TextField(
-                                    value = nextKmText,
-                                    onValueChange = { newValue ->
-                                        if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
-                                            nextKmText = newValue
-                                            newValue.toIntOrNull()?.let {
-                                                prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, it) }
-                                            }
-                                        }
-                                    },
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    modifier = Modifier.weight(1f),
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color(0xFF2A2F37),
-                                        unfocusedContainerColor = Color(0xFF2A2F37),
-                                        focusedTextColor = Color.White,
-                                        unfocusedTextColor = Color(0xFFB0B8C4),
-                                        focusedIndicatorColor = Color(0xFF4A9EFF),
-                                        unfocusedIndicatorColor = Color(0xFF3A3F47)
-                                    )
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Button(
-                                    onClick = {
-                                        val currentKm = ServiceManager.getInstance().totalOdometer
-                                        val newNextKm = currentKm + 12000
-                                        nextKmText = newNextKm.toString()
-                                        prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, newNextKm) }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF4A9EFF)
-                                    )
-                                ) {
-                                    Text("Resetar", color = Color.White)
-                                }
+                        // Mode selector: Auto / Manual
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    revisionMode = "auto"
+                                    prefs.edit { putString(SharedPreferencesKeys.INSTRUMENT_REVISION_MODE.key, "auto") }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (revisionMode == "auto") Color(0xFF4A9EFF) else Color(0xFF2A2F37)
+                                ),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Automático", color = Color.White)
+                            }
+                            Button(
+                                onClick = {
+                                    revisionMode = "manual"
+                                    prefs.edit { putString(SharedPreferencesKeys.INSTRUMENT_REVISION_MODE.key, "manual") }
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (revisionMode == "manual") Color(0xFF4A9EFF) else Color(0xFF2A2F37)
+                                ),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Manual", color = Color.White)
                             }
                         }
 
+                        if (revisionMode == "auto") {
+                            // Auto mode: interval slider
+                            Column {
+                                Text(
+                                    "Intervalo: ${revisionInterval / 1000}k km",
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Slider(
+                                    value = revisionInterval.toFloat(),
+                                    onValueChange = { newVal ->
+                                        revisionInterval = newVal.toInt()
+                                        prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, newVal.toInt()) }
+                                    },
+                                    valueRange = 5000f..20000f,
+                                    steps = 14,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = Color(0xFF4A9EFF),
+                                        activeTrackColor = Color(0xFF4A9EFF)
+                                    )
+                                )
+                                val totalOdo = ServiceManager.getInstance().totalOdometer
+                                val interval = if (revisionInterval > 0) revisionInterval else 12000
+                                val serviceNum = totalOdo / interval
+                                val nextKm = (serviceNum + 1) * interval
+                                val remaining = nextKm - totalOdo
+                                Text(
+                                    "Revisão #${serviceNum + 1} • Restam $remaining km",
+                                    color = Color(0xFFB0B8C4),
+                                    fontSize = 14.sp
+                                )
+                            }
+                        } else {
+                            // Manual mode: ask how many services done
+                            Column {
+                                val interval = if (revisionInterval > 0) revisionInterval else 12000
+                                val currentServiceCount = (nextKmText.toIntOrNull() ?: 0)
+                                val nextServiceKm = (currentServiceCount + 1) * interval
+                                val totalOdo = ServiceManager.getInstance().totalOdometer
+                                val remaining = nextServiceKm - totalOdo
+
+                                Text(
+                                    "Quantas revisões já foram feitas?",
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Button(
+                                        onClick = {
+                                            val count = (nextKmText.toIntOrNull() ?: 0) - 1
+                                            if (count >= 0) {
+                                                nextKmText = count.toString()
+                                                prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, (count + 1) * interval) }
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2F37)),
+                                        modifier = Modifier.size(48.dp)
+                                    ) {
+                                        Text("−", color = Color.White, fontSize = 22.sp)
+                                    }
+                                    Spacer(Modifier.width(16.dp))
+                                    Text(
+                                        text = nextKmText,
+                                        color = Color(0xFF4A9EFF),
+                                        fontSize = 42.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(Modifier.width(16.dp))
+                                    Button(
+                                        onClick = {
+                                            val count = (nextKmText.toIntOrNull() ?: 0) + 1
+                                            nextKmText = count.toString()
+                                            prefs.edit { putInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, (count + 1) * interval) }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2F37)),
+                                        modifier = Modifier.size(48.dp)
+                                    ) {
+                                        Text("+", color = Color.White, fontSize = 22.sp)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Próxima revisão: ${nextServiceKm} km (restam $remaining km)",
+                                    color = Color(0xFFB0B8C4),
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+
+                        // Date picker (shared between modes)
                         Column {
                             Text(
                                 "Próxima data: $formattedNextDate",

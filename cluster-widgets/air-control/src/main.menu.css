@@ -13,9 +13,8 @@
     height: 452px;
 
     background-image: radial-gradient(circle at center,
-        #0a2345 0%,
-        transparent 80%
-    );
+            #0a2345 0%,
+            transparent 80%);
     border-radius: 50%;
 
     --item-gap: 80px;
@@ -92,9 +91,11 @@
 .menu-item.focused {
     background-color: transparent;
 }
+
 .menu-item.focused .icon-container {
     background-color: transparent;
 }
+
 .menu-item.focused .menu-label {
     color: #FFFFFF;
     font-size: 52px;
@@ -121,51 +122,404 @@
     color: #4CAF50;
 }
 
-.menu-carousel.focus-0 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
-.menu-carousel.focus-0 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-0 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-0 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
-.menu-carousel.focus-0 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  2)) scale(0.2); opacity: 0;   z-index: 6; }
+.menu-carousel.focus-0 .menu-item[data-index="0"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
 
-.menu-carousel.focus-1 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-1 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
-.menu-carousel.focus-1 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-1 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-1 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
-.menu-carousel.focus-1 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  2)) scale(0.2); opacity: 0;   z-index: 6; }
+.menu-carousel.focus-0 .menu-item[data-index="1"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
 
-.menu-carousel.focus-2 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-2 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-2 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
-.menu-carousel.focus-2 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-2 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-2 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
+.menu-carousel.focus-0 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
 
-.menu-carousel.focus-3 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
-.menu-carousel.focus-3 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-3 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-3 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
-.menu-carousel.focus-3 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-3 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-3 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.8)) scale(0.4); opacity: 0;   z-index: 7; }
+.menu-carousel.focus-0 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
 
-.menu-carousel.focus-4 .menu-item[data-index="0"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
-.menu-carousel.focus-4 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
-.menu-carousel.focus-4 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-4 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-4 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
-.menu-carousel.focus-4 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-4 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
+.menu-carousel.focus-0 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
 
-.menu-carousel.focus-5 .menu-item[data-index="1"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
-.menu-carousel.focus-5 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
-.menu-carousel.focus-5 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-5 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-5 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
-.menu-carousel.focus-5 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) *  1)) scale(0.8); opacity: 0.8; z-index: 9; }
+.menu-carousel.focus-1 .menu-item[data-index="0"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
 
-.menu-carousel.focus-6 .menu-item[data-index="2"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2); opacity: 0;   z-index: 6; }
-.menu-carousel.focus-6 .menu-item[data-index="3"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4); opacity: 0;   z-index: 7; }
-.menu-carousel.focus-6 .menu-item[data-index="4"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6); opacity: 0.6; z-index: 8; }
-.menu-carousel.focus-6 .menu-item[data-index="5"] { transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8); opacity: 0.8; z-index: 9; }
-.menu-carousel.focus-6 .menu-item[data-index="6"] { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; z-index: 10; }
+.menu-carousel.focus-1 .menu-item[data-index="1"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-1 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-1 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-1 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-1 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-2 .menu-item[data-index="0"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-2 .menu-item[data-index="1"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-2 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-2 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-2 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-2 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="0"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="1"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-3 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="0"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="1"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-4 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-5 .menu-item[data-index="1"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-5 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-5 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-5 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-5 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-5 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="2"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="7"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-6 .menu-item[data-index="8"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="3"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="7"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="8"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-7 .menu-item[data-index="9"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-8 .menu-item[data-index="4"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-8 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-8 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-8 .menu-item[data-index="7"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-8 .menu-item[data-index="8"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-8 .menu-item[data-index="9"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * 1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-9 .menu-item[data-index="5"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-9 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-9 .menu-item[data-index="7"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-9 .menu-item[data-index="8"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-9 .menu-item[data-index="9"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}
+
+.menu-carousel.focus-10 .menu-item[data-index="6"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -2)) scale(0.2);
+    opacity: 0;
+    z-index: 6;
+}
+
+.menu-carousel.focus-10 .menu-item[data-index="7"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.8)) scale(0.4);
+    opacity: 0;
+    z-index: 7;
+}
+
+.menu-carousel.focus-10 .menu-item[data-index="8"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1.5)) scale(0.6);
+    opacity: 0.6;
+    z-index: 8;
+}
+
+.menu-carousel.focus-10 .menu-item[data-index="9"] {
+    transform: translate(-50%, -50%) translateY(calc(var(--item-gap) * -1)) scale(0.8);
+    opacity: 0.8;
+    z-index: 9;
+}
+
+.menu-carousel.focus-10 .menu-item[data-index="10"] {
+    transform: translate(-50%, -50%) translateY(0) scale(1);
+    opacity: 1;
+    z-index: 10;
+}

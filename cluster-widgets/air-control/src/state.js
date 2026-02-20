@@ -9,18 +9,18 @@ function StateManager(initialState) {
     this._listeners = new Map();
 }
 
-StateManager.prototype.get = function(key) {
+StateManager.prototype.get = function (key) {
     return this._state[key];
 };
 
-StateManager.prototype.set = function(key, value) {
+StateManager.prototype.set = function (key, value) {
     if (this._state[key] !== value) {
         this._state[key] = value;
         this._notifyListeners(key, value);
     }
 };
 
-StateManager.prototype.getState = function() {
+StateManager.prototype.getState = function () {
     var newState = {};
     for (var key in this._state) {
         if (this._state.hasOwnProperty(key)) {
@@ -30,15 +30,15 @@ StateManager.prototype.getState = function() {
     return newState;
 };
 
-StateManager.prototype.subscribe = function(key, callback) {
+StateManager.prototype.subscribe = function (key, callback) {
     if (!this._listeners.has(key)) {
         this._listeners.set(key, new Set());
     }
     this._listeners.get(key).add(callback);
-    
+
     // Return unsubscribe function
     var self = this;
-    return function() {
+    return function () {
         var listeners = self._listeners.get(key);
         if (listeners) {
             listeners.delete(callback);
@@ -46,10 +46,10 @@ StateManager.prototype.subscribe = function(key, callback) {
     };
 };
 
-StateManager.prototype._notifyListeners = function(key, value) {
+StateManager.prototype._notifyListeners = function (key, value) {
     var listeners = this._listeners.get(key);
     if (listeners) {
-        listeners.forEach(function(callback) {
+        listeners.forEach(function (callback) {
             try {
                 callback(value, key);
             } catch (error) {
@@ -86,6 +86,29 @@ var stateManager = new StateManager({
     lastRegenValue: 0,
     onepedal: false,
 
+    // Vehicle Status states
+    doorFL: 'closed', doorFR: 'closed', doorRL: 'closed', doorRR: 'closed',
+    windowFL: 'closed', windowFR: 'closed', windowRL: 'closed', windowRR: 'closed',
+    sunroof: 'closed', doorLock: 'locked',
+
+    // EV Dashboard states
+    batteryPercent: 0, batteryVoltage: 12.6, chargingState: 0,
+    powerMode: 'HEV', evRange: 0,
+    energyDriveState: 'hybrid',
+    cycleEnergyConsume: 0,
+    cycleFuelConsume: 0,
+    energyRecovery: 0,
+    energyOutputPct: 0,
+    evRangeKm: 0, fuelRangeKm: 0,
+
+    // TPMS states
+    tpmsFL: 2.3, tpmsFR: 2.3, tpmsRL: 2.2, tpmsRR: 2.2, tpmsWarning: 0,
+
+    // Maintenance states
+    totalOdometer: 0, tripOdometer: 0,
+    maintenanceWarning: 0, maintenanceKm: 0,
+    oilWarning: 0, engineService: 0, coolantWarning: 0,
+
     // Graph values
     currentGraph: 'evConsumption',
     evConsumption: 0,
@@ -102,16 +125,16 @@ var stateManager = new StateManager({
 });
 
 // Convenience functions for easier usage
-var getState = function(key) { return stateManager.get(key); };
-var setState = function(key, value) { stateManager.set(key, value); };
-var subscribe = function(key, callback) { return stateManager.subscribe(key, callback); };
+var getState = function (key) { return stateManager.get(key); };
+var setState = function (key, value) { stateManager.set(key, value); };
+var subscribe = function (key, callback) { return stateManager.subscribe(key, callback); };
 
 // For backward compatibility, export the state object with getters/setters
 var state = new Proxy({}, {
-    get: function(target, prop) {
+    get: function (target, prop) {
         return stateManager.get(prop);
     },
-    set: function(target, prop, value) {
+    set: function (target, prop, value) {
         stateManager.set(prop, value);
         return true;
     }
