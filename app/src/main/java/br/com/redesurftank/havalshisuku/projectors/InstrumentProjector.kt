@@ -118,13 +118,13 @@ class InstrumentProjector(outerContext: Context, display: Display) : BaseProject
             var serviceLabel: String
 
             if (mode == "auto") {
-                val interval = preferences.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 12000)
+                val interval = preferences.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 0)
                 val serviceNumber = if (interval > 0) currentKm / interval else 0
                 val nextServiceKm = (serviceNumber + 1) * interval
                 remainingKm = nextServiceKm - currentKm
                 serviceLabel = "🔧 Revisão ${serviceNumber + 1}: $remainingKm km restantes"
             } else {
-                val nextKm = preferences.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, 12000)
+                val nextKm = preferences.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, 0)
                 remainingKm = nextKm - currentKm
                 serviceLabel = "🔧 Manutenção em: $remainingKm km"
             }

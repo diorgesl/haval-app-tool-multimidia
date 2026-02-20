@@ -1241,8 +1241,8 @@ fun TelasTab() {
     var enableTemperature by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TEMPERATURE.key, false)) }
     var enableTripOdometer by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_TRIP_ODOMETER.key, false)) }
     var revisionMode by remember { mutableStateOf(prefs.getString(SharedPreferencesKeys.INSTRUMENT_REVISION_MODE.key, "auto") ?: "auto") }
-    var revisionInterval by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 12000)) }
-    var nextKmText by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, 12000).toString()) }
+    var revisionInterval by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_INTERVAL.key, 0)) }
+    var nextKmText by remember { mutableStateOf(prefs.getInt(SharedPreferencesKeys.INSTRUMENT_REVISION_KM.key, 0).toString()) }
     var nextDateMillis by remember { mutableLongStateOf(prefs.getLong(SharedPreferencesKeys.INSTRUMENT_REVISION_NEXT_DATE.key, 0L)) }
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -1401,7 +1401,7 @@ fun TelasTab() {
                                     )
                                 )
                                 val totalOdo = ServiceManager.getInstance().totalOdometer
-                                val interval = if (revisionInterval > 0) revisionInterval else 12000
+                                val interval = if (revisionInterval > 0) revisionInterval else 0
                                 val serviceNum = totalOdo / interval
                                 val nextKm = (serviceNum + 1) * interval
                                 val remaining = nextKm - totalOdo
@@ -1414,7 +1414,7 @@ fun TelasTab() {
                         } else {
                             // Manual mode: ask how many services done
                             Column {
-                                val interval = if (revisionInterval > 0) revisionInterval else 12000
+                                val interval = if (revisionInterval > 0) revisionInterval else 0
                                 val currentServiceCount = (nextKmText.toIntOrNull() ?: 0)
                                 val nextServiceKm = (currentServiceCount + 1) * interval
                                 val totalOdo = ServiceManager.getInstance().totalOdometer
