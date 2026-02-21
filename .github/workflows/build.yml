@@ -31,6 +31,20 @@ jobs:
       - name: Decode Keystore
         run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.keystore
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build air-control widget
+        working-directory: cluster-widgets/air-control
+        run: |
+          npm install
+          npx parcel build app-night.html --dist-dir dist --public-url ./
+          node inline.js
+          cp dist/app-night.html ../../app/src/main/res/raw/app.html
+          echo "✅ Widget built and copied to Android resources"
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
