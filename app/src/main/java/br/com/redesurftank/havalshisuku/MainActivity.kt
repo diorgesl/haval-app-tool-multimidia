@@ -47,6 +47,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
@@ -123,6 +124,7 @@ import br.com.redesurftank.havalshisuku.ui.components.SettingCard
 import br.com.redesurftank.havalshisuku.ui.components.SettingItem
 import br.com.redesurftank.havalshisuku.ui.components.StyledCard
 import br.com.redesurftank.havalshisuku.ui.components.TwoColumnSettingsLayout
+import br.com.redesurftank.havalshisuku.ui.tabs.DashboardTab
 import br.com.redesurftank.havalshisuku.ui.theme.HavalShisukuTheme
 import br.com.redesurftank.havalshisuku.utils.FridaUtils
 import coil.compose.AsyncImage
@@ -171,8 +173,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
     val advancedUse = prefs.getBoolean(SharedPreferencesKeys.ADVANCE_USE.key, false)
 
     val menuItems = buildList {
+        add(DrawerMenuItem("Dashboard", Icons.Default.Dashboard))
         add(DrawerMenuItem("Configurações", Icons.Default.Settings))
         add(DrawerMenuItem("Telas", Icons.Default.SmartDisplay))
+        // "Valores Atuais" hidden — debug only, CurrentValuesTab() still exists if needed
         add(DrawerMenuItem("Valores Atuais", Icons.Default.DeveloperMode))
         add(DrawerMenuItem("Instalar Apps", Icons.Default.ShoppingCart))
         add(DrawerMenuItem("Informações", Icons.Default.Info))
@@ -291,9 +295,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
             // Content Area
             ContentArea {
                 when (selectedItem) {
-                    0 -> BasicSettingsTab()
-                    1 -> TelasTab()
-                    2 -> CurrentValuesTab()
+                    0 -> DashboardTab()
+                    1 -> BasicSettingsTab()
+                    2 -> TelasTab()
                     3 -> InstallAppsTab()
                     4 -> InformacoesTab()
                     5 -> FridaHooksTab()
