@@ -1,12 +1,17 @@
 package br.com.redesurftank.havalshisuku.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -113,10 +118,13 @@ fun SettingCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .padding(vertical = AppDimensions.CardSpacing, horizontal = AppDimensions.CardSpacing)
+            .animateContentSize(
+                animationSpec = tween(300, easing = FastOutSlowInEasing)
+            )
             .then(
                 if (checked && sliderValue != null) Modifier else Modifier.heightIn(min = 100.dp)
             )
-            .padding(vertical = AppDimensions.CardSpacing, horizontal = AppDimensions.CardSpacing)
             .then(
                 if (checked && enabled) {
                     Modifier.shadow(
@@ -287,117 +295,36 @@ fun TwoColumnSettingsLayout(
     modifier: Modifier = Modifier,
     bottomContent: @Composable (() -> Unit)? = null
 ) {
-    // Organiza os items em duas colunas (ordem por coluna)
-    val midPoint = (settingsList.size + 1) / 2
-    val leftColumnItems = settingsList.take(midPoint)
-    val rightColumnItems = settingsList.drop(midPoint)
-
-    Box(
-        modifier = modifier.fillMaxSize()
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Adaptive(minSize = 340.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = AppDimensions.CardSpacing),
+        verticalItemSpacing = 0.dp,
+        horizontalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        val scrollState = rememberScrollState()
+        items(settingsList) { setting ->
+            SettingCard(
+                title = setting.title,
+                description = setting.description,
+                checked = setting.checked,
+                onCheckedChange = setting.onCheckedChange,
+                enabled = setting.enabled,
+                sliderValue = setting.sliderValue,
+                sliderRange = setting.sliderRange,
+                sliderStep = setting.sliderStep,
+                onSliderChange = setting.onSliderChange,
+                sliderLabel = setting.sliderLabel,
+                customContent = setting.customContent
+            )
+        }
 
         if (bottomContent != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        leftColumnItems.forEach { setting ->
-                            SettingCard(
-                                title = setting.title,
-                                description = setting.description,
-                                checked = setting.checked,
-                                onCheckedChange = setting.onCheckedChange,
-                                enabled = setting.enabled,
-                                sliderValue = setting.sliderValue,
-                                sliderRange = setting.sliderRange,
-                                sliderStep = setting.sliderStep,
-                                onSliderChange = setting.onSliderChange,
-                                sliderLabel = setting.sliderLabel,
-                                customContent = setting.customContent
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        rightColumnItems.forEach { setting ->
-                            SettingCard(
-                                title = setting.title,
-                                description = setting.description,
-                                checked = setting.checked,
-                                onCheckedChange = setting.onCheckedChange,
-                                enabled = setting.enabled,
-                                sliderValue = setting.sliderValue,
-                                sliderRange = setting.sliderRange,
-                                sliderStep = setting.sliderStep,
-                                onSliderChange = setting.onSliderChange,
-                                sliderLabel = setting.sliderLabel,
-                                customContent = setting.customContent
-                            )
-                        }
-                    }
-                }
-
-                bottomContent()
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    leftColumnItems.forEach { setting ->
-                        SettingCard(
-                            title = setting.title,
-                            description = setting.description,
-                            checked = setting.checked,
-                            onCheckedChange = setting.onCheckedChange,
-                            enabled = setting.enabled,
-                            sliderValue = setting.sliderValue,
-                            sliderRange = setting.sliderRange,
-                            sliderStep = setting.sliderStep,
-                            onSliderChange = setting.onSliderChange,
-                            sliderLabel = setting.sliderLabel,
-                            customContent = setting.customContent
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    rightColumnItems.forEach { setting ->
-                        SettingCard(
-                            title = setting.title,
-                            description = setting.description,
-                            checked = setting.checked,
-                            onCheckedChange = setting.onCheckedChange,
-                            enabled = setting.enabled,
-                            sliderValue = setting.sliderValue,
-                            sliderRange = setting.sliderRange,
-                            sliderStep = setting.sliderStep,
-                            onSliderChange = setting.onSliderChange,
-                            sliderLabel = setting.sliderLabel,
-                            customContent = setting.customContent
-                        )
-                    }
+            item(span = StaggeredGridItemSpan.FullLine) {
+                // Adicionamos um spacer extra para afastar do grid se necessário
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    bottomContent()
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

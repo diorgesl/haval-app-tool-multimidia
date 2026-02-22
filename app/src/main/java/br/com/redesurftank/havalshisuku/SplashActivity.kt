@@ -5,11 +5,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,13 +21,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,140 +62,206 @@ class SplashActivity : ComponentActivity() {
 @Composable
 fun SplashScreen(onComplete: () -> Unit) {
     var progress by remember { mutableFloatStateOf(0f) }
-    var showDots by remember { mutableStateOf(true) }
     
-    // Animate progress
+    // Scale animation for breathing effect on logo
+    val infiniteTransition = rememberInfiniteTransition(label = "breathing")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
+    // Entry animation for alpha
+    val alphaAnim = animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(1500),
+        label = "alpha"
+    )
+
     LaunchedEffect(Unit) {
         // Simulate loading
         for (i in 1..100) {
             progress = i / 100f
-            delay(30) // 3 seconds total
+            delay(30) // ~3 seconds total
         }
         onComplete()
     }
-    
-    // Dots animation
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(500)
-            showDots = !showDots
-        }
-    }
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.radialGradient(
+                Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF2A3F5F),
-                        Color(0xFF151920)
-                    ),
-                    radius = 800f
+                        Color(0xFF0F172A), // Deep Slate
+                        Color(0xFF020617)  // Near Black
+                    )
                 )
             ),
         contentAlignment = Alignment.Center
     ) {
+        // Background Ambient Glows
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                color = Color(0xFF4A9EFF).copy(alpha = 0.04f),
+                radius = size.minDimension * 0.9f,
+                center = Offset(size.width * 0.15f, size.height * 0.2f)
+            )
+            drawCircle(
+                color = Color(0xFF4A9EFF).copy(alpha = 0.04f),
+                radius = size.minDimension * 0.7f,
+                center = Offset(size.width * 0.85f, size.height * 0.8f)
+            )
+        }
+
+        // Main Glass Container
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .graphicsLayer(alpha = alphaAnim.value)
+                .width(520.dp)
+                .padding(16.dp)
+                .background(
+                    color = Color.White.copy(alpha = 0.02f),
+                    shape = RoundedCornerShape(32.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.12f),
+                            Color.Transparent,
+                            Color(0xFF4A9EFF).copy(alpha = 0.15f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(32.dp)
+                )
+                .padding(vertical = 48.dp, horizontal = 40.dp)
         ) {
-            // Logo Container
-            Box(
-                modifier = Modifier.size(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // Animated Circle
-                Canvas(
-                    modifier = Modifier.size(180.dp)
-                ) {
-                    drawAnimatedCircle(progress)
-                }
-                
-                // Lightning Logo
-                Canvas(
-                    modifier = Modifier.size(80.dp)
-                ) {
-                    drawLightningLogo()
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(40.dp))
-            
-            // HAVAL Text
-            Text(
-                stringResource(R.string.app_splash_title),
-                color = Color.White,
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 8.sp
-            )
-            
-            // IMPULSE Text
-            Text(
-                stringResource(R.string.app_splash_subtitle),
-                color = Color(0xFF4A9EFF),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Light,
-                letterSpacing = 12.sp
-            )
-            
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            // Support Text
-            Text(
-                stringResource(R.string.app_splash_support),
-                color = Color(0xFFB0B8C4),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                letterSpacing = 2.sp
-            )
-            
-            Spacer(modifier = Modifier.height(60.dp))
-            
-            // Loading dots
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.height(20.dp)
-            ) {
-                for (i in 0..2) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(
-                                if (showDots || i == 0) Color(0xFF4A9EFF) 
-                                else Color(0xFF4A9EFF).copy(alpha = 0.3f),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
-                    )
-                    if (i < 2) Spacer(modifier = Modifier.width(16.dp))
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(40.dp))
-            
-            // Loading Text
-            Text(
-                stringResource(R.string.app_splash_init),
-                color = Color(0xFFB0B8C4),
-                fontSize = 16.sp
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Progress Bar
+            // Logo with breathing effect and glow
             Box(
                 modifier = Modifier
-                    .width(300.dp)
-                    .height(4.dp)
+                    .size(150.dp)
+                    .graphicsLayer(scaleX = scale, scaleY = scale),
+                contentAlignment = Alignment.Center
             ) {
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFF4A9EFF),
-                    trackColor = Color(0xFF2A3F47).copy(alpha = 0.5f)
+                // Subtle radial glow behind logo
+                Box(
+                    modifier = Modifier
+                        .size(130.dp)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0xFF4A9EFF).copy(alpha = 0.12f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
                 )
+                Image(
+                    painter = painterResource(id = R.mipmap.ic_launcher_havalx),
+                    contentDescription = "Haval X Logo",
+                    modifier = Modifier.size(120.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Branding Section
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    stringResource(R.string.app_splash_title),
+                    color = Color.White,
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 10.sp,
+                    style = MaterialTheme.typography.displaySmall
+                )
+                
+                Text(
+                    stringResource(R.string.app_splash_subtitle),
+                    color = Color(0xFF4A9EFF).copy(alpha = 0.9f),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(56.dp))
+
+            // Progress Section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(300.dp)
+            ) {
+                // High-tech Progress Bar
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(Color.White.copy(alpha = 0.06f), CircleShape)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .fillMaxHeight()
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFF4A9EFF).copy(alpha = 0.6f),
+                                        Color(0xFF4A9EFF)
+                                    )
+                                ),
+                                CircleShape
+                            )
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = CircleShape,
+                                spotColor = Color(0xFF4A9EFF)
+                            )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Text(
+                    stringResource(R.string.app_splash_init).uppercase(),
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 3.sp
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // Active loading indicator (small dots or light glow)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(3) { i ->
+                        val dotAlpha by infiniteTransition.animateFloat(
+                            initialValue = 0.2f,
+                            targetValue = 1f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(600, delayMillis = i * 200),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "dotAlpha"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(4.dp)
+                                .graphicsLayer(alpha = dotAlpha)
+                                .background(Color(0xFF4A9EFF), CircleShape)
+                        )
+                    }
+                }
             }
         }
     }
@@ -219,55 +293,3 @@ fun DrawScope.drawAnimatedCircle(progress: Float) {
     }
 }
 
-fun DrawScope.drawLightningLogo() {
-    val centerX = size.width / 2
-    val centerY = size.height / 2
-    val scale = size.minDimension * 0.01f
-    
-    // Lightning bolt path matching the app icon
-    val lightningPath = Path().apply {
-        moveTo(centerX + scale * 16f, centerY - scale * 26f)  // Top point
-        lineTo(centerX - scale * 16f, centerY + scale * 0f)   // Left middle
-        lineTo(centerX - scale * 4f, centerY + scale * 0f)    // Small indent right
-        lineTo(centerX - scale * 18f, centerY + scale * 26f)  // Bottom point
-        lineTo(centerX + scale * 10f, centerY + scale * 1f)   // Right middle
-        lineTo(centerX - scale * 2f, centerY + scale * 1f)    // Small indent left
-        close()
-    }
-    
-    // Drop shadow
-    val shadowPath = Path().apply {
-        moveTo(centerX + scale * 16.5f, centerY - scale * 25.5f)
-        lineTo(centerX - scale * 15.5f, centerY + scale * 0.5f)
-        lineTo(centerX - scale * 3.5f, centerY + scale * 0.5f)
-        lineTo(centerX - scale * 17.5f, centerY + scale * 26.5f)
-        lineTo(centerX + scale * 10.5f, centerY + scale * 1.5f)
-        lineTo(centerX - scale * 1.5f, centerY + scale * 1.5f)
-        close()
-    }
-    
-    // Draw shadow
-    drawPath(
-        path = shadowPath,
-        color = Color.Black.copy(alpha = 0.15f)
-    )
-    
-    // Draw outer glow
-    drawPath(
-        path = lightningPath,
-        color = Color.White.copy(alpha = 0.2f),
-        style = Stroke(width = scale * 3f)
-    )
-    
-    // Draw main lightning bolt in white
-    drawPath(
-        path = lightningPath,
-        color = Color.White
-    )
-    
-    // Add subtle blue tint on top
-    drawPath(
-        path = lightningPath,
-        color = Color(0xFF6BB6FF).copy(alpha = 0.1f)
-    )
-}

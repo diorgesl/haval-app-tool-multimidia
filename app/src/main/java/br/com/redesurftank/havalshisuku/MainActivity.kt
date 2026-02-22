@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -170,7 +171,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     val prefs = App.getDeviceProtectedContext().getSharedPreferences("haval_prefs", Context.MODE_PRIVATE)
-    val advancedUse = prefs.getBoolean(SharedPreferencesKeys.ADVANCE_USE.key, false)
+    var advancedUse by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ADVANCE_USE.key, false)) }
+
+    DisposableEffect(Unit) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == SharedPreferencesKeys.ADVANCE_USE.key) {
+                advancedUse = sharedPreferences.getBoolean(key, false)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
 
     val menuItems = buildList {
         add(DrawerMenuItem("Dashboard", Icons.Default.Dashboard))
@@ -203,6 +216,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
+                    .verticalScroll(rememberScrollState())
             ) {
                 menuItems.forEachIndexed { index, item ->
                     val animatedWidth by animateFloatAsState(
@@ -298,9 +312,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     0 -> DashboardTab()
                     1 -> BasicSettingsTab()
                     2 -> TelasTab()
-                    3 -> InstallAppsTab()
-                    4 -> InformacoesTab()
-                    5 -> FridaHooksTab()
+                    3 -> CurrentValuesTab()
+                    4 -> InstallAppsTab()
+                    5 -> InformacoesTab()
+                    6 -> FridaHooksTab()
                 }
             }
         }
@@ -1131,42 +1146,40 @@ fun FridaHooksTab() {
     var enableFridaHookSystemServer by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOK_SYSTEM_SERVER.key, false)) }
     var showFridaDialog by remember { mutableStateOf(false) }
     var showManualDialog by remember { mutableStateOf(false) }
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            SettingCard(
-                title = "Habilitar Frida Hooks",
-                description = SharedPreferencesKeys.ENABLE_FRIDA_HOOKS.description,
-                checked = enableFridaHooks,
-                onCheckedChange = { newValue ->
-                    if (!newValue) {
-                        enableFridaHooks = false
-                        prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOKS.key, false) }
-                    } else {
-                        showFridaDialog = true
-                    }
+    val settingsList = listOf(
+        SettingItem(
+            title = "Habilitar Frida Hooks",
+            description = SharedPreferencesKeys.ENABLE_FRIDA_HOOKS.description,
+            checked = enableFridaHooks,
+            onCheckedChange = { newValue ->
+                if (!newValue) {
+                    enableFridaHooks = false
+                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOKS.key, false) }
+                } else {
+                    showFridaDialog = true
                 }
-            )
-        }
-        item {
-            SettingCard(
-                title = "Hook System Server",
-                description = SharedPreferencesKeys.ENABLE_FRIDA_HOOK_SYSTEM_SERVER.description,
-                checked = enableFridaHookSystemServer,
-                onCheckedChange = { newValue ->
-                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOK_SYSTEM_SERVER.key, newValue) }
-                    enableFridaHookSystemServer = newValue
-                    if (newValue)
-                        FridaUtils.injectSystemServer()
-                }
-            )
-        }
-        item {
+            }
+        ),
+        SettingItem(
+            title = "Hook System Server",
+            description = SharedPreferencesKeys.ENABLE_FRIDA_HOOK_SYSTEM_SERVER.description,
+            checked = enableFridaHookSystemServer,
+            onCheckedChange = { newValue ->
+                prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_FRIDA_HOOK_SYSTEM_SERVER.key, newValue) }
+                enableFridaHookSystemServer = newValue
+                if (newValue)
+                    FridaUtils.injectSystemServer()
+            }
+        )
+    )
+
+    TwoColumnSettingsLayout(
+        settingsList = settingsList,
+        bottomContent = {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color(0xFF13151A)
                 )
@@ -1184,7 +1197,7 @@ fun FridaHooksTab() {
                 }
             }
         }
-    }
+    )
     if (showFridaDialog) {
         AlertDialog(
             onDismissRequest = { showFridaDialog = false },
