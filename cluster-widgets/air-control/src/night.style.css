@@ -1140,23 +1140,45 @@ canvas.regen-chart {
 }
 
 .graph-curved-labels text {
-  font-family: 'Khand', sans-serif;
-  font-weight: 700;
-  font-size: 24px;
   fill-opacity: 1;
 }
 
 .curved-label-rpm {
-  fill: #ff8c00;
+  fill: #ff5500;
+  font-family: 'Khand', sans-serif;
+  font-size: 24px;
+  font-weight: 300;
   dominant-baseline: hanging;
+}
+
+#graph-rpm-bar-svg {
+  stroke: #ff5500;
 }
 
 .curved-label-power {
-  fill: #4a90e2;
+  fill: #00c3ff;
+  font-family: 'Khand', sans-serif;
+  font-size: 34px;
+  font-weight: 500;
   dominant-baseline: hanging;
 }
 
+#graph-power-bar-svg {
+  stroke: #00c3ff;
+  transition: stroke 0.3s ease;
+}
 
+#graph-power-path {
+  fill: #00c3ff;
+  transition: fill 0.3s ease; }
+
+#graph-power-bar-svg.regen-active {
+  stroke: #00ff88;
+}
+
+#graph-power-path.regen-active {
+  fill: #00ff88;
+}
 
 .graph-inner-ring {
   position: absolute;
@@ -1307,7 +1329,7 @@ canvas.regen-chart {
   top: 62px;
   left: 255px;
   color: #9affb5;
-  font-size: 18px;
+  font-size: 16px;
   opacity: 0.8;
 }
 

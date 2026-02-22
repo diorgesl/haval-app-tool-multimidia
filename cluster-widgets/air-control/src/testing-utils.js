@@ -92,12 +92,12 @@ document.addEventListener('keydown', (e) => {
             const newAutoModeState = (currentState.auto == 0 ? 1 : 0);
             setState('auto', newAutoModeState);
         } else if (e.key === 'a') {
-/* TODO: for future use with impulseauto. For now it triggers maxauto mode
-            e.preventDefault();
-            const newModeState = (currentState.impulseauto == 0 ? 1 : 0);
-            setState('impulseauto', newModeState);
-            window.focus('temp');
-*/
+            /* TODO: for future use with impulseauto. For now it triggers maxauto mode
+                        e.preventDefault();
+                        const newModeState = (currentState.impulseauto == 0 ? 1 : 0);
+                        setState('impulseauto', newModeState);
+                        window.focus('temp');
+            */
             e.preventDefault();
             const newModeState = (currentState.maxauto == 0 ? 1 : 0);
             setState('maxauto', newModeState);
@@ -265,10 +265,11 @@ window.simulationInterval = setInterval(() => {
         setState('engineRPM', 800);
     }
 
-    // Simulate EV consumption: can be positive (accelerating) or negative (braking/regen)
-    // lastValue is 0..100
-    // Let's make it -100 to 100
-    setState('evConsumption', Math.round(lastValue * 2) - 100);
+    // Simulate EV power factor: -100 to +100 % (for power ring)
+    const powerFactor = Math.round(lastValue * 2) - 100;
+    setState('evPowerFactor', powerFactor);
+    // Simulate EV power in kW: ±120 kW range (for graph)
+    setState('evPowerKw', Math.round(powerFactor * 1.2));
     setState('lastRegenValue', Math.round(lastValue));
 
 }, SIMULATION_INTERVAL);

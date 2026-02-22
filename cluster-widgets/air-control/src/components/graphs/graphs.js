@@ -16,19 +16,21 @@ export const graphList = [
     {
         id: 'evConsumption',
         displayLabel: 'Consumo EV',
-        decimalPlaces: 0,
+        decimalPlaces: 1,
         secondaryDecimalPlaces: 1,
+        primaryColor: '#ffffff',
+        secondaryColor: '#00c3ff',
         datasets: [
             {
-                label: 'Consumo EV',
-                dataKey: 'evConsumption',
-                unity: '% de Energia',
+                label: 'Potência EV',
+                dataKey: 'evPowerKw',
+                unity: 'kWatts',
                 yAxisID: 'y'
             },
             {
                 label: 'Média',
-                dataKey: 'evConsumptionAvg',
-                unity: '% avg',
+                dataKey: 'evPowerKwAvg',
+                unity: 'kWavg',
                 yAxisID: 'y'
             }
         ]
@@ -38,20 +40,22 @@ export const graphList = [
         displayLabel: 'Consumo Misto',
         decimalPlaces: 1,
         secondaryDecimalPlaces: 1,
+        primaryColor: '#00c3ff',
+        secondaryColor: '#ff5500',
         datasets: [
+            {
+                label: 'Consumo Elétrico',
+                dataKey: 'evPowerKw',
+                unity: 'kWatts',
+                yAxisID: 'y'
+            },
             {
                 label: 'Consumo Instantâneo',
                 dataKey: 'gasConsumptionSmoothed',
                 unity: 'Km/L',
-                yAxisID: 'y',
+                yAxisID: 'y1',
                 idleKey: 'gasConsumptionIdle',
-                idleUnity: 'L/100km',
-            },
-            {
-                label: 'Consumo Elétrico',
-                dataKey: 'evConsumption',
-                unity: '%',
-                yAxisID: 'y1'
+                idleUnity: 'l/100km',
             }
         ]
     },
@@ -60,6 +64,8 @@ export const graphList = [
         displayLabel: 'Velocidade',
         decimalPlaces: 0,
         secondaryDecimalPlaces: 1,
+        primaryColor: '#00c3ff',
+        secondaryColor: '#ff5500',
         datasets: [
             {
                 label: 'Velocidade',
@@ -110,7 +116,7 @@ function startGlobalDataCollector() {
         setState('gasConsumptionSmoothed', smoothedGas);
 
         for (const dataKey in historicalData) {
-            if (dataKey === 'evConsumptionAvg') continue;
+            if (dataKey === 'evPowerKwAvg') continue;
 
             const value = getState(dataKey);
             if (value !== undefined) {
@@ -123,22 +129,22 @@ function startGlobalDataCollector() {
             }
         }
 
-        // Calculate Average for last 30s
-        if (historicalData['evConsumption']) {
-            const evData = historicalData['evConsumption'];
+        // Calculate rolling average for evPowerKw
+        if (historicalData['evPowerKw']) {
+            const evData = historicalData['evPowerKw'];
             if (evData.length > 0) {
                 const sum = evData.reduce((acc, point) => acc + point.y, 0);
                 const avg = sum / evData.length;
 
                 // Update Global State for Tooltip/Label
-                setState('evConsumptionAvg', avg);
+                setState('evPowerKwAvg', avg);
 
-                if (!historicalData['evConsumptionAvg']) historicalData['evConsumptionAvg'] = [];
-                historicalData['evConsumptionAvg'].push({ x: now, y: avg });
+                if (!historicalData['evPowerKwAvg']) historicalData['evPowerKwAvg'] = [];
+                historicalData['evPowerKwAvg'].push({ x: now, y: avg });
 
-                const firstPoint = historicalData['evConsumptionAvg'][0];
+                const firstPoint = historicalData['evPowerKwAvg'][0];
                 if (firstPoint && now - firstPoint.x > DURATION) {
-                    historicalData['evConsumptionAvg'].shift();
+                    historicalData['evPowerKwAvg'].shift();
                 }
             }
         }
@@ -153,6 +159,10 @@ const graphController = {
         primary: '#00c3ff',
         secondary: '#9affb5'
     },
+
+    // Resolved colors for the current graph (updated by switchTo)
+    currentPrimary: '#00c3ff',
+    currentSecondary: '#9affb5',
 
     chartInstance: null,
     isInitialized: false,
@@ -369,7 +379,7 @@ const graphController = {
                         primaryTooltipEl.querySelector('.tooltip-value').textContent = value1.toFixed(dataset1Info.decimalPlaces || 1);
                         primaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset1Info.unity;
                         primaryLineEl.style.top = `${yAxis.getPixelForValue(value1) + LINE_OFFSET}px`;
-                        primaryLineEl.style.backgroundColor = this.colors.primary;
+                        primaryLineEl.style.backgroundColor = this.currentPrimary;
                         primaryTooltipEl.style.opacity = 1;
                         primaryLineEl.style.opacity = 0.5;
                     }
@@ -377,8 +387,10 @@ const graphController = {
                     if (value2 !== undefined && secondaryTooltipEl && secondaryLineEl) {
                         secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 1);
                         secondaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset2Info.unity;
+                        secondaryTooltipEl.querySelector('.tooltip-value').style.color = this.currentSecondary;
+                        secondaryTooltipEl.querySelector('.tooltip-unity').style.color = this.currentSecondary;
                         secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + LINE_OFFSET}px`;
-                        secondaryLineEl.style.backgroundColor = this.colors.secondary;
+                        secondaryLineEl.style.backgroundColor = this.currentSecondary;
                         secondaryTooltipEl.style.opacity = 1;
                         secondaryLineEl.style.opacity = 0.5;
                     }
@@ -457,30 +469,31 @@ const graphController = {
                     this.setChronometer('stop');
 
                     if (graphInfo.id === 'gasConsumption') {
+                        const evVal = getState('evPowerFactor');
+                        activeValue = evVal;
+                        activeUnity = graphInfo.datasets[0].unity;
+                        activeDatasetIndex = 0;
+
                         const runningValue = getState('gasConsumptionSmoothed');
-                        const idleValue = getState(graphInfo.datasets[0].idleKey);
+                        const idleValue = getState(graphInfo.datasets[1].idleKey);
                         if (runningValue > 0) {
-                            activeValue = runningValue;
-                            activeUnity = graphInfo.datasets[0].unity;
-                            activeDatasetIndex = 0;
+                            secValue = runningValue;
+                            secUnity = graphInfo.datasets[1].unity;
+                            //secDatasetIndex = 1;
                         } else {
-                            activeValue = idleValue;
-                            activeUnity = graphInfo.datasets[0].idleUnity;
-                            activeDatasetIndex = 0;
+                            secValue = idleValue;
+                            secUnity = graphInfo.datasets[1].idleUnity;
+                            //secDatasetIndex = 1;
                         }
 
-                        // Second dataset for gasConsumption is evConsumption
-                        const evVal = getState('evConsumption');
-                        secValue = evVal;
-                        secUnity = graphInfo.datasets[1].unity;
                     } else if (graphInfo.id === 'evConsumption') {
                         const mainDatasetInfo = graphInfo.datasets[0];
                         activeValue = getState(mainDatasetInfo.dataKey);
                         activeUnity = mainDatasetInfo.unity;
                         activeDatasetIndex = 0;
 
-                        // Second dataset for evConsumption is evConsumptionAvg
-                        secValue = getState('evConsumptionAvg');
+                        // Second dataset for evConsumption graph is evPowerKwAvg (rolling avg kW)
+                        secValue = getState('evPowerKwAvg');
                         secUnity = graphInfo.datasets[1].unity;
                     } else {
                         const mainDatasetInfo = graphInfo.datasets[0];
@@ -494,7 +507,7 @@ const graphController = {
                         primaryTooltipEl.querySelector('.tooltip-value').textContent = activeValue.toFixed(graphInfo.decimalPlaces || 0);
                         primaryTooltipEl.querySelector('.tooltip-unity').textContent = activeUnity;
                         primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + LINE_OFFSET}px`;
-                        primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? this.colors.primary : this.colors.secondary;
+                        primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? this.currentPrimary : this.currentSecondary;
                         primaryTooltipEl.style.opacity = 1;
                         primaryLineEl.style.opacity = 0.5;
                     }
@@ -505,8 +518,10 @@ const graphController = {
 
                         secondaryTooltipEl.querySelector('.tooltip-value').textContent = secValue.toFixed(graphInfo.secondaryDecimalPlaces !== undefined ? graphInfo.secondaryDecimalPlaces : (graphInfo.decimalPlaces || 0));
                         secondaryTooltipEl.querySelector('.tooltip-unity').textContent = secUnity;
+                        secondaryTooltipEl.querySelector('.tooltip-value').style.color = this.currentSecondary;
+                        secondaryTooltipEl.querySelector('.tooltip-unity').style.color = this.currentSecondary;
                         secondaryLineEl.style.top = `${secAxis.getPixelForValue(secValue) + LINE_OFFSET}px`;
-                        secondaryLineEl.style.backgroundColor = this.colors.secondary;
+                        secondaryLineEl.style.backgroundColor = this.currentSecondary;
                         secondaryTooltipEl.style.opacity = 1;
                         secondaryLineEl.style.opacity = 0.5;
                         secondaryTooltipEl.style.display = 'flex';
@@ -516,7 +531,7 @@ const graphController = {
                 this.chartInstance.update('quiet');
 
                 // Update Power/RPM Ring
-                const powerV = getState('evConsumption');
+                const powerV = getState('evPowerFactor');
                 const rpmV = getState('engineRPM');
 
                 const powerBar = document.getElementById('graph-power-bar-svg');
@@ -525,10 +540,22 @@ const graphController = {
                 const powerPath = document.getElementById('graph-power-path');
 
                 if (powerBar && rpmBar) {
+                    const isRegen = powerV < 0;
+
+                    if (isRegen) {
+                        powerBar.classList.add('regen-active');
+                        if (powerPath) powerPath.classList.add('regen-active');
+                    } else {
+                        powerBar.classList.remove('regen-active');
+                        if (powerPath) powerPath.classList.remove('regen-active');
+                    }
+
                     const wrapAngle = (a) => ((a % 360) + 360) % 360;
 
-                    // Scaling: Power 100 = 135 deg, RPM 7000 = 90 deg
-                    const powerAngleWidth = (powerV / 100) * 135;
+                    // Scaling: Power 100 = 270 deg if positive and 90 deg if negative, RPM 7000 = 90 deg
+                    const powerAngleWidth = powerV >= 0
+                        ? (powerV / 100) * 270
+                        : (powerV / 100) * 90;
                     const rpmAngleWidth = (rpmV / 7000) * 90;
 
                     const pStart = 270; // LEFT side
@@ -553,7 +580,7 @@ const graphController = {
                     if (Math.abs(powerAngleWidth) > 0.1) {
                         powerBar.setAttribute("d", `M ${pS.x} ${pS.y} A ${radius} ${radius} 0 ${pLarge} ${pSweep} ${pE.x} ${pE.y}`);
                         powerBar.style.opacity = 1;
-                        powerBar.setAttribute("stroke-width", "4.5");
+                        powerBar.setAttribute("stroke-width", "10");
                     } else {
                         powerBar.style.opacity = 0;
                     }
@@ -565,15 +592,15 @@ const graphController = {
                     if (rpmV > 1) {
                         rpmBar.setAttribute("d", `M ${rS.x} ${rS.y} A ${radius} ${radius} 0 ${rLarge} 1 ${rE.x} ${rE.y}`);
                         rpmBar.style.opacity = 1;
-                        rpmBar.setAttribute("stroke-width", "4.5");
+                        rpmBar.setAttribute("stroke-width", "10");
                     } else {
                         rpmBar.style.opacity = 0;
                     }
 
                     // Update Curved Labels (RADIUS 210 - INSIDE)
                     if (rpmPath) {
-                        const rpm = Math.round(rpmV);
-                        rpmPath.textContent = ` ${rpm} rpm`;
+                        const rpm = (rpmV / 1000).toFixed(1);
+                        rpmPath.textContent = ` ${rpm} kRPM`;
                         rpmPath.parentElement.style.opacity = rpm > 0 ? 1 : 0;
 
                         // RPM Label follows rStart (start of RPM bar)
@@ -592,10 +619,10 @@ const graphController = {
                         rpmPath.setAttribute('startOffset', `${rpmOffset}%`);
                     }
                     if (powerPath) {
-                        const pwr = Math.round(powerV);
-                        powerPath.textContent = `${pwr}% power`;
+                        const pwr = Math.abs(Math.round(powerV));
+                        powerPath.textContent = `${pwr} %`;
                         powerPath.parentElement.style.opacity = Math.abs(pwr) > 0 ? 1 : 0;
-                        powerPath.setAttribute('startOffset', `75%`); // Fixed at Left (270 deg)
+                        powerPath.setAttribute('startOffset', '75%');
                     }
                 }
             } catch (error) {
@@ -636,14 +663,14 @@ const graphController = {
 
 
         if (graphId === 'gasConsumption') {
-            scales.y.min = -15;
-            scales.y.max = 45;
-            scales.y.ticks.stepSize = 10;
-            scales.y.ticks.color = this.colors.primary + 'B3';
-            scales.y1.min = -125;
-            scales.y1.max = 115;
-            scales.y1.ticks.stepSize = 25;
-            scales.y1.ticks.color = this.colors.secondary + 'B3';
+            scales.y.min = -50;
+            scales.y.max = 140;
+            scales.y.ticks.stepSize = 50;
+            scales.y.ticks.color = this.colors.secondary + 'B3';
+            scales.y1.min = -15;
+            scales.y1.max = 45;
+            scales.y1.ticks.stepSize = 10;
+            scales.y1.ticks.color = this.colors.primary + 'B3';
         } else if (graphId === 'carSpeed') {
             scales.y.min = -50;
             scales.y.max = 200;
@@ -653,25 +680,35 @@ const graphController = {
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = this.colors.secondary + 'B3';
         } else if (graphId === 'evConsumption') {
-            scales.y.min = -125
-            scales.y.max = 115;
-            scales.y.ticks.stepSize = 25;
-            scales.y1.min = -125;
-            scales.y1.max = 115;
-            scales.y1.ticks.stepSize = 25;
+            scales.y.min = -100;
+            scales.y.max = 140;
+            scales.y.ticks.stepSize = 50;
+            scales.y1.min = -100;
+            scales.y1.max = 140;
+            scales.y1.ticks.stepSize = 50;
         }
 
+        // Resolve colors: per-graph overrides take priority over global defaults
+        const primary = graphInfo.primaryColor || this.colors.primary;
+        const secondary = graphInfo.secondaryColor || this.colors.secondary;
+        this.currentPrimary = primary;
+        this.currentSecondary = secondary;
+
         const newDatasets = [];
-        const datasetColors = [this.colors.primary, this.colors.secondary];
+        const datasetColors = [primary, secondary];
+
+        // Update axis tick colors to match the resolved palette
+        scales.y.ticks.color = primary + 'B3';
 
         graphInfo.datasets.forEach((datasetInfo, index) => {
             if (datasetInfo.dataKey) {
+                const color = datasetColors[index];
                 newDatasets.push({
                     label: datasetInfo.label,
                     data: historicalData[datasetInfo.dataKey] || [],
                     yAxisID: datasetInfo.yAxisID,
-                    borderColor: datasetColors[index],
-                    backgroundColor: index === 0 ? this.colors.primary + '26' : this.colors.secondary + '1A',
+                    borderColor: color,
+                    backgroundColor: color + (index === 0 ? '26' : '1A'),
                     borderWidth: 2,
                     pointRadius: 0,
                     fill: true,
@@ -751,15 +788,11 @@ export function createGraphScreen() {
     const powerBar = document.createElementNS(svgNS, "path");
     powerBar.setAttribute("id", "graph-power-bar-svg");
     powerBar.setAttribute("fill", "none");
-    powerBar.setAttribute("stroke", "#4a90e2");
-    powerBar.setAttribute("stroke-width", "3");
     svg.appendChild(powerBar);
 
     const rpmBar = document.createElementNS(svgNS, "path");
     rpmBar.setAttribute("id", "graph-rpm-bar-svg");
     rpmBar.setAttribute("fill", "none");
-    rpmBar.setAttribute("stroke", "#ff8c00");
-    rpmBar.setAttribute("stroke-width", "3");
     svg.appendChild(rpmBar);
 
     const rpmText = document.createElementNS(svgNS, "text");

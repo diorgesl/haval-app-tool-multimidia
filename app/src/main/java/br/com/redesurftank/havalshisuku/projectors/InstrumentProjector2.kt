@@ -6,8 +6,6 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Outline
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Display
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -40,6 +38,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) :
     private val webViewsLoaded = mutableMapOf<WebView, Boolean>()
     private val pendingJsQueues = mutableMapOf<WebView, MutableList<String>>()
     private lateinit var root: FrameLayout
+
+    // Cached EV power values for kW calculation
+    private var batteryVoltage = 0f
+    private var batteryCurrent = 0f
 
     private val prefsListener =
             SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -171,19 +173,33 @@ class InstrumentProjector2(outerContext: Context, display: Display) :
                         val regenValue = kotlin.math.max(0.0f, -1 * (value).toFloat())
                         evaluateJsIfReady(
                                 webView,
-                                "control('${GraphicsScreen.GraphOptions.EV_CONSUMPTION}',$value)"
+                                "control('${GraphicsScreen.GraphOptions.EV_POWER_FACTOR}',$value)"
                         )
                         evaluateJsIfReady(
                                 webView,
                                 "control('${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME}', $regenValue)"
                         )
                     }
+                    CarConstants.CAR_EV_INFO_POWER_BATTERY_VOLTAGE.value -> {
+                        batteryVoltage = value.toFloatOrNull() ?: 0f
+                        val kw = batteryVoltage * batteryCurrent / 1000f
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${GraphicsScreen.GraphOptions.EV_POWER_KW}', $kw)"
+                        )
+                    }
+                    CarConstants.CAR_EV_INFO_CUR_CHARGE_CURRENT.value -> {
+                        batteryCurrent = value.toFloatOrNull() ?: 0f
+                        val kw = batteryVoltage * batteryCurrent / 1000f
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${GraphicsScreen.GraphOptions.EV_POWER_KW}', $kw)"
+                        )
+                    }
                     CarConstants.CAR_BASIC_INSTANT_FUEL_CONSUMPTION.value -> {
                         val stringValue = value.toString()
                         var metricValue = 0.0f
                         var consumptionValue = 0.0f
-                        var consumptionMetric = "km/l"
-                        var consumptionMetricIdle = "l/h"
                         var adjustedValue = 0.0f
                         var adjustedValueIdle = 0.0f
                         if (stringValue.startsWith("{") &&
@@ -256,7 +272,8 @@ class InstrumentProjector2(outerContext: Context, display: Display) :
                     ServiceManagerEventType.CLUSTER_CARD_CHANGED -> {
                         val card = args[0] as Int
                         circularView.isVisible = card != 0
-                        //webView?.visibility = View.INVISIBLE    //uncomment if you wan to show blank screen between card transitions
+                        // webView?.visibility = View.INVISIBLE    //uncomment if you wan to show
+                        // blank screen between card transitions
                         when (card) {
                             1, 3 -> {
                                 MainUiManager.getInstance().handleCardChange(card)
