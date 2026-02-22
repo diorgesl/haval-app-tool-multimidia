@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Outline
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Display
 import android.view.View
 import android.view.ViewOutlineProvider
@@ -29,27 +31,42 @@ import br.com.redesurftank.havalshisuku.models.screens.RegenScreen
 import br.com.redesurftank.havalshisuku.models.screens.Screen
 import kotlin.math.roundToInt
 
-class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjector(outerContext, display) {
-    private val preferences: SharedPreferences = App.getDeviceProtectedContext().getSharedPreferences("haval_prefs", Context.MODE_PRIVATE)
+class InstrumentProjector2(outerContext: Context, display: Display) :
+        BaseProjector(outerContext, display) {
+    private val preferences: SharedPreferences =
+            App.getDeviceProtectedContext()
+                    .getSharedPreferences("haval_prefs", Context.MODE_PRIVATE)
     private var webView: WebView? = null
     private val webViewsLoaded = mutableMapOf<WebView, Boolean>()
     private val pendingJsQueues = mutableMapOf<WebView, MutableList<String>>()
-    private lateinit var root: FrameLayout;
+    private lateinit var root: FrameLayout
 
-    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key in listOf(
-                SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key,
-                SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key
-            )
-        ) {
-            ensureUi {
-                root.isVisible = shouldShowProjector() && ServiceManager.getInstance().isMainScreenOn
+    private val prefsListener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                if (key in
+                                listOf(
+                                        SharedPreferencesKeys
+                                                .ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION
+                                                .key,
+                                        SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key
+                                )
+                ) {
+                    ensureUi {
+                        root.isVisible =
+                                shouldShowProjector() && ServiceManager.getInstance().isMainScreenOn
+                    }
+                }
             }
-        }
-    }
 
     private fun shouldShowProjector(): Boolean {
-        return preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, false) && preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false)
+        return preferences.getBoolean(
+                SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key,
+                false
+        ) &&
+                preferences.getBoolean(
+                        SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key,
+                        false
+                )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,11 +91,12 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         circularView.layoutParams = params
         circularView.setBackgroundColor(Color.TRANSPARENT)
         circularView.clipToOutline = true
-        circularView.outlineProvider = object : ViewOutlineProvider() {
-            override fun getOutline(view: View, outline: Outline) {
-                outline.setOval(0, 0, view.width, view.height)
-            }
-        }
+        circularView.outlineProvider =
+                object : ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: Outline) {
+                        outline.setOval(0, 0, view.width, view.height)
+                    }
+                }
         root.addView(circularView)
         circularView.isVisible = false
         setupAcControlView(circularView)
@@ -89,65 +107,77 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     CarConstants.CAR_HVAC_FAN_SPEED.value -> {
                         evaluateJsIfReady(webView, "control('fan', $value)")
                     }
-
                     CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.value -> {
                         evaluateJsIfReady(webView, "control('temp', $value)")
                     }
-
                     CarConstants.CAR_HVAC_POWER_MODE.value -> {
                         evaluateJsIfReady(webView, "control('power', $value)")
                     }
-
                     CarConstants.CAR_HVAC_CYCLE_MODE.value -> {
                         evaluateJsIfReady(webView, "control('recycle', $value)")
                     }
-
                     CarConstants.CAR_HVAC_AUTO_ENABLE.value -> {
                         evaluateJsIfReady(webView, "control('auto', $value)")
                     }
-
                     CarConstants.CAR_HVAC_ANION_ENABLE.value -> {
                         evaluateJsIfReady(webView, "control('aion', $value)")
                     }
-
                     CarConstants.CAR_BASIC_OUTSIDE_TEMP.value -> {
-                        evaluateJsIfReady(webView, "control('outside_temp', ${value.toFloat().roundToInt()})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('outside_temp', ${value.toFloat().roundToInt()})"
+                        )
                     }
-
                     CarConstants.CAR_BASIC_INSIDE_TEMP.value -> {
-                        evaluateJsIfReady(webView, "control('inside_temp', ${value.toFloat().roundToInt()})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('inside_temp', ${value.toFloat().roundToInt()})"
+                        )
                     }
-
                     CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value -> {
-                        evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(value)})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('evMode', ${MainMenu.EvModeOptions.getLabel(value)})"
+                        )
                     }
-
                     CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE.value -> {
-                        evaluateJsIfReady(webView, "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(value)})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(value)})"
+                        )
                     }
-
                     CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value -> {
-                        evaluateJsIfReady(webView, "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(value)})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(value)})"
+                        )
                     }
-
                     CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value -> {
-                        evaluateJsIfReady (webView, "control('espStatus', ${MainMenu.EspOptions.getLabel(value)})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('espStatus', ${MainMenu.EspOptions.getLabel(value)})"
+                        )
                     }
-
                     CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value -> {
-                        evaluateJsIfReady(webView, "control('onepedal', ${value == "1"})")                    }
-
+                        evaluateJsIfReady(webView, "control('onepedal', ${value == "1"})")
+                    }
                     CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value -> {
-                        evaluateJsIfReady (webView, "control('regenMode', ${RegenScreen.RegenOptions.getLabel(value)})")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('regenMode', ${RegenScreen.RegenOptions.getLabel(value)})"
+                        )
                     }
-
                     CarConstants.CAR_EV_INFO_ENERGY_OUTPUT_PERCENTAGE.value -> {
-                        val regenValue = kotlin.math.max(0.0f,-1 * (value).toFloat())
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.EV_CONSUMPTION}',$value)")
-                        evaluateJsIfReady (webView, "control('${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME}', $regenValue)")
-
+                        val regenValue = kotlin.math.max(0.0f, -1 * (value).toFloat())
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${GraphicsScreen.GraphOptions.EV_CONSUMPTION}',$value)"
+                        )
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${RegenScreen.RegenOptions.REGEN_GRAPH_STATE_NAME}', $regenValue)"
+                        )
                     }
-
                     CarConstants.CAR_BASIC_INSTANT_FUEL_CONSUMPTION.value -> {
                         val stringValue = value.toString()
                         var metricValue = 0.0f
@@ -156,7 +186,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         var consumptionMetricIdle = "l/h"
                         var adjustedValue = 0.0f
                         var adjustedValueIdle = 0.0f
-                        if (stringValue.startsWith("{") && stringValue.endsWith("}") && stringValue.contains(",")) {
+                        if (stringValue.startsWith("{") &&
+                                        stringValue.endsWith("}") &&
+                                        stringValue.contains(",")
+                        ) {
                             try {
                                 val cleanedString = stringValue.substring(1, stringValue.length - 1)
                                 val parts = cleanedString.split(',')
@@ -174,35 +207,44 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                             if (consumptionValue > 0.0f) {
                                 adjustedValueIdle = kotlin.math.truncate(consumptionValue * 10) / 10
                                 adjustedValue = 0.0f
-                                evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})")
+                                evaluateJsIfReady(
+                                        webView,
+                                        "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})"
+                                )
                             } else {
                                 adjustedValueIdle = 0.0f
                             }
                         } else if (metricValue == 1.0f) {
                             if (consumptionValue > 0.0f) {
-                                adjustedValue = kotlin.math.truncate(10 * 100 / consumptionValue) / 10
+                                adjustedValue =
+                                        kotlin.math.truncate(10 * 100 / consumptionValue) / 10
                                 adjustedValueIdle = 0.0f
                                 evaluateJsIfReady(
-                                    webView,
-                                    "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})"
+                                        webView,
+                                        "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_MODE}', ${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_METRIC_IDLE})"
                                 )
                             } else {
                                 adjustedValue = 0.0f
                             }
                         }
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_IDLE}', $adjustedValueIdle)")
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION_IDLE}', $adjustedValueIdle)"
+                        )
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${GraphicsScreen.GraphOptions.GAS_CONSUMPTION}', $adjustedValue)"
+                        )
                     }
-
-
                     CarConstants.CAR_BASIC_VEHICLE_SPEED.value -> {
-                        evaluateJsIfReady (webView, "control('${GraphicsScreen.GraphOptions.CAR_SPEED}',$value)")
+                        evaluateJsIfReady(
+                                webView,
+                                "control('${GraphicsScreen.GraphOptions.CAR_SPEED}',$value)"
+                        )
                     }
-
                     CarConstants.CAR_BASIC_ENGINE_SPEED.value -> {
-                        evaluateJsIfReady (webView, "control('engineRPM',$value)")
+                        evaluateJsIfReady(webView, "control('engineRPM',$value)")
                     }
-
                     else -> {}
                 }
             }
@@ -214,61 +256,48 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     ServiceManagerEventType.CLUSTER_CARD_CHANGED -> {
                         val card = args[0] as Int
                         circularView.isVisible = card != 0
-                        webView?.isVisible = false;
+                        //webView?.visibility = View.INVISIBLE    //uncomment if you wan to show blank screen between card transitions
                         when (card) {
-                            1,3 -> {
-                                showWebView()
+                            1, 3 -> {
                                 MainUiManager.getInstance().handleCardChange(card)
+                                updateValuesWebView()
+                                showWebView()
                             }
-
-                            else -> {
-
-                            }
+                            else -> {}
                         }
                     }
-
                     ServiceManagerEventType.STEERING_WHEEL_AC_CONTROL -> {
                         when (args[0] as SteeringWheelAcControlType) {
                             SteeringWheelAcControlType.FAN_SPEED -> {
                                 evaluateJsIfReady(webView, "focus('fan')")
                             }
-
-
                             SteeringWheelAcControlType.TEMPERATURE -> {
                                 evaluateJsIfReady(webView, "focus('temp')")
                             }
-
                             SteeringWheelAcControlType.POWER -> {
                                 evaluateJsIfReady(webView, "focus('power')")
                             }
                         }
                     }
-
                     ServiceManagerEventType.MENU_ITEM_NAVIGATION -> {
                         val item = args[0] as String
                         evaluateJsIfReady(webView, "focus('$item')")
                     }
-
                     ServiceManagerEventType.UPDATE_SCREEN -> {
                         val screen = args[0] as Screen
                         val screenName = screen.jsName
                         evaluateJsIfReady(webView, "showScreen('$screenName')")
                     }
-
                     ServiceManagerEventType.GRAPH_SCREEN_NAVIGATION -> {
                         val screen = args[0] as String
                         evaluateJsIfReady(webView, "control('currentGraph','$screen')")
                     }
-
                     ServiceManagerEventType.MAX_AUTO_AC_STATUS_CHANGED -> {
                         val maxauto = args[0] as Int
                         evaluateJsIfReady(webView, "control('maxauto', $maxauto)")
                     }
-
                 }
             }
-
-
         }
 
         root.isVisible = shouldShowProjector() && ServiceManager.getInstance().isMainScreenOn
@@ -277,32 +306,38 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupAcControlView(circularView: FrameLayout) {
         if (webView == null) {
-            webView = WebView(context).apply {
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.allowContentAccess = true
-                webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        view?.let {
-                            webViewsLoaded[it] = true
-                            updateValuesWebView()
-                            val queue = pendingJsQueues[it] ?: return
-                            queue.forEach { js -> it.evaluateJavascript(js, null) }
-                            pendingJsQueues.remove(it)
-                        }
+            webView =
+                    WebView(context).apply {
+                        layoutParams =
+                                FrameLayout.LayoutParams(
+                                        FrameLayout.LayoutParams.MATCH_PARENT,
+                                        FrameLayout.LayoutParams.MATCH_PARENT
+                                )
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.allowContentAccess = true
+                        webViewClient =
+                                object : WebViewClient() {
+                                    override fun onPageFinished(view: WebView?, url: String?) {
+                                        super.onPageFinished(view, url)
+                                        view?.let {
+                                            webViewsLoaded[it] = true
+                                            updateValuesWebView()
+                                            val queue = pendingJsQueues[it] ?: return
+                                            queue.forEach { js -> it.evaluateJavascript(js, null) }
+                                            pendingJsQueues.remove(it)
+                                        }
+                                    }
+                                }
+                        loadDataWithBaseURL(null, readRawHtml(context), "text/html", "UTF-8", null)
                     }
-                }
-                loadDataWithBaseURL(null, readRawHtml(context), "text/html", "UTF-8", null)
-            }
             circularView.addView(webView)
-            webView?.isVisible = false;
+            webView?.visibility = View.INVISIBLE
         }
     }
 
     private fun showWebView() {
-        webView?.isVisible = true
+        webView?.visibility = View.VISIBLE
         webView?.let {
             if (webViewsLoaded[it] == true) {
                 updateValuesWebView()
@@ -311,21 +346,46 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
     }
 
     private fun updateValuesWebView() {
-        val currentTemp = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.value)
-        val currentFanSpeed = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_FAN_SPEED.value)
-        val currentAcState = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_POWER_MODE.value)
-        val currentRecycleMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_CYCLE_MODE.value)
-        val currentAutoMode = ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_AUTO_ENABLE.value)
+        val currentTemp =
+                ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_DRIVER_TEMPERATURE.value)
+        val currentFanSpeed =
+                ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_FAN_SPEED.value)
+        val currentAcState =
+                ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_POWER_MODE.value)
+        val currentRecycleMode =
+                ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_CYCLE_MODE.value)
+        val currentAutoMode =
+                ServiceManager.getInstance().getData(CarConstants.CAR_HVAC_AUTO_ENABLE.value)
 
-        val currentEVMode = ServiceManager.getInstance().getData(CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value)
-        val currentDrivingMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE.value)
-        val currentSteerMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value)
+        val currentEVMode =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_EV_SETTING_POWER_MODEL_CONFIG.value)
+        val currentDrivingMode =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_DRIVE_SETTING_DRIVE_MODE.value)
+        val currentSteerMode =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_DRIVE_SETTING_STEERING_WHEEL_ASSIST_MODE.value)
 
-        val regenMode = ServiceManager.getInstance().getData(CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value)
-        val espMode = ServiceManager.getInstance().getData(CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value)
-        val insideTemp = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_INSIDE_TEMP.value).toFloat().roundToInt()
-        val outsideTemp = ServiceManager.getInstance().getData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.value).toFloat().roundToInt()
-        val onePedal = ServiceManager.getInstance().getData(CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value) == "1"
+        val regenMode =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_EV_SETTING_ENERGY_RECOVERY_LEVEL.value)
+        val espMode =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_DRIVE_SETTING_ESP_ENABLE.value)
+        val insideTemp =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_BASIC_INSIDE_TEMP.value)
+                        .toFloat()
+                        .roundToInt()
+        val outsideTemp =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.value)
+                        .toFloat()
+                        .roundToInt()
+        val onePedal =
+                ServiceManager.getInstance()
+                        .getData(CarConstants.CAR_CONFIGURE_PEDAL_CONTROL_ENABLE.value) == "1"
 
         evaluateJsIfReady(webView, "control('temp', $currentTemp)")
         evaluateJsIfReady(webView, "control('fan', $currentFanSpeed)")
@@ -337,12 +397,23 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
         evaluateJsIfReady(webView, "control('inside_temp', $insideTemp)")
         evaluateJsIfReady(webView, "control('onepedal', $onePedal)")
 
-        evaluateJsIfReady(webView, "control('evMode', ${MainMenu.EvModeOptions.getLabel(currentEVMode)})")
-        evaluateJsIfReady(webView, "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(currentDrivingMode)})")
-        evaluateJsIfReady(webView, "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(currentSteerMode)})")
+        evaluateJsIfReady(
+                webView,
+                "control('evMode', ${MainMenu.EvModeOptions.getLabel(currentEVMode)})"
+        )
+        evaluateJsIfReady(
+                webView,
+                "control('drivingMode', ${MainMenu.DrivingModeOptions.getLabel(currentDrivingMode)})"
+        )
+        evaluateJsIfReady(
+                webView,
+                "control('steerMode', ${MainMenu.SteerModeOptions.getLabel(currentSteerMode)})"
+        )
         evaluateJsIfReady(webView, "control('espStatus', ${MainMenu.EspOptions.getLabel(espMode)})")
-        evaluateJsIfReady(webView, "control('regenMode', ${RegenScreen.RegenOptions.getLabel(regenMode)})")
-
+        evaluateJsIfReady(
+                webView,
+                "control('regenMode', ${RegenScreen.RegenOptions.getLabel(regenMode)})"
+        )
     }
 
     private fun evaluateJsIfReady(webView: WebView?, js: String) {
@@ -360,17 +431,10 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
     }
 
     override fun carMainScreenOff() {
-        ensureUi {
-            root.isVisible = false;
-        }
+        ensureUi { root.visibility = View.INVISIBLE }
     }
 
     override fun carMainScreenOn() {
-        ensureUi {
-            root.isVisible = true;
-        }
+        ensureUi { root.visibility = View.VISIBLE }
     }
-
-
 }
-
