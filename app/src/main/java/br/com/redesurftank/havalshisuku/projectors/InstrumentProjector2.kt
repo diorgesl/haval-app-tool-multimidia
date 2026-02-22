@@ -48,7 +48,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
     }
 
     private fun shouldShowProjector(): Boolean {
-        return preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, false) && preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false)
+        return preferences.getBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

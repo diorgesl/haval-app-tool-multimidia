@@ -1275,11 +1275,9 @@ fun TelasTab() {
                 enableProjector = it
                 prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_PROJECTOR.key, it) }
                 if (!it) {
-                    enableWarning = false
-                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_REVISION_WARNING.key, false) }
-                    enableCustomIntegration = false
-                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false) }
-
+                    // When disabling the main projector, we just ensure system apps are restored
+                    // We don't necessarily want to wipe the user's preference for other sub-settings
+                    // so they don't have to re-configure everything next time they enable it.
                     try {
                         ServiceManager.getInstance().ensureSystemApps()
                     } catch (e: Exception) {
@@ -1303,19 +1301,20 @@ fun TelasTab() {
             description = SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.description,
             checked = enableCustomIntegration,
             onCheckedChange = {
+                val previousValue = enableCustomIntegration
                 enableCustomIntegration = it
                 prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, it) }
 
                 try {
                     ServiceManager.getInstance().ensureSystemApps()
-                    if (enableCustomIntegration) {
+                    if (it) {
                         ServiceManager.getInstance().startClusterHeartbeat()
                     }
                 } catch (e: Exception) {
-                    // Log do erro e desabilitar a opção se falhar
                     Log.e("TelasTab", "Erro ao configurar integração de mídia: ${e.message}", e)
-                    enableCustomIntegration = false
-                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, false) }
+                    // If it failed, we might want to revert the UI state
+                    enableCustomIntegration = previousValue
+                    prefs.edit { putBoolean(SharedPreferencesKeys.ENABLE_INSTRUMENT_CUSTOM_MEDIA_INTEGRATION.key, previousValue) }
                 }
             },
             enabled = enableProjector
