@@ -19,6 +19,7 @@ import br.com.redesurftank.App
 import br.com.redesurftank.havalshisuku.R
 import br.com.redesurftank.havalshisuku.managers.ServiceManager
 import br.com.redesurftank.havalshisuku.models.CarConstants
+import br.com.redesurftank.havalshisuku.models.MainUiManager
 import br.com.redesurftank.havalshisuku.models.ServiceManagerEventType
 import br.com.redesurftank.havalshisuku.models.SharedPreferencesKeys
 import br.com.redesurftank.havalshisuku.models.SteeringWheelAcControlType
@@ -215,8 +216,9 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                         circularView.isVisible = card != 0
                         webView?.isVisible = false;
                         when (card) {
-                            1 -> {
+                            1,3 -> {
                                 showWebView()
+                                MainUiManager.getInstance().handleCardChange(card)
                             }
 
                             else -> {

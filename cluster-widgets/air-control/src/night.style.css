@@ -1142,7 +1142,7 @@ canvas.regen-chart {
 .graph-curved-labels text {
   font-family: 'Khand', sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 24px;
   fill-opacity: 1;
 }
 

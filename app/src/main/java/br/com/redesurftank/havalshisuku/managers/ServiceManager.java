@@ -386,7 +386,7 @@ public class ServiceManager {
                         }
                     }
                     if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_CUSTOM_MENU.getKey(), false)) {
-                        if (clusterCardView == 1) {
+                        if (clusterCardView == 1 || clusterCardView == 3) {
                             Screen.Key key = null;
                             switch (keyEvent.getKeyCode()) {
                                 case 1024: key = Screen.Key.UP; break;

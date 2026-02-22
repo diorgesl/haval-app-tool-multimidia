@@ -7,7 +7,7 @@ import 'chartjs-adapter-date-fns';
 import { WarpTunnelAnimation } from './warpTunnel.js';
 Chart.register(...registerables, streamingPlugin);
 
-const HISTORY_DURATION = 60000; //ms
+const HISTORY_DURATION = 30000; //ms
 const TIMER_HIDE_DELAY = 30000; //ms
 const UI_UPDATE_INTERVAL = 100; //ms
 const ACCELERATION_THRESHOLD = 10; //s (ie 100km/h in 5s = 5, 100km/h in 10s = 10)
@@ -104,8 +104,8 @@ function startGlobalDataCollector() {
         } else {
             gasConsumptionSamples = 0;
         }
-        // Multiplier from 0 to 1 over 1 second (5 samples at 200ms)
-        const multiplier = Math.min(gasConsumptionSamples / 5, 1);
+        // Multiplier from 0 to 1 over 1 second (10 samples at 100ms)
+        const multiplier = Math.min(gasConsumptionSamples / 10, 1);
         const smoothedGas = rawGas * multiplier;
         setState('gasConsumptionSmoothed', smoothedGas);
 
@@ -123,7 +123,7 @@ function startGlobalDataCollector() {
             }
         }
 
-        // Calculate Average for last 1 minute
+        // Calculate Average for last 30s
         if (historicalData['evConsumption']) {
             const evData = historicalData['evConsumption'];
             if (evData.length > 0) {
@@ -593,7 +593,7 @@ const graphController = {
                     }
                     if (powerPath) {
                         const pwr = Math.round(powerV);
-                        powerPath.textContent = `power ${pwr}% `;
+                        powerPath.textContent = `${pwr}% power`;
                         powerPath.parentElement.style.opacity = Math.abs(pwr) > 0 ? 1 : 0;
                         powerPath.setAttribute('startOffset', `75%`); // Fixed at Left (270 deg)
                     }
@@ -743,7 +743,7 @@ export function createGraphScreen() {
     const path = document.createElementNS(svgNS, "path");
     path.setAttribute("id", "labelPath");
     // Circle with radius ~210 to be close to bars but inside
-    path.setAttribute("d", "M 250, 40 a 210,210 0 1,1 0,420 a 210,210 0 1,1 0,-420");
+    path.setAttribute("d", "M 245, 40 a 210,210 0 1,1 0,420 a 210,210 0 1,1 0,-420");
     path.setAttribute("fill", "none");
     defs.appendChild(path);
     svg.appendChild(defs);
