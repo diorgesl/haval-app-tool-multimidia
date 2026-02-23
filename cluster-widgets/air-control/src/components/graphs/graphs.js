@@ -98,56 +98,74 @@ function initializeGlobalDataStore() {
 function startGlobalDataCollector() {
     initializeGlobalDataStore();
 
+    const addDataPoint = (dataKey, value) => {
+        if (value === undefined || value === null) return;
+        const now = Date.now();
+        if (!historicalData[dataKey]) historicalData[dataKey] = [];
+
+        historicalData[dataKey].push({ x: now, y: value });
+
+        const DURATION = HISTORY_DURATION;
+        while (historicalData[dataKey].length > 0 && now - historicalData[dataKey][0].x > DURATION) {
+            historicalData[dataKey].shift();
+        }
+    };
+
+    // Track all data keys mentioned in graphList
+    const dataKeys = new Set();
+    graphList.forEach(graph => {
+        graph.datasets.forEach(dataset => {
+            if (dataset.dataKey) dataKeys.add(dataset.dataKey);
+            if (dataset.idleKey) dataKeys.add(dataset.idleKey);
+        });
+    });
+
+    // Add other relevant keys
+    dataKeys.add('evPowerFactor');
+    dataKeys.add('engineRPM');
+
+    dataKeys.forEach(dataKey => {
+        if (dataKey === 'evPowerKwAvg' || dataKey === 'gasConsumptionSmoothed') return;
+
+        subscribe(dataKey, (value) => {
+            addDataPoint(dataKey, value);
+
+            // Special handling for derived types
+            if (dataKey === 'evPowerKw') {
+                const evData = historicalData['evPowerKw'];
+                if (evData && evData.length > 0) {
+                    const sum = evData.reduce((acc, point) => acc + point.y, 0);
+                    const avg = sum / evData.length;
+                    setState('evPowerKwAvg', avg);
+                }
+            }
+        });
+    });
+
+    // Subscribe to derived keys to update their history
+    subscribe('evPowerKwAvg', (value) => {
+        addDataPoint('evPowerKwAvg', value);
+    });
+
+    subscribe('gasConsumptionSmoothed', (value) => {
+        addDataPoint('gasConsumptionSmoothed', value);
+    });
+
+    // Pulse timer for smoothing logic that depends on time/samples
     let gasConsumptionSamples = 0;
     setInterval(() => {
-        const now = Date.now();
-        const DURATION = HISTORY_DURATION;
-
-        // Smooth Gas Consumption logic
         const rawGas = getState('gasConsumption');
         if (rawGas > 0) {
-            gasConsumptionSamples++;
+            gasConsumptionSamples = Math.min(gasConsumptionSamples + 1, 10);
         } else {
             gasConsumptionSamples = 0;
         }
-        // Multiplier from 0 to 1 over 1 second (10 samples at 100ms)
-        const multiplier = Math.min(gasConsumptionSamples / 10, 1);
+
+        const multiplier = gasConsumptionSamples / 10;
         const smoothedGas = rawGas * multiplier;
+
+        // This will only trigger the 'gasConsumptionSmoothed' subscription if the value actually changes
         setState('gasConsumptionSmoothed', smoothedGas);
-
-        for (const dataKey in historicalData) {
-            if (dataKey === 'evPowerKwAvg') continue;
-
-            const value = getState(dataKey);
-            if (value !== undefined) {
-                historicalData[dataKey].push({ x: now, y: value });
-
-                const firstPoint = historicalData[dataKey][0];
-                if (firstPoint && now - firstPoint.x > DURATION) {
-                    historicalData[dataKey].shift();
-                }
-            }
-        }
-
-        // Calculate rolling average for evPowerKw
-        if (historicalData['evPowerKw']) {
-            const evData = historicalData['evPowerKw'];
-            if (evData.length > 0) {
-                const sum = evData.reduce((acc, point) => acc + point.y, 0);
-                const avg = sum / evData.length;
-
-                // Update Global State for Tooltip/Label
-                setState('evPowerKwAvg', avg);
-
-                if (!historicalData['evPowerKwAvg']) historicalData['evPowerKwAvg'] = [];
-                historicalData['evPowerKwAvg'].push({ x: now, y: avg });
-
-                const firstPoint = historicalData['evPowerKwAvg'][0];
-                if (firstPoint && now - firstPoint.x > DURATION) {
-                    historicalData['evPowerKwAvg'].shift();
-                }
-            }
-        }
     }, 200);
 }
 
