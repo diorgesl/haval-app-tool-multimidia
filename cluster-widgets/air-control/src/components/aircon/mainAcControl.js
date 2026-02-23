@@ -49,9 +49,9 @@ export function createAcControlScreen() {
   container.appendChild(tempProgressRing);
 
   var powerIcon = img({
-      src: stateManager.get('power') === 1 ? acON : acOFF,
-      className: 'w-32 h-32 ac-power-icon',
-      id: 'ac-power-icon',
+    src: stateManager.get('power') === 1 ? acON : acOFF,
+    className: 'w-32 h-32 ac-power-icon',
+    id: 'ac-power-icon',
   });
 
   const divider = document.createElement('div');
@@ -91,26 +91,28 @@ export function createAcControlScreen() {
   //container.appendChild(impulseAutoElement);
   main.appendChild(container);
 
-  setTimeout(() => {
-    const activeFanLabel = container.querySelector(`#fan-label-${stateManager.get('fanSpeed')}`);
-    if (activeFanLabel) activeFanLabel.classList.add('active');
+  const updateActiveLabels = () => {
+    let tempValue = stateManager.get('temp');
+    if (tempValue == 32) tempValue = 'HI';
+    else if (tempValue == 16) tempValue = 'LO';
+  };
 
-    const activeTempLabel = container.querySelector(`#temp-label-${stateManager.get('temperature')}`);
-    if (activeTempLabel) activeTempLabel.classList.add('active');
+  setTimeout(() => {
+    updateActiveLabels();
   }, 0);
 
   const onMountFuncs = [
-      tempInfoElement.onMount,
-      () => updateProgressRings(),
-      () => {
-          const unsubscribePower = subscribe('power', (newPower) => {
-              const icon = document.getElementById('ac-power-icon');
-              if (icon) {
-                  icon.src = newPower === 1 ? acON : acOFF;
-              }
-          });
-          return unsubscribePower;
-      },
+    tempInfoElement.onMount,
+    () => updateProgressRings(),
+    () => {
+      const unsubscribePower = subscribe('power', (newPower) => {
+        const icon = document.getElementById('ac-power-icon');
+        if (icon) {
+          icon.src = newPower === 1 ? acON : acOFF;
+        }
+      });
+      return unsubscribePower;
+    },
   ].filter(Boolean);
 
   let cleanupFuncs = [];
@@ -118,35 +120,37 @@ export function createAcControlScreen() {
   main.onMount = () => {
     cleanupFuncs = onMountFuncs.map(fn => fn()).filter(Boolean);
 
-    const activeFanLabel = container.querySelector(`#fan-label-${stateManager.get('fanSpeed')}`);
-    if (activeFanLabel) activeFanLabel.classList.add('active');
-    const activeTempLabel = container.querySelector(`#temp-label-${stateManager.get('temperature')}`);
-    if (activeTempLabel) activeTempLabel.classList.add('active');
+    updateActiveLabels();
+
+    const unsubscribeFan = subscribe('fan', updateActiveLabels);
+    const unsubscribeTemp = subscribe('temp', updateActiveLabels);
+
+    cleanupFuncs.push(unsubscribeFan, unsubscribeTemp);
   };
 
   main.cleanup = () => {
-      cleanupFuncs.forEach(fn => fn());
+    cleanupFuncs.forEach(fn => fn());
   };
 
   return main;
 }
 
 export function updateProgressRings() {
-    const fanRing = document.getElementById('fan-progress-ring');
-    const tempRing = document.getElementById('temp-progress-ring');
+  const fanRing = document.getElementById('fan-progress-ring');
+  const tempRing = document.getElementById('temp-progress-ring');
 
-    const fanValues = 7;
-    const currentFanIndex = stateManager.get('fan');
-    const fanAngle = parseInt(currentFanIndex) * 180 / fanValues;
-    if (fanRing) {
-        fanRing.style.setProperty('--progress-angle', `${fanAngle}deg`);
-    }
+  const fanValues = 7;
+  const currentFanIndex = stateManager.get('fan');
+  const fanAngle = parseInt(currentFanIndex) * 180 / fanValues;
+  if (fanRing) {
+    fanRing.style.setProperty('--progress-angle', `${fanAngle}deg`);
+  }
 
-    const tempValues = 20;
-    const currentTemp = stateManager.get('temp');
-    const currentTempIndex = (currentTemp > 16 + (tempValues/2) ? 10 : currentTemp - 16);
-    const tempAngle = 360 - (2 * (parseFloat(currentTempIndex) * 180 / tempValues));
-    if (tempRing) {
-        tempRing.style.setProperty('--progress-angle', `${tempAngle}deg`);
-    }
+  const tempValues = 20;
+  const currentTemp = stateManager.get('temp');
+  const currentTempIndex = (currentTemp > 16 + (tempValues / 2) ? 10 : currentTemp - 16);
+  const tempAngle = 360 - (2 * (parseFloat(currentTempIndex) * 180 / tempValues));
+  if (tempRing) {
+    tempRing.style.setProperty('--progress-angle', `${tempAngle}deg`);
+  }
 }

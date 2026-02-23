@@ -572,7 +572,7 @@ const graphController = {
                         return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
                     };
 
-                    // Draw Power Bar (4.5px)
+                    // Draw Power Bar
                     const pS = getCoords(pStart);
                     const pE = getCoords(tipAngle);
                     const pLarge = Math.abs(powerAngleWidth) > 180 ? 1 : 0;
@@ -585,7 +585,7 @@ const graphController = {
                         powerBar.style.opacity = 0;
                     }
 
-                    // Draw RPM Bar (4.5px)
+                    // Draw RPM Bar
                     const rS = getCoords(rStart);
                     const rE = getCoords(rEnd);
                     const rLarge = Math.abs(rpmAngleWidth) > 180 ? 1 : 0;

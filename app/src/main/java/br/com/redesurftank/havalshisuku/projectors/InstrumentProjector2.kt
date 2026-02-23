@@ -409,7 +409,7 @@ class InstrumentProjector2(outerContext: Context, display: Display) :
         evaluateJsIfReady(webView, "control('power', $currentAcState)")
         evaluateJsIfReady(webView, "control('recycle', $currentRecycleMode)")
         evaluateJsIfReady(webView, "control('auto', $currentAutoMode)")
-        evaluateJsIfReady(webView, "focus('fan')")
+        //        evaluateJsIfReady(webView, "focus('fan')")
         evaluateJsIfReady(webView, "control('outside_temp', $outsideTemp)")
         evaluateJsIfReady(webView, "control('inside_temp', $insideTemp)")
         evaluateJsIfReady(webView, "control('onepedal', $onePedal)")
