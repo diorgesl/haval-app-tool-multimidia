@@ -1814,7 +1814,8 @@ fun InstallAppsTab() {
     var downloadingUrl by remember { mutableStateOf(false) }
     var urlProgress by remember { mutableFloatStateOf(0f) }
 
-    LaunchedEffect(Unit) {
+    fun refreshApps() {
+        isLoading = true
         scope.launch(Dispatchers.IO) {
             try {
                 val url = URL("https://raw.githubusercontent.com/diorgesl/haval-impulse-static-files/refs/heads/main/apps.json?rnd=${System.currentTimeMillis()}")
@@ -1847,6 +1848,10 @@ fun InstallAppsTab() {
                 isLoading = false
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        refreshApps()
     }
 
     fun getInstalledVersion(packageName: String): String? {
@@ -1972,6 +1977,39 @@ fun InstallAppsTab() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item(span = { GridItemSpan(4) }) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Instalador de Aplicativos",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(
+                    onClick = { refreshApps() },
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = AppColors.Primary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Atualizar lista",
+                            tint = AppColors.Primary
+                        )
+                    }
+                }
+            }
+        }
+
         // URL Input Section
         item(span = { GridItemSpan(4) }) {
             Column(
