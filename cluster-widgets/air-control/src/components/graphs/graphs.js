@@ -293,6 +293,10 @@ const graphController = {
                         tension: 0.3,
                         shadowColor: 'rgba(0, 195, 255, 0.5)',
                         shadowBlur: 10,
+                        segment: {
+                            borderColor: ctx => ctx.p0.parsed.y < 0 ? '#00ff88' : '#00c3ff',
+                            backgroundColor: ctx => ctx.p0.parsed.y < 0 ? 'rgba(0, 255, 136, 0.15)' : 'rgba(0, 120, 255, 0.15)'
+                        }
                     },
                     {
                         label: '',
@@ -335,9 +339,8 @@ const graphController = {
                             display: true,
                             drawOnChartArea: true,
                             drawTicks: false,
-                            color: 'rgba(0,160,255,0.3)',
-                            zeroLineColor: 'rgba(100, 172, 255, 0.8)',
-                            zeroLineWidth: 3
+                            color: (ctx) => (ctx.tick.value === 0 ? 'rgba(0, 195, 255, 1)' : 'rgba(0,160,255,0.3)'),
+                            lineWidth: (ctx) => (ctx.tick.value === 0 ? 4 : 1),
                         },
                     },
                     y1: {
@@ -554,25 +557,24 @@ const graphController = {
 
                 const powerBar = document.getElementById('graph-power-bar-svg');
                 const rpmBar = document.getElementById('graph-rpm-bar-svg');
-                const rpmPath = document.getElementById('graph-rpm-path');
-                const powerPath = document.getElementById('graph-power-path');
+                const rpmLabelHtml = document.getElementById('graph-rpm-label-html');
+                const powerLabelHtml = document.getElementById('graph-power-label-html');
+                const labelWrapper = document.querySelector('.graph-vertical-labels-wrapper');
 
                 if (powerBar && rpmBar) {
                     const isRegen = powerV < 0;
 
                     if (isRegen) {
                         powerBar.classList.add('regen-active');
-                        if (powerPath) powerPath.classList.add('regen-active');
                     } else {
                         powerBar.classList.remove('regen-active');
-                        if (powerPath) powerPath.classList.remove('regen-active');
                     }
 
                     const wrapAngle = (a) => ((a % 360) + 360) % 360;
 
-                    // Scaling: Power 100 = 270 deg if positive and 90 deg if negative, RPM 7000 = 90 deg
+                    // Scaling: Power 100 = 180 deg if positive and 90 deg if negative, RPM 7000 = 90 deg
                     const powerAngleWidth = powerV >= 0
-                        ? (powerV / 100) * 270
+                        ? (powerV / 100) * 180
                         : (powerV / 100) * 90;
                     const rpmAngleWidth = (rpmV / 7000) * 90;
 
@@ -580,25 +582,34 @@ const graphController = {
                     const tipAngle = wrapAngle(pStart + powerAngleWidth);
 
                     // Behavior: If power is negative, RPM starts at 270 (Left)
-                    const rStart = powerV >= 0 ? tipAngle : 270;
+                    const GAP = 2; // Degrees gap
+                    const rStart = (powerV >= 0 ? tipAngle : 270) + GAP;
                     const rEnd = wrapAngle(rStart + rpmAngleWidth);
 
-                    const radius = 218; // Bars further outside
+                    const radius = 218; // Original radius
                     const cx = 250, cy = 250;
                     const getCoords = (deg) => {
                         const rad = (deg - 90) * Math.PI / 180;
                         return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
                     };
 
+
+
                     // Draw Power Bar
                     const pS = getCoords(pStart);
                     const pE = getCoords(tipAngle);
                     const pLarge = Math.abs(powerAngleWidth) > 180 ? 1 : 0;
                     const pSweep = powerV >= 0 ? 1 : 0;
+
                     if (Math.abs(powerAngleWidth) > 0.1) {
                         powerBar.setAttribute("d", `M ${pS.x} ${pS.y} A ${radius} ${radius} 0 ${pLarge} ${pSweep} ${pE.x} ${pE.y}`);
                         powerBar.style.opacity = 1;
-                        powerBar.setAttribute("stroke-width", "10");
+                        powerBar.setAttribute("stroke-width", "6");
+
+                        // Sectioned bars logic: 10 segments for 100%. 
+                        // Power sweep is 180 deg (68.4px per 10%), Regen sweep is 90 deg (34.2px per 10%).
+                        const dash = isRegen ? 30.2 : 64.4;
+                        powerBar.setAttribute("stroke-dasharray", `${dash} 4.0`);
                     } else {
                         powerBar.style.opacity = 0;
                     }
@@ -607,40 +618,34 @@ const graphController = {
                     const rS = getCoords(rStart);
                     const rE = getCoords(rEnd);
                     const rLarge = Math.abs(rpmAngleWidth) > 180 ? 1 : 0;
+
                     if (rpmV > 1) {
                         rpmBar.setAttribute("d", `M ${rS.x} ${rS.y} A ${radius} ${radius} 0 ${rLarge} 1 ${rE.x} ${rE.y}`);
                         rpmBar.style.opacity = 1;
-                        rpmBar.setAttribute("stroke-width", "10");
+                        rpmBar.setAttribute("stroke-width", "6");
+
+                        // Sectioned bars logic (7 segments for 7k RPM)
+                        rpmBar.setAttribute("stroke-dasharray", "44.9 4.01");
                     } else {
                         rpmBar.style.opacity = 0;
                     }
 
-                    // Update Curved Labels (RADIUS 210 - INSIDE)
-                    if (rpmPath) {
+                    // Update HTML Labels
+                    if (rpmLabelHtml) {
                         const rpm = (rpmV / 1000).toFixed(1);
-                        rpmPath.textContent = ` ${rpm} kRPM`;
-                        rpmPath.parentElement.style.opacity = rpm > 0 ? 1 : 0;
-
-                        // RPM Label follows rStart (start of RPM bar)
-                        let rpmOffset = (rStart / 360) * 100;
-
-                        // Overlap protection from Power Label (fixed @ 270deg = 75%)
-                        if (powerV < 0) {
-                            // If regen, rStart is 270 (75%). Offset RPM text to e.g. 83%
-                            rpmOffset = 83;
-                        } else {
-                            // Avoid overlap on both sides of 75% if Power is near 0
-                            if (rpmOffset > 68 && rpmOffset < 75) rpmOffset = 68;
-                            if (rpmOffset < 83 && rpmOffset >= 75) rpmOffset = 83;
-                        }
-
-                        rpmPath.setAttribute('startOffset', `${rpmOffset}%`);
+                        rpmLabelHtml.innerHTML = `<span class="val">${rpm}</span><span class="unit">RPM</span>`;
+                        rpmLabelHtml.style.opacity = rpm > 0 ? 1 : 0;
                     }
-                    if (powerPath) {
+                    if (powerLabelHtml) {
                         const pwr = Math.abs(Math.round(powerV));
-                        powerPath.textContent = `${pwr} %`;
-                        powerPath.parentElement.style.opacity = Math.abs(pwr) > 0 ? 1 : 0;
-                        powerPath.setAttribute('startOffset', '75%');
+                        powerLabelHtml.innerHTML = `<span class="val">${pwr}</span><span class="symbol">%</span>`;
+                        powerLabelHtml.style.opacity = pwr > 0 ? 1 : 0;
+                        if (isRegen) powerLabelHtml.classList.add('regen');
+                        else powerLabelHtml.classList.remove('regen');
+                    }
+                    if (labelWrapper) {
+                        if (rpmV > 1) labelWrapper.classList.add('has-rpm');
+                        else labelWrapper.classList.remove('has-rpm');
                     }
                 }
             } catch (error) {
@@ -683,17 +688,17 @@ const graphController = {
         if (graphId === 'gasConsumption') {
             scales.y.min = -50;
             scales.y.max = 140;
-            scales.y.ticks.stepSize = 50;
+            scales.y.ticks.stepSize = 25;
             scales.y.ticks.color = this.colors.secondary + 'B3';
             scales.y1.min = -15;
             scales.y1.max = 45;
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = this.colors.primary + 'B3';
         } else if (graphId === 'carSpeed') {
-            scales.y.min = -50;
+            scales.y.min = -72;
             scales.y.max = 200;
             scales.y.ticks.stepSize = 40;
-            scales.y1.min = -15;
+            scales.y1.min = -22;
             scales.y1.max = 45;
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = this.colors.secondary + 'B3';
@@ -721,7 +726,7 @@ const graphController = {
         graphInfo.datasets.forEach((datasetInfo, index) => {
             if (datasetInfo.dataKey) {
                 const color = datasetColors[index];
-                newDatasets.push({
+                const ds = {
                     label: datasetInfo.label,
                     data: historicalData[datasetInfo.dataKey] || [],
                     yAxisID: datasetInfo.yAxisID,
@@ -731,7 +736,14 @@ const graphController = {
                     pointRadius: 0,
                     fill: true,
                     tension: 0.3,
-                });
+                };
+                if (graphId === 'evConsumption' && index === 0) {
+                    ds.segment = {
+                        borderColor: ctx => ctx.p0.parsed.y < 0 ? '#00ff88' : color,
+                        backgroundColor: ctx => ctx.p0.parsed.y < 0 ? 'rgba(0, 255, 136, 0.15)' : color + '26'
+                    };
+                }
+                newDatasets.push(ds);
             }
         });
 
@@ -794,15 +806,6 @@ export function createGraphScreen() {
     svg.style.pointerEvents = "none";
     svg.style.zIndex = "10";
 
-    const defs = document.createElementNS(svgNS, "defs");
-    const path = document.createElementNS(svgNS, "path");
-    path.setAttribute("id", "labelPath");
-    // Circle with radius ~210 to be close to bars but inside
-    path.setAttribute("d", "M 245, 40 a 210,210 0 1,1 0,420 a 210,210 0 1,1 0,-420");
-    path.setAttribute("fill", "none");
-    defs.appendChild(path);
-    svg.appendChild(defs);
-
     const powerBar = document.createElementNS(svgNS, "path");
     powerBar.setAttribute("id", "graph-power-bar-svg");
     powerBar.setAttribute("fill", "none");
@@ -813,28 +816,22 @@ export function createGraphScreen() {
     rpmBar.setAttribute("fill", "none");
     svg.appendChild(rpmBar);
 
-    const rpmText = document.createElementNS(svgNS, "text");
-    rpmText.setAttribute("text-anchor", "start");
-    const rpmPath = document.createElementNS(svgNS, "textPath");
-    rpmPath.setAttribute("id", "graph-rpm-path");
-    rpmPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#labelPath");
-    rpmPath.classList.add("curved-label-rpm");
-    rpmText.appendChild(rpmPath);
-    svg.appendChild(rpmText);
-
-    const powerText = document.createElementNS(svgNS, "text");
-    powerText.setAttribute("text-anchor", "start");
-    const powerPath = document.createElementNS(svgNS, "textPath");
-    powerPath.setAttribute("id", "graph-power-path");
-    powerPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "#labelPath");
-    powerPath.classList.add("curved-label-power");
-    powerText.appendChild(powerPath);
-    svg.appendChild(powerText);
-
     container.appendChild(svg);
+
+    // New HTML labels for vertical stacking and rotation
+    const labelContainer = div({ className: 'graph-vertical-labels-wrapper' });
+    const rpmLabel = div({ className: 'graph-vertical-label rpm', id: 'graph-rpm-label-html' });
+    rpmLabel.innerHTML = '<span class="unit">kRPM</span><span class="val">0.0</span>';
+    const powerLabel = div({ className: 'graph-vertical-label power', id: 'graph-power-label-html' });
+    powerLabel.innerHTML = '<span class="val">0</span><span class="symbol">%</span>';
+
+    labelContainer.appendChild(rpmLabel);
+    labelContainer.appendChild(powerLabel);
+    container.appendChild(labelContainer);
 
     const divider = div({ className: 'graph-selector-line' });
     const outerRing = div({ className: 'graph-outer-ring' });
+    const innerBorder = div({ className: 'graph-inner-border' });
     const innerRingShadow = div({ className: 'graph-inner-ring-shadow' });
     const innerRing = div({ className: 'graph-inner-ring' });
 
@@ -853,6 +850,8 @@ export function createGraphScreen() {
     const dynamicTooltipLine = div({ className: 'dynamic-tooltip-line primary' });
     const secondaryTooltipLine = div({ className: 'dynamic-tooltip-line secondary' });
 
+    const tooltipMask = div({ className: 'graph-tooltip-mask' });
+    innerRing.appendChild(tooltipMask);
     innerRing.appendChild(dynamicTooltip);
     innerRing.appendChild(secondaryTooltip);
     innerRing.appendChild(dynamicTooltipLine);
@@ -881,6 +880,7 @@ export function createGraphScreen() {
     innerRing.appendChild(canvas);
 
     container.appendChild(outerRing);
+    container.appendChild(innerBorder);
     container.appendChild(innerRingShadow);
     container.appendChild(innerRing);
 
