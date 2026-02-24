@@ -1208,16 +1208,6 @@ public class ServiceManager {
                     }
                 }
             }
-            // Feature 6: Disable seat belt warning
-            if (key.equals(CarConstants.CAR_BASIC_SEAT_BELT_WARNING.getValue()) && value.equals("1")) {
-                if (sharedPreferences.getBoolean(SharedPreferencesKeys.DISABLE_SEAT_BELT_WARNING.getKey(), false)) {
-                    // Try the configure constant which controls the warning system itself
-                    updateData(CarConstants.CAR_CONFIGURE_SEAT_BELT_WARNING.getValue(), "0");
-                    // Also try the front seat belt config as fallback
-                    updateData(CarConstants.CAR_CONFIGURE_FRONT_SEAT_BELT.getValue(), "0");
-                    Log.w(TAG, "Seat belt warning suppressed by user preference (configure method)");
-                }
-            }
             // Feature 2 continued: Turn off seat heating when temp rises
             if (key.equals(CarConstants.CAR_BASIC_INSIDE_TEMP.getValue()) && autoSeatHeatingActive) {
                 try {

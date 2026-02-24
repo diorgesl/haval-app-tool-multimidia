@@ -377,7 +377,6 @@ fun BasicSettingsTab() {
     var coolantTempThreshold by remember { mutableFloatStateOf(prefs.getFloat(SharedPreferencesKeys.COOLANT_TEMP_THRESHOLD.key, 105f)) }
     var enableAutoMassage by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_MASSAGE.key, false)) }
     var autoMassageMinutes by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.AUTO_MASSAGE_MINUTES.key, 60)) }
-    var disableSeatBeltWarning by remember { mutableStateOf(prefs.getBoolean(SharedPreferencesKeys.DISABLE_SEAT_BELT_WARNING.key, false)) }
     var ambientLightColor by remember { mutableIntStateOf(prefs.getInt(SharedPreferencesKeys.AMBIENT_LIGHT_CUSTOM_COLOR.key, 0x4A9EFF)) }
     var ambientRed by remember { mutableFloatStateOf(((prefs.getInt(SharedPreferencesKeys.AMBIENT_LIGHT_CUSTOM_COLOR.key, 0x4A9EFF) shr 16) and 0xFF).toFloat()) }
     var ambientGreen by remember { mutableFloatStateOf(((prefs.getInt(SharedPreferencesKeys.AMBIENT_LIGHT_CUSTOM_COLOR.key, 0x4A9EFF) shr 8) and 0xFF).toFloat()) }
@@ -975,15 +974,6 @@ fun BasicSettingsTab() {
                     prefs.edit { putInt(SharedPreferencesKeys.AUTO_MASSAGE_MINUTES.key, newMin) }
                 },
                 sliderLabel = "Tempo: ${autoMassageMinutes} minutos"
-            ),
-            SettingItem(
-                title = "Desativar alerta de cinto de segurança",
-                description = "Tenta suprimir o alerta de cinto de segurança (pode não funcionar em todos os modelos)",
-                checked = disableSeatBeltWarning,
-                onCheckedChange = {
-                    disableSeatBeltWarning = it
-                    prefs.edit { putBoolean(SharedPreferencesKeys.DISABLE_SEAT_BELT_WARNING.key, it) }
-                }
             )
         )
     )
