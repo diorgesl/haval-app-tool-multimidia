@@ -68,6 +68,7 @@ public class ProjectorManager {
             for (Integer id : projectorCreators.keySet()) {
                 Display display = getDisplayById(id);
                 if (display != null) {
+                    Log.w(TAG, "Matching projector creator for ID: " + id + " with display: " + display.getName());
                     projectorCreators.get(id).accept(App.getContext(), display);
                     pending.remove(id);
                 }

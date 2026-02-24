@@ -224,15 +224,26 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                 when (event) {
                     ServiceManagerEventType.CLUSTER_CARD_CHANGED -> {
                         val card = args[0] as Int
-                        circularView.isVisible = card != 0
-                        webView?.isVisible = false;
+                        Log.d("InstrumentProjector2", "ServiceManagerEventType.CLUSTER_CARD_CHANGED: card=$card")
+                        
+                        // Keep visible if not on main menu OR if card is not 0
+                        val isMainMenu = ServiceManager.getInstance().getSharedPreferences().getString(SharedPreferencesKeys.LAST_CLUSTER_SCREEN.key, "main_menu") == "main_menu"
+                        
+                        circularView.isVisible = (card != 0) || !isMainMenu
+                        
                         when (card) {
                             1 -> {
+                                Log.d("InstrumentProjector2", "Showing WebView for card 1")
                                 showWebView()
                             }
-
                             else -> {
-
+                                if (isMainMenu) {
+                                    Log.d("InstrumentProjector2", "Hiding WebView: card=$card and currently in main_menu")
+                                    webView?.isVisible = false
+                                } else {
+                                    Log.d("InstrumentProjector2", "Keeping WebView visible: card=$card but NOT in main_menu")
+                                    showWebView()
+                                }
                             }
                         }
                     }
@@ -262,6 +273,12 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                     ServiceManagerEventType.UPDATE_SCREEN -> {
                         val screen = args[0] as Screen
                         val screenName = screen.jsName
+                        Log.d("InstrumentProjector2", "ServiceManagerEventType.UPDATE_SCREEN: screenName=$screenName")
+                        
+                        // Ensure visibility when manual navigation occurs
+                        circularView.isVisible = true
+                        showWebView()
+                        
                         evaluateJsIfReady(webView, "showScreen('$screenName')")
                     }
 
@@ -295,10 +312,12 @@ class InstrumentProjector2(outerContext: Context, display: Display) : BaseProjec
                 webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
+                        Log.d("InstrumentProjector2", "WebView PageFinished: url=$url")
                         view?.let {
                             webViewsLoaded[it] = true
                             updateValuesWebView()
                             val queue = pendingJsQueues[it] ?: return
+                            Log.d("InstrumentProjector2", "Executing ${queue.size} pending JS commands")
                             queue.forEach { js -> it.evaluateJavascript(js, null) }
                             pendingJsQueues.remove(it)
                         }
