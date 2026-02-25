@@ -15,23 +15,37 @@ const ACCELERATION_THRESHOLD = 10; //s (ie 100km/h in 5s = 5, 100km/h in 10s = 1
 export const graphList = [
     {
         id: 'evConsumption',
-        displayLabel: 'Consumo EV',
+        displayLabel: 'Potência EV',
         decimalPlaces: 1,
         secondaryDecimalPlaces: 1,
         primaryColor: '#ffffff',
         secondaryColor: '#00c3ff',
+        yAxis: {
+            min: -100,
+            max: 140,
+            stepSize: 50
+        },
+        y1Axis: {
+            min: -100,
+            max: 140,
+            stepSize: 50
+        },
         datasets: [
             {
                 label: 'Potência EV',
                 dataKey: 'evPowerKw',
                 unity: 'kWatts',
-                yAxisID: 'y'
+                yAxisID: 'y',
+                showInTooltip: true
             },
             {
                 label: 'Média',
-                dataKey: 'evPowerKwAvg',
+                dataKey: 'evPowerKw',
+                type: 'average',
+                avgConfig: { seconds: 15 },
                 unity: 'kWavg',
-                yAxisID: 'y'
+                yAxisID: 'y',
+                showInTooltip: true
             }
         ]
     },
@@ -42,12 +56,23 @@ export const graphList = [
         secondaryDecimalPlaces: 1,
         primaryColor: '#00c3ff',
         secondaryColor: '#ff5500',
+        yAxis: {
+            min: -43,
+            max: 120,
+            stepSize: 15
+        },
+        y1Axis: {
+            min: -10,
+            max: 30,
+            stepSize: 10
+        },
         datasets: [
             {
                 label: 'Consumo Elétrico',
-                dataKey: 'evPowerKw',
-                unity: 'kWatts',
-                yAxisID: 'y'
+                dataKey: 'instantEVConsumption',
+                unity: 'KWh/100km',
+                yAxisID: 'y',
+                showInTooltip: true
             },
             {
                 label: 'Consumo Instantâneo',
@@ -56,6 +81,7 @@ export const graphList = [
                 yAxisID: 'y1',
                 idleKey: 'gasConsumptionIdle',
                 idleUnity: 'l/100km',
+                showInTooltip: true
             }
         ]
     },
@@ -66,18 +92,30 @@ export const graphList = [
         secondaryDecimalPlaces: 1,
         primaryColor: '#00c3ff',
         secondaryColor: '#ff5500',
+        yAxis: {
+            min: -72,
+            max: 200,
+            stepSize: 40
+        },
+        y1Axis: {
+            min: -10,
+            max: 30,
+            stepSize: 10
+        },
         datasets: [
             {
                 label: 'Velocidade',
                 dataKey: 'carSpeed',
                 unity: 'km/h',
-                yAxisID: 'y'
+                yAxisID: 'y',
+                showInTooltip: true
             },
             {
                 label: 'Consumo',
                 dataKey: 'gasConsumptionSmoothed',
                 unity: 'km/L',
-                yAxisID: 'y'
+                yAxisID: 'y',
+                showInTooltip: true
             }
         ]
     },
@@ -317,6 +355,14 @@ const graphController = {
                     legend: { display: false },
                     tooltip: { enabled: false },
                 },
+                layout: {
+                    padding: {
+                        left: 18,
+                        right: 18,
+                        top: 0,
+                        bottom: 0
+                    }
+                },
                 scales: {
                     x: {
                         type: 'realtime',
@@ -331,7 +377,8 @@ const graphController = {
                         max: 120,
                         ticks: {
                             display: true,
-                            padding: 10,
+                            mirror: true,
+                            padding: 0,
                             stepSize: 20,
                             color: 'rgba(100,172,255,0.7)',
                         },
@@ -350,7 +397,8 @@ const graphController = {
                         max: 200,
                         ticks: {
                             display: true,
-                            padding: 10,
+                            mirror: true,
+                            padding: 0,
                             align: 'start',
                             stepSize: 2,
                             color: 'rgba(0, 255, 187, 0.5)',
@@ -489,33 +537,25 @@ const graphController = {
                     this.setWarpAnimation(false);
                     this.setChronometer('stop');
 
-                    if (graphInfo.id === 'gasConsumption') {
-                        const evVal = getState('evPowerFactor');
-                        activeValue = evVal;
-                        activeUnity = graphInfo.datasets[0].unity;
-                        activeDatasetIndex = 0;
-
-                        const runningValue = getState('gasConsumptionSmoothed');
-                        const idleValue = getState(graphInfo.datasets[1].idleKey);
-                        if (runningValue > 0) {
-                            secValue = runningValue;
-                            secUnity = graphInfo.datasets[1].unity;
-                            //secDatasetIndex = 1;
-                        } else {
-                            secValue = idleValue;
-                            secUnity = graphInfo.datasets[1].idleUnity;
-                            //secDatasetIndex = 1;
-                        }
-
-                    } else if (graphInfo.id === 'evConsumption') {
+                    if (graphInfo.id === 'gasConsumption' || graphInfo.id === 'evConsumption') {
                         const mainDatasetInfo = graphInfo.datasets[0];
                         activeValue = getState(mainDatasetInfo.dataKey);
                         activeUnity = mainDatasetInfo.unity;
                         activeDatasetIndex = 0;
 
-                        // Second dataset for evConsumption graph is evPowerKwAvg (rolling avg kW)
-                        secValue = getState('evPowerKwAvg');
-                        secUnity = graphInfo.datasets[1].unity;
+                        const secDatasetInfo = graphInfo.datasets[1];
+                        if (secDatasetInfo) {
+                            const runningValue = getState(secDatasetInfo.dataKey);
+                            const idleValue = secDatasetInfo.idleKey ? getState(secDatasetInfo.idleKey) : undefined;
+
+                            if (idleValue !== undefined && runningValue <= 0) {
+                                secValue = idleValue;
+                                secUnity = secDatasetInfo.idleUnity;
+                            } else {
+                                secValue = runningValue;
+                                secUnity = secDatasetInfo.unity;
+                            }
+                        }
                     } else {
                         const mainDatasetInfo = graphInfo.datasets[0];
                         activeValue = getState(mainDatasetInfo.dataKey);
@@ -586,7 +626,7 @@ const graphController = {
                     const rStart = (powerV >= 0 ? tipAngle : 270) + GAP;
                     const rEnd = wrapAngle(rStart + rpmAngleWidth);
 
-                    const radius = 218; // Original radius
+                    const radius = 217; // Updated radius
                     const cx = 250, cy = 250;
                     const getCoords = (deg) => {
                         const rad = (deg - 90) * Math.PI / 180;
@@ -604,7 +644,7 @@ const graphController = {
                     if (Math.abs(powerAngleWidth) > 0.1) {
                         powerBar.setAttribute("d", `M ${pS.x} ${pS.y} A ${radius} ${radius} 0 ${pLarge} ${pSweep} ${pE.x} ${pE.y}`);
                         powerBar.style.opacity = 1;
-                        powerBar.setAttribute("stroke-width", "6");
+                        powerBar.setAttribute("stroke-width", "8");
 
                         // Sectioned bars logic: 10 segments for 100%. 
                         // Power sweep is 180 deg (68.4px per 10%), Regen sweep is 90 deg (34.2px per 10%).
@@ -622,7 +662,7 @@ const graphController = {
                     if (rpmV > 1) {
                         rpmBar.setAttribute("d", `M ${rS.x} ${rS.y} A ${radius} ${radius} 0 ${rLarge} 1 ${rE.x} ${rE.y}`);
                         rpmBar.style.opacity = 1;
-                        rpmBar.setAttribute("stroke-width", "6");
+                        rpmBar.setAttribute("stroke-width", "8");
 
                         // Sectioned bars logic (7 segments for 7k RPM)
                         rpmBar.setAttribute("stroke-dasharray", "44.9 4.01");
@@ -686,20 +726,20 @@ const graphController = {
 
 
         if (graphId === 'gasConsumption') {
-            scales.y.min = -50;
-            scales.y.max = 140;
-            scales.y.ticks.stepSize = 25;
+            scales.y.min = -43;
+            scales.y.max = 120;
+            scales.y.ticks.stepSize = 15;
             scales.y.ticks.color = this.colors.secondary + 'B3';
-            scales.y1.min = -15;
-            scales.y1.max = 45;
+            scales.y1.min = -10;
+            scales.y1.max = 30;
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = this.colors.primary + 'B3';
         } else if (graphId === 'carSpeed') {
             scales.y.min = -72;
             scales.y.max = 200;
             scales.y.ticks.stepSize = 40;
-            scales.y1.min = -22;
-            scales.y1.max = 45;
+            scales.y1.min = -10;
+            scales.y1.max = 30;
             scales.y1.ticks.stepSize = 10;
             scales.y1.ticks.color = this.colors.secondary + 'B3';
         } else if (graphId === 'evConsumption') {

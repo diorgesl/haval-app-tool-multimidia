@@ -504,7 +504,7 @@ button {
   height: 392px;
   border: 3px solid #053477;
   border-radius: 50%;
-  background: radial-gradient(circle, #006aff 0%, #000000 100%);
+  background: radial-gradient(circle, #0a2345 0%, #000000 100%);
   z-index: 2;
 }
 
@@ -1100,9 +1100,9 @@ canvas.regen-chart {
 
 .graph-inner-border {
   position: absolute;
-  width: 428px;
-  height: 428px;
-  border: 2px solid #00c3ff88;
+  width: 424px;
+  height: 424px;
+  border: 2px solid #0074ff44;
   border-radius: 50%;
   top: 50%;
   left: 50%;
@@ -1154,7 +1154,7 @@ canvas.regen-chart {
 
 .graph-vertical-labels-wrapper {
   position: absolute;
-  left: -20px;
+  left: -10px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -1175,7 +1175,7 @@ canvas.regen-chart {
   padding: 1px 1px;
   background-color: rgba(0, 0, 0, 0.7);
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
   transform-origin: center;
   transition: transform 1s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.5s ease, color 0.3s ease;
   font-family: 'Khand', sans-serif;
@@ -1221,18 +1221,18 @@ canvas.regen-chart {
 }
 
 .graph-vertical-labels-wrapper.has-rpm .graph-vertical-label.power {
-  transform: translate(5px, 22px);
+  transform: translate(5px, 25px);
 }
 
 .graph-vertical-labels-wrapper.has-rpm .graph-vertical-label.rpm {
   opacity: 1;
-  transform: translateY(-22px);
+  transform: translateY(-25px);
 }
 
 
 #graph-rpm-bar-svg {
   stroke: #ffffff;
-  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 8px #ffffff85);
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 8px #ffffff);
 }
 
 #graph-power-bar-svg {
@@ -1248,8 +1248,8 @@ canvas.regen-chart {
 
 .graph-inner-ring {
   position: absolute;
-  width: 428px;
-  height: 428px;
+  width: 424px;
+  height: 424px;
   border-radius: 50%;
   top: 50%;
   left: 50%;
@@ -1263,8 +1263,8 @@ canvas.regen-chart {
 .graph-inner-ring-shadow {
   box-shadow: 0 0 12px 5px rgb(0 0 0 / 50%);
   position: absolute;
-  width: 428px;
-  height: 428px;
+  width: 424px;
+  height: 424px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -1405,7 +1405,7 @@ canvas.regen-chart {
   background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0) 100%);
   pointer-events: none;
   z-index: 10;
-  border-radius: 0 0 214px 214px;
+  border-radius: 0 0 212px 212px;
 }
 
 .warp-tunnel-canvas {
