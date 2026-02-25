@@ -1,4 +1,3 @@
-// Create a reactive state manager
 function StateManager(initialState) {
     this._state = {};
     for (var key in initialState) {
@@ -9,18 +8,18 @@ function StateManager(initialState) {
     this._listeners = new Map();
 }
 
-StateManager.prototype.get = function(key) {
+StateManager.prototype.get = function (key) {
     return this._state[key];
 };
 
-StateManager.prototype.set = function(key, value) {
+StateManager.prototype.set = function (key, value) {
     if (this._state[key] !== value) {
         this._state[key] = value;
         this._notifyListeners(key, value);
     }
 };
 
-StateManager.prototype.getState = function() {
+StateManager.prototype.getState = function () {
     var newState = {};
     for (var key in this._state) {
         if (this._state.hasOwnProperty(key)) {
@@ -30,15 +29,15 @@ StateManager.prototype.getState = function() {
     return newState;
 };
 
-StateManager.prototype.subscribe = function(key, callback) {
+StateManager.prototype.subscribe = function (key, callback) {
     if (!this._listeners.has(key)) {
         this._listeners.set(key, new Set());
     }
     this._listeners.get(key).add(callback);
-    
+
     // Return unsubscribe function
     var self = this;
-    return function() {
+    return function () {
         var listeners = self._listeners.get(key);
         if (listeners) {
             listeners.delete(callback);
@@ -46,10 +45,10 @@ StateManager.prototype.subscribe = function(key, callback) {
     };
 };
 
-StateManager.prototype._notifyListeners = function(key, value) {
+StateManager.prototype._notifyListeners = function (key, value) {
     var listeners = this._listeners.get(key);
     if (listeners) {
-        listeners.forEach(function(callback) {
+        listeners.forEach(function (callback) {
             try {
                 callback(value, key);
             } catch (error) {
@@ -59,7 +58,6 @@ StateManager.prototype._notifyListeners = function(key, value) {
     }
 };
 
-// Create the state instance
 var stateManager = new StateManager({
     // Main Menu state
     screen: 'main_menu',
@@ -71,15 +69,17 @@ var stateManager = new StateManager({
 
     // Ac screen states
     focusArea: 'fan',
-    temp: 25,
-    fan: 1,
-    power: 1,
-    auto: 1,
+    temp: '--',
+    fan: '-',
+    power: 0,
+    auto: 0,
     recycle: 0,
     aion: 0,
     maxauto: 0,
-    outside_temp: '-',
-    inside_temp: '-',
+    impulseauto: 0, // TODO: for future implementation of AC automated control, should replace maxauto
+    targetTemp: '--',
+    outside_temp: '--',
+    inside_temp: '--',
 
     // Regen screen states
     regenMode: 'Normal',
@@ -88,7 +88,9 @@ var stateManager = new StateManager({
 
     // Graph values
     currentGraph: 'evConsumption',
-    evConsumption: 0,
+    evPowerFactor: 0,
+    evPowerKw: 0,
+    instantEVConsumption: 0,
     gasConsumption: 0.0,
     gasConsumptionMetric: 'Km/l',
     gasConsumptionIdle: 0.0,
@@ -98,24 +100,40 @@ var stateManager = new StateManager({
     avgGasConsumption: 0,
     avgEvConsumption: 0,
     instantEvConsumption: 0,
-    batteryLevel: 0
+    batteryLevel: 0,
+    engineRPM: 0,
+    evPowerKwAvg: 0
 });
 
-// Convenience functions for easier usage
-var getState = function(key) { return stateManager.get(key); };
-var setState = function(key, value) { stateManager.set(key, value); };
-var subscribe = function(key, callback) { return stateManager.subscribe(key, callback); };
+var getState = function (key) { return stateManager.get(key); };
+var setState = function (key, value) { stateManager.set(key, value); };
+var subscribe = function (key, callback) { return stateManager.subscribe(key, callback); };
 
-// For backward compatibility, export the state object with getters/setters
 var state = new Proxy({}, {
-    get: function(target, prop) {
+    get: function (target, prop) {
         return stateManager.get(prop);
     },
-    set: function(target, prop, value) {
+    set: function (target, prop, value) {
         stateManager.set(prop, value);
         return true;
     }
 });
 
-// Export all functions and objects
+const updateInstantConsumption = () => {
+    const power = getState('evPowerKw') || 0;
+    const speed = parseFloat(getState('carSpeed')) || 0;
+
+    let consumption = 0;
+    if (speed > 0) {
+        consumption = (power * 100) / speed;
+    }
+
+    if (getState('instantEVConsumption') !== consumption) {
+        setState('instantEVConsumption', consumption);
+    }
+};
+
+subscribe('evPowerKw', updateInstantConsumption);
+//subscribe('carSpeed', updateInstantConsumption);
+
 export { stateManager, getState, setState, subscribe, state };

@@ -70,5 +70,11 @@ enum class SharedPreferencesKeys(val key: String, val description: String) {
     ENABLE_INSTRUMENT_AVG_CONSUME("enableInstrumentAvgConsume", "Mostrar consumo médio no painel"),
     ENABLE_INSTRUMENT_TEMPERATURE("enableInstrumentTemperature", "Mostrar temperatura no painel"),
     ENABLE_INSTRUMENT_TRIP_ODOMETER("enableInstrumentTripOdometer", "Mostrar odômetro da viagem no painel"),
-    INSTRUMENT_REVISION_COUNT("instrumentRevisionCount", "Quantidade de revisões já realizadas")
+    INSTRUMENT_REVISION_COUNT("instrumentRevisionCount", "Quantidade de revisões já realizadas"),
+    ENABLE_OPEN_SUNROOF_CURTAIN_ON_START("enableOpenSunroofCurtainOnStart", "Habilitar abertura da cortina do teto solar ao ligar"),
+    OPEN_SUNROOF_CURTAIN_START_HOUR("openSunroofCurtainStartHour", "Hora de início para abrir cortina"),
+    OPEN_SUNROOF_CURTAIN_START_MINUTE("openSunroofCurtainStartMinute", "Minuto de início para abrir cortina"),
+    OPEN_SUNROOF_CURTAIN_END_HOUR("openSunroofCurtainEndHour", "Hora fim para abrir cortina"),
+    OPEN_SUNROOF_CURTAIN_END_MINUTE("openSunroofCurtainEndMinute", "Minuto fim para abrir cortina"),
+    OPEN_SUNROOF_CURTAIN_MAX_TEMP("openSunroofCurtainMaxTemp", "Temperatura externa máxima para abrir cortina")
 }
