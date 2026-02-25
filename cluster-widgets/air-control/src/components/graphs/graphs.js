@@ -12,14 +12,29 @@ const TIMER_HIDE_DELAY = 30000; //ms
 const UI_UPDATE_INTERVAL = 100; //ms
 const ACCELERATION_THRESHOLD = 10; //s (ie 100km/h in 5s = 5, 100km/h in 10s = 10)
 
+const hexToRgba = (hex, alpha) => {
+    let r = 255, g = 255, b = 255;
+    if (hex.startsWith('#')) {
+        const h = hex.replace('#', '');
+        if (h.length === 3) {
+            r = parseInt(h[0] + h[0], 16);
+            g = parseInt(h[1] + h[1], 16);
+            b = parseInt(h[2] + h[2], 16);
+        } else if (h.length >= 6) {
+            r = parseInt(h.substring(0, 2), 16);
+            g = parseInt(h.substring(2, 4), 16);
+            b = parseInt(h.substring(4, 6), 16);
+        }
+    }
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export const graphList = [
     {
         id: 'evConsumption',
         displayLabel: 'Potência EV',
         decimalPlaces: 1,
         secondaryDecimalPlaces: 1,
-        primaryColor: '#ffffff',
-        secondaryColor: '#00c3ff',
         yAxis: {
             min: -100,
             max: 140,
@@ -36,16 +51,18 @@ export const graphList = [
                 dataKey: 'evPowerKw',
                 unity: 'kWatts',
                 yAxisID: 'y',
-                showInTooltip: true
+                lineColor: '#ffffff',
+                positiveColor: '#ffffff',
+                negativeColor: '#00ff88'
             },
             {
                 label: 'Média',
                 dataKey: 'evPowerKw',
                 type: 'average',
-                avgConfig: { seconds: 15 },
+                avgConfig: { seconds: 30 },
                 unity: 'kWavg',
-                yAxisID: 'y',
-                showInTooltip: true
+                yAxisID: 'y1',
+                lineColor: '#00c3ff'
             }
         ]
     },
@@ -54,8 +71,6 @@ export const graphList = [
         displayLabel: 'Consumo Misto',
         decimalPlaces: 1,
         secondaryDecimalPlaces: 1,
-        primaryColor: '#00c3ff',
-        secondaryColor: '#ff5500',
         yAxis: {
             min: -43,
             max: 120,
@@ -70,9 +85,12 @@ export const graphList = [
             {
                 label: 'Consumo Elétrico',
                 dataKey: 'instantEVConsumption',
+                type: 'average',
+                avgConfig: { samples: 3 },
                 unity: 'KWh/100km',
                 yAxisID: 'y',
-                showInTooltip: true
+                lineColor: '#ffffff',
+                valueFilter: 'positive'
             },
             {
                 label: 'Consumo Instantâneo',
@@ -81,7 +99,19 @@ export const graphList = [
                 yAxisID: 'y1',
                 idleKey: 'gasConsumptionIdle',
                 idleUnity: 'l/100km',
-                showInTooltip: true
+                lineColor: '#ff5500',
+                valueFilter: 'positive'
+            },
+            {
+                label: 'Média EV',
+                dataKey: 'instantEVConsumption',
+                type: 'average',
+                avgConfig: { seconds: 30 },
+                unity: 'KWh/100km',
+                yAxisID: 'y2',
+                followAxis: 'y',
+                lineColor: '#00c3ff',
+                valueFilter: 'positive'
             }
         ]
     },
@@ -90,8 +120,6 @@ export const graphList = [
         displayLabel: 'Velocidade',
         decimalPlaces: 0,
         secondaryDecimalPlaces: 1,
-        primaryColor: '#00c3ff',
-        secondaryColor: '#ff5500',
         yAxis: {
             min: -72,
             max: 200,
@@ -108,14 +136,14 @@ export const graphList = [
                 dataKey: 'carSpeed',
                 unity: 'km/h',
                 yAxisID: 'y',
-                showInTooltip: true
+                lineColor: '#ffffff'
             },
             {
                 label: 'Consumo',
                 dataKey: 'gasConsumptionSmoothed',
                 unity: 'km/L',
-                yAxisID: 'y',
-                showInTooltip: true
+                yAxisID: 'y1',
+                lineColor: '#ff5500'
             }
         ]
     },
@@ -123,71 +151,153 @@ export const graphList = [
 
 const historicalData = {};
 
+const addDataPoint = (dataKey, value) => {
+    if (value === undefined || value === null) return;
+    const now = Date.now();
+    if (!historicalData[dataKey]) historicalData[dataKey] = [];
+
+    const data = historicalData[dataKey];
+
+    // Gap bridging: Avoid diagonal gaps by inserting square transitions
+    if (data.length > 0) {
+        const lastPoint = data[data.length - 1];
+        const gap = now - lastPoint.x;
+
+        if (gap > 100) {
+            if (value !== 0 && lastPoint.y === 0) {
+                // Leaving 0: add a dot at 0 right before jumping
+                data.push({ x: now - 100, y: 0 });
+            } else if (value === 0 && lastPoint.y !== 0) {
+                // Entering 0: add a dot at last value right before dropping
+                data.push({ x: now - 100, y: lastPoint.y });
+            }
+        }
+    }
+
+    data.push({ x: now, y: value });
+
+    const DURATION = HISTORY_DURATION;
+    while (data.length > 0 && now - data[0].x > DURATION) {
+        data.shift();
+    }
+};
+
 function initializeGlobalDataStore() {
     graphList.forEach(graph => {
         graph.datasets.forEach(dataset => {
             if (dataset.dataKey) {
                 historicalData[dataset.dataKey] = [];
+
+                let currentKey = dataset.dataKey;
+                if (dataset.valueFilter) {
+                    const filterKey = `${dataset.dataKey}_filtered_${dataset.valueFilter}`;
+                    historicalData[filterKey] = [];
+                    dataset.filterInternalKey = filterKey;
+                    currentKey = filterKey;
+                }
+
+                if (dataset.type === 'average') {
+                    const avgKey = `${currentKey}_avg_${dataset.avgConfig.samples || dataset.avgConfig.seconds || '10'}`;
+                    historicalData[avgKey] = [];
+                    dataset.avgInternalKey = avgKey;
+                }
+            }
+            if (dataset.idleKey) {
+                dataKeys.add(dataset.idleKey); // This will handle gasConsumptionIdle
+                historicalData[dataset.idleKey] = [];
             }
         });
     });
 }
 
+const dataKeys = new Set();
+const averagesToTrack = []; // List of { sourceKey, targetKey, config }
+const filtersToTrack = []; // List of { sourceKey, targetKey, filterType }
+
 function startGlobalDataCollector() {
     initializeGlobalDataStore();
 
-    const addDataPoint = (dataKey, value) => {
-        if (value === undefined || value === null) return;
-        const now = Date.now();
-        if (!historicalData[dataKey]) historicalData[dataKey] = [];
-
-        historicalData[dataKey].push({ x: now, y: value });
-
-        const DURATION = HISTORY_DURATION;
-        while (historicalData[dataKey].length > 0 && now - historicalData[dataKey][0].x > DURATION) {
-            historicalData[dataKey].shift();
-        }
-    };
-
-    // Track all data keys mentioned in graphList
-    const dataKeys = new Set();
     graphList.forEach(graph => {
         graph.datasets.forEach(dataset => {
-            if (dataset.dataKey) dataKeys.add(dataset.dataKey);
-            if (dataset.idleKey) dataKeys.add(dataset.idleKey);
+            if (dataset.dataKey) {
+                dataKeys.add(dataset.dataKey);
+
+                if (dataset.filterInternalKey) {
+                    filtersToTrack.push({
+                        sourceKey: dataset.dataKey,
+                        targetKey: dataset.filterInternalKey,
+                        filterType: dataset.valueFilter
+                    });
+                }
+
+                if (dataset.avgInternalKey) {
+                    averagesToTrack.push({
+                        sourceKey: dataset.filterInternalKey || dataset.dataKey,
+                        targetKey: dataset.avgInternalKey,
+                        config: dataset.avgConfig
+                    });
+                }
+            }
         });
     });
 
     // Add other relevant keys
     dataKeys.add('evPowerFactor');
     dataKeys.add('engineRPM');
+    dataKeys.add('gasConsumptionSmoothed');
 
     dataKeys.forEach(dataKey => {
-        if (dataKey === 'evPowerKwAvg' || dataKey === 'gasConsumptionSmoothed') return;
-
         subscribe(dataKey, (value) => {
             addDataPoint(dataKey, value);
 
-            // Special handling for derived types
-            if (dataKey === 'evPowerKw') {
-                const evData = historicalData['evPowerKw'];
-                if (evData && evData.length > 0) {
-                    const sum = evData.reduce((acc, point) => acc + point.y, 0);
-                    const avg = sum / evData.length;
-                    setState('evPowerKwAvg', avg);
+            // Handle Filters
+            filtersToTrack.forEach(filter => {
+                if (filter.sourceKey === dataKey) {
+                    let passes = true;
+                    if (filter.filterType === 'positive') passes = value >= 0;
+                    else if (filter.filterType === 'negative') passes = value <= 0;
+
+                    if (passes) {
+                        addDataPoint(filter.targetKey, value);
+                        setState(filter.targetKey, value);
+                    }
                 }
-            }
+            });
+
+            // Generic average handling
+            averagesToTrack.forEach(avg => {
+                if (avg.sourceKey === dataKey || filtersToTrack.some(f => f.targetKey === avg.sourceKey && f.sourceKey === dataKey)) {
+                    // Check if this avg relies on the filtered key or raw key
+                    const activeKey = (filtersToTrack.find(f => f.sourceKey === dataKey && f.targetKey === avg.sourceKey)) ? avg.sourceKey : dataKey;
+
+                    // If it matches either raw or the specific filtered key we just updated
+                    if (avg.sourceKey === activeKey) {
+                        const sourceData = historicalData[activeKey];
+                        if (sourceData && sourceData.length > 0) {
+                            let filteredData = sourceData;
+
+                            if (avg.config.samples) {
+                                filteredData = sourceData.slice(-avg.config.samples);
+                            } else if (avg.config.seconds) {
+                                const now = Date.now();
+                                const threshold = now - (avg.config.seconds * 1000);
+                                filteredData = sourceData.filter(p => p.x >= threshold);
+                            }
+
+                            if (filteredData.length > 0) {
+                                const sum = filteredData.reduce((acc, point) => acc + point.y, 0);
+                                const denominator = avg.config.samples || filteredData.length;
+                                const avgVal = sum / denominator;
+                                addDataPoint(avg.targetKey, avgVal);
+                                setState(avg.targetKey, avgVal);
+                            }
+                        }
+                    }
+                }
+            });
         });
     });
 
-    // Subscribe to derived keys to update their history
-    subscribe('evPowerKwAvg', (value) => {
-        addDataPoint('evPowerKwAvg', value);
-    });
-
-    subscribe('gasConsumptionSmoothed', (value) => {
-        addDataPoint('gasConsumptionSmoothed', value);
-    });
 
     // Pulse timer for smoothing logic that depends on time/samples
     let gasConsumptionSamples = 0;
@@ -202,7 +312,6 @@ function startGlobalDataCollector() {
         const multiplier = gasConsumptionSamples / 10;
         const smoothedGas = rawGas * multiplier;
 
-        // This will only trigger the 'gasConsumptionSmoothed' subscription if the value actually changes
         setState('gasConsumptionSmoothed', smoothedGas);
     }, 200);
 }
@@ -210,15 +319,6 @@ function startGlobalDataCollector() {
 startGlobalDataCollector();
 
 const graphController = {
-
-    colors: {
-        primary: '#00c3ff',
-        secondary: '#9affb5'
-    },
-
-    // Resolved colors for the current graph (updated by switchTo)
-    currentPrimary: '#00c3ff',
-    currentSecondary: '#9affb5',
 
     chartInstance: null,
     isInitialized: false,
@@ -406,6 +506,13 @@ const graphController = {
                         grid: {
                             drawOnChartArea: false,
                         }
+                    },
+                    y2: {
+                        id: 'y2',
+                        display: false,
+                        grid: {
+                            drawOnChartArea: false,
+                        }
                     }
                 }
             }
@@ -426,97 +533,161 @@ const graphController = {
                 const speedTimerValue = document.getElementById('timer-tooltip-value');
                 const LINE_OFFSET = 13;
 
-                if (primaryTooltipEl) primaryTooltipEl.style.opacity = 0;
-                if (primaryLineEl) primaryLineEl.style.opacity = 0;
-                if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'none';
-                if (secondaryLineEl) secondaryLineEl.style.display = 'none';
+                if (primaryTooltipEl) {
+                    primaryTooltipEl.style.display = 'none';
+                    primaryTooltipEl.style.opacity = '0';
+                }
+                if (primaryLineEl) primaryLineEl.style.opacity = '0';
+                if (secondaryTooltipEl) {
+                    secondaryTooltipEl.style.display = 'none';
+                    secondaryTooltipEl.style.opacity = '0';
+                }
+                if (secondaryLineEl) secondaryLineEl.style.opacity = '0';
 
+                // Find datasets for tooltips based on yAxisID
+                const primaryDS = graphInfo.datasets.find(ds => ds.yAxisID === 'y');
+                const secondaryDS = graphInfo.datasets.find(ds => ds.yAxisID === 'y1');
+
+                let activeValue, activeUnity;
+                let secValue, secUnity;
+
+                if (primaryDS) {
+                    const dataKey = primaryDS.avgInternalKey || primaryDS.filterInternalKey || primaryDS.dataKey;
+                    const val = getState(dataKey);
+
+                    if (graphInfo.id === 'gasConsumption' && primaryDS.idleKey && val <= 0) {
+                        activeValue = getState(primaryDS.idleKey);
+                        activeUnity = primaryDS.idleUnity;
+                    } else {
+                        activeValue = val;
+                        activeUnity = primaryDS.unity;
+                    }
+                }
+
+                if (secondaryDS) {
+                    const dataKey = secondaryDS.avgInternalKey || secondaryDS.filterInternalKey || secondaryDS.dataKey;
+                    secValue = getState(dataKey);
+                    secUnity = secondaryDS.unity;
+                }
+
+                const yAxis = this.chartInstance.scales.y;
+                const y1Axis = this.chartInstance.scales.y1;
+
+                if (primaryDS && primaryTooltipEl && primaryLineEl) {
+                    const activeVal = activeValue !== undefined ? activeValue : 0;
+                    const decimalPlaces = graphInfo.decimalPlaces !== undefined ? graphInfo.decimalPlaces : 1;
+                    const valueEl = primaryTooltipEl.querySelector('.tooltip-value');
+                    const unityEl = primaryTooltipEl.querySelector('.tooltip-unity');
+
+                    let dsColor = (primaryDS && primaryDS.lineColor) || '#ffffff';
+                    let txtColor = (primaryDS && (primaryDS.tooltipColor || primaryDS.lineColor)) || '#ffffff';
+
+                    if (primaryDS && primaryDS.positiveColor && activeVal >= 0) {
+                        dsColor = primaryDS.positiveColor;
+                        txtColor = primaryDS.tooltipColor || primaryDS.positiveColor;
+                    } else if (primaryDS && primaryDS.negativeColor && activeVal < 0) {
+                        dsColor = primaryDS.negativeColor;
+                        txtColor = primaryDS.tooltipColor || primaryDS.negativeColor;
+                    }
+
+                    primaryTooltipEl.style.display = 'flex';
+                    primaryTooltipEl.style.opacity = '1';
+
+                    valueEl.textContent = activeVal.toFixed(decimalPlaces);
+                    valueEl.style.color = txtColor;
+                    unityEl.style.color = txtColor;
+
+                    if (activeVal < 0 && graphInfo.id === 'gasConsumption') {
+                        valueEl.classList.add('negative');
+                    } else {
+                        valueEl.classList.remove('negative');
+                    }
+
+                    unityEl.textContent = activeUnity;
+                    primaryLineEl.style.top = `${yAxis.getPixelForValue(activeVal) + LINE_OFFSET}px`;
+                    primaryLineEl.style.backgroundColor = dsColor;
+                    primaryLineEl.style.opacity = 0.5;
+                }
+
+                if (secondaryDS && secondaryTooltipEl && secondaryLineEl) {
+                    const val = secValue !== undefined ? secValue : 0;
+                    const decimalPlaces = graphInfo.secondaryDecimalPlaces !== undefined ? graphInfo.secondaryDecimalPlaces : 1;
+                    const valueEl = secondaryTooltipEl.querySelector('.tooltip-value');
+                    const unityEl = secondaryTooltipEl.querySelector('.tooltip-unity');
+
+                    let dsColor = (secondaryDS && secondaryDS.lineColor) || '#00c3ff';
+                    let txtColor = (secondaryDS && (secondaryDS.tooltipColor || secondaryDS.lineColor)) || '#00c3ff';
+
+                    if (secondaryDS.positiveColor && val >= 0) {
+                        dsColor = secondaryDS.positiveColor;
+                        txtColor = secondaryDS.tooltipColor || secondaryDS.positiveColor;
+                    } else if (secondaryDS.negativeColor && val < 0) {
+                        dsColor = secondaryDS.negativeColor;
+                        txtColor = secondaryDS.tooltipColor || secondaryDS.negativeColor;
+                    }
+
+                    secondaryTooltipEl.style.display = 'flex';
+                    secondaryTooltipEl.style.opacity = '1';
+                    secondaryLineEl.style.display = 'block';
+
+                    valueEl.textContent = val.toFixed(decimalPlaces);
+                    unityEl.textContent = secUnity;
+
+                    valueEl.style.color = txtColor;
+                    unityEl.style.color = txtColor;
+
+                    const axis = (secondaryDS && secondaryDS.yAxisID === 'y1') ? y1Axis : yAxis;
+                    secondaryLineEl.style.top = `${axis.getPixelForValue(val) + LINE_OFFSET}px`;
+                    secondaryLineEl.style.backgroundColor = dsColor;
+                    secondaryLineEl.style.opacity = 0.5;
+                }
+
+                // Speed Timer / Chronometer Special Logic (only for carSpeed)
                 if (graphInfo.id === 'carSpeed') {
-                    if (secondaryTooltipEl) secondaryTooltipEl.style.display = 'flex';
-                    if (secondaryLineEl) secondaryLineEl.style.display = 'block';
-
-                    const dataset1Info = graphInfo.datasets[0];
-                    const dataset2Info = graphInfo.datasets[1];
-
-                    const value1 = getState(dataset1Info.dataKey);
-                    const value2 = getState(dataset2Info.dataKey);
-
-                    const yAxis = this.chartInstance.scales.y;
-                    const y1Axis = this.chartInstance.scales.y1;
-
-                    if (value1 !== undefined && primaryTooltipEl && primaryLineEl) {
-                        primaryTooltipEl.querySelector('.tooltip-value').textContent = value1.toFixed(dataset1Info.decimalPlaces || 1);
-                        primaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset1Info.unity;
-                        primaryLineEl.style.top = `${yAxis.getPixelForValue(value1) + LINE_OFFSET}px`;
-                        primaryLineEl.style.backgroundColor = this.currentPrimary;
-                        primaryTooltipEl.style.opacity = 1;
-                        primaryLineEl.style.opacity = 0.5;
-                    }
-
-                    if (value2 !== undefined && secondaryTooltipEl && secondaryLineEl) {
-                        secondaryTooltipEl.querySelector('.tooltip-value').textContent = value2.toFixed(dataset2Info.decimalPlaces || 1);
-                        secondaryTooltipEl.querySelector('.tooltip-unity').textContent = dataset2Info.unity;
-                        secondaryTooltipEl.querySelector('.tooltip-value').style.color = this.currentSecondary;
-                        secondaryTooltipEl.querySelector('.tooltip-unity').style.color = this.currentSecondary;
-                        secondaryLineEl.style.top = `${yAxis.getPixelForValue(value2) + LINE_OFFSET}px`;
-                        secondaryLineEl.style.backgroundColor = this.currentSecondary;
-                        secondaryTooltipEl.style.opacity = 1;
-                        secondaryLineEl.style.opacity = 0.5;
-                    }
-
                     const currentSpeed = getState('carSpeed') || 0.0;
                     const drivingMode = getState('drivingMode');
                     const acceleration = parseFloat(currentSpeed - this.lastCarSpeed) * (1000 / UI_UPDATE_INTERVAL);
                     const isFastAcceleration = acceleration >= (100 / ACCELERATION_THRESHOLD);
 
-                    // Chronometer Running Logic
                     if (this.isSpeedTimerRunning) {
                         const elapsedTime = (Date.now() - this.speedTimerStartTime) / 1000;
-
-
-                        // 1. Abort Conditions
                         if (elapsedTime > 15) {
                             this.triggerFlash('red');
                             this.setWarpAnimation(false);
                             this.setChronometer('stop');
-                        }
-
-                        // 2. Success Condition
-                        else if (currentSpeed >= 100) {
-
+                        } else if (currentSpeed >= 100) {
                             if (!this.last0To100Time) {
                                 this.last0To100Time = elapsedTime.toFixed(1);
                             }
                             if (speedTimerValue) speedTimerValue.textContent = `${this.last0To100Time}s`;
 
-                            // Trigger Flash and hold results for few secs
-                            this.triggerFlash('white');
-                            this.setChronometer('success_hold');
-                        }
+                            // Flash only in Sport mode
+                            if (drivingMode === 'Sport') {
+                                this.triggerFlash('white');
+                            }
 
-                        // 3. Reset if car has stopped
-                        else if (currentSpeed === 0) {
+                            this.setChronometer('success_hold');
+                        } else if (currentSpeed === 0) {
                             this.setWarpAnimation(false);
                             this.setChronometer('stop');
-                        }
-
-                        // 4. Update Condition
-                        else {
-                            // Update Timer (ensure its visible)
+                        } else {
                             if (speedTimerValue) speedTimerValue.textContent = `${elapsedTime.toFixed(1)}s`;
                             if (speedTimerTooltip && !speedTimerTooltip.classList.contains('visible')) {
                                 speedTimerTooltip.classList.add('visible');
                             }
-
-                            // Ensure warp is running if we are still accelerating
-                            if (acceleration > 0) {
+                            if (acceleration > 0 && drivingMode === 'Sport') {
                                 this.setWarpAnimation(true);
                                 if (this.warpTunnel) this.warpTunnel.setSpeed(currentSpeed);
                             }
                         }
+                    } else {
+                        if (currentSpeed === 0) {
+                            this.setChronometer('ready');
+                        } else if (isFastAcceleration && currentSpeed < 10 && currentSpeed > 1 && drivingMode === 'Sport') {
+                            this.setChronometer('start');
+                        }
                     }
 
-                    // Chronometer & Warp Tunnel Start Condition
                     const shouldWarp = this.lastCarSpeed === 0 && currentSpeed > 0 && isFastAcceleration && drivingMode === 'Sport';
                     if (shouldWarp) {
                         this.triggerFlash('orange');
@@ -528,66 +699,9 @@ const graphController = {
                     }
 
                     this.lastCarSpeed = currentSpeed;
-
-                } else {  // Other graphs
-                    let activeValue, activeUnity, activeDatasetIndex;
-                    let secValue, secUnity;
-
-                    // makes sure warp tunnel and speed timer are hidden
+                } else {
                     this.setWarpAnimation(false);
                     this.setChronometer('stop');
-
-                    if (graphInfo.id === 'gasConsumption' || graphInfo.id === 'evConsumption') {
-                        const mainDatasetInfo = graphInfo.datasets[0];
-                        activeValue = getState(mainDatasetInfo.dataKey);
-                        activeUnity = mainDatasetInfo.unity;
-                        activeDatasetIndex = 0;
-
-                        const secDatasetInfo = graphInfo.datasets[1];
-                        if (secDatasetInfo) {
-                            const runningValue = getState(secDatasetInfo.dataKey);
-                            const idleValue = secDatasetInfo.idleKey ? getState(secDatasetInfo.idleKey) : undefined;
-
-                            if (idleValue !== undefined && runningValue <= 0) {
-                                secValue = idleValue;
-                                secUnity = secDatasetInfo.idleUnity;
-                            } else {
-                                secValue = runningValue;
-                                secUnity = secDatasetInfo.unity;
-                            }
-                        }
-                    } else {
-                        const mainDatasetInfo = graphInfo.datasets[0];
-                        activeValue = getState(mainDatasetInfo.dataKey);
-                        activeUnity = mainDatasetInfo.unity;
-                        activeDatasetIndex = 0;
-                    }
-
-                    if (activeValue !== undefined) {
-                        const yAxis = activeDatasetIndex === 0 ? this.chartInstance.scales.y : this.chartInstance.scales.y1;
-                        primaryTooltipEl.querySelector('.tooltip-value').textContent = activeValue.toFixed(graphInfo.decimalPlaces || 0);
-                        primaryTooltipEl.querySelector('.tooltip-unity').textContent = activeUnity;
-                        primaryLineEl.style.top = `${yAxis.getPixelForValue(activeValue) + LINE_OFFSET}px`;
-                        primaryLineEl.style.backgroundColor = activeDatasetIndex === 0 ? this.currentPrimary : this.currentSecondary;
-                        primaryTooltipEl.style.opacity = 1;
-                        primaryLineEl.style.opacity = 0.5;
-                    }
-
-                    if (secValue !== undefined && secondaryTooltipEl && secondaryLineEl) {
-                        const secDatasetInfo = graphInfo.datasets[1];
-                        const secAxis = (secDatasetInfo && secDatasetInfo.yAxisID === 'y1') ? this.chartInstance.scales.y1 : this.chartInstance.scales.y;
-
-                        secondaryTooltipEl.querySelector('.tooltip-value').textContent = secValue.toFixed(graphInfo.secondaryDecimalPlaces !== undefined ? graphInfo.secondaryDecimalPlaces : (graphInfo.decimalPlaces || 0));
-                        secondaryTooltipEl.querySelector('.tooltip-unity').textContent = secUnity;
-                        secondaryTooltipEl.querySelector('.tooltip-value').style.color = this.currentSecondary;
-                        secondaryTooltipEl.querySelector('.tooltip-unity').style.color = this.currentSecondary;
-                        secondaryLineEl.style.top = `${secAxis.getPixelForValue(secValue) + LINE_OFFSET}px`;
-                        secondaryLineEl.style.backgroundColor = this.currentSecondary;
-                        secondaryTooltipEl.style.opacity = 1;
-                        secondaryLineEl.style.opacity = 0.5;
-                        secondaryTooltipEl.style.display = 'flex';
-                        secondaryLineEl.style.display = 'block';
-                    }
                 }
                 this.chartInstance.update('quiet');
 
@@ -706,7 +820,7 @@ const graphController = {
         if (!graphInfo) return;
 
         const scales = this.chartInstance.options.scales;
-        const hasSecondaryAxis = graphInfo.datasets[1] && graphInfo.datasets[1].dataKey;
+        const hasSecondaryAxis = graphInfo.datasets.some(ds => ds.yAxisID === 'y1');
         scales.y1.display = hasSecondaryAxis;
 
         const bulletContainer = document.querySelector('.graph-bullet-container');
@@ -724,63 +838,70 @@ const graphController = {
             }
         }
 
-
-        if (graphId === 'gasConsumption') {
-            scales.y.min = -43;
-            scales.y.max = 120;
-            scales.y.ticks.stepSize = 15;
-            scales.y.ticks.color = this.colors.secondary + 'B3';
-            scales.y1.min = -10;
-            scales.y1.max = 30;
-            scales.y1.ticks.stepSize = 10;
-            scales.y1.ticks.color = this.colors.primary + 'B3';
-        } else if (graphId === 'carSpeed') {
-            scales.y.min = -72;
-            scales.y.max = 200;
-            scales.y.ticks.stepSize = 40;
-            scales.y1.min = -10;
-            scales.y1.max = 30;
-            scales.y1.ticks.stepSize = 10;
-            scales.y1.ticks.color = this.colors.secondary + 'B3';
-        } else if (graphId === 'evConsumption') {
-            scales.y.min = -100;
-            scales.y.max = 140;
-            scales.y.ticks.stepSize = 50;
-            scales.y1.min = -100;
-            scales.y1.max = 140;
-            scales.y1.ticks.stepSize = 50;
+        // Apply axis configurations from graphList
+        if (graphInfo.yAxis) {
+            scales.y.min = graphInfo.yAxis.min;
+            scales.y.max = graphInfo.yAxis.max;
+            scales.y.ticks.stepSize = graphInfo.yAxis.stepSize;
+        }
+        if (graphInfo.y1Axis) {
+            scales.y1.min = graphInfo.y1Axis.min;
+            scales.y1.max = graphInfo.y1Axis.max;
+            scales.y1.ticks.stepSize = graphInfo.y1Axis.stepSize;
         }
 
-        // Resolve colors: per-graph overrides take priority over global defaults
-        const primary = graphInfo.primaryColor || this.colors.primary;
-        const secondary = graphInfo.secondaryColor || this.colors.secondary;
-        this.currentPrimary = primary;
-        this.currentSecondary = secondary;
+        // Auto-set axis tick colors based on the first dataset assigned to each axis
+        const yDS = graphInfo.datasets.find(ds => ds.yAxisID === 'y');
+        if (yDS && yDS.lineColor) scales.y.ticks.color = yDS.lineColor + 'B3';
+
+        const y1DS = graphInfo.datasets.find(ds => ds.yAxisID === 'y1');
+        if (y1DS && y1DS.lineColor) scales.y1.ticks.color = y1DS.lineColor + 'B3';
 
         const newDatasets = [];
-        const datasetColors = [primary, secondary];
 
-        // Update axis tick colors to match the resolved palette
-        scales.y.ticks.color = primary + 'B3';
+        graphInfo.datasets.forEach((datasetInfo) => {
+            const dataKey = datasetInfo.avgInternalKey || datasetInfo.filterInternalKey || datasetInfo.dataKey;
+            if (dataKey) {
+                let color = datasetInfo.lineColor || '#ffffff';
 
-        graphInfo.datasets.forEach((datasetInfo, index) => {
-            if (datasetInfo.dataKey) {
-                const color = datasetColors[index];
+                if (datasetInfo.yAxisID === 'y2' && datasetInfo.followAxis) {
+                    const followDS = graphInfo.datasets.find(ds => ds.yAxisID === datasetInfo.followAxis);
+                    if (followDS && followDS.lineColor && !datasetInfo.lineColor) {
+                        color = followDS.lineColor;
+                    }
+                    // Sync Y2 scale with following axis
+                    const followScale = datasetInfo.followAxis === 'y1' ? scales.y1 : scales.y;
+                    scales.y2.min = followScale.min;
+                    scales.y2.max = followScale.max;
+                }
+
                 const ds = {
                     label: datasetInfo.label,
-                    data: historicalData[datasetInfo.dataKey] || [],
+                    data: historicalData[dataKey] || [],
                     yAxisID: datasetInfo.yAxisID,
                     borderColor: color,
-                    backgroundColor: color + (index === 0 ? '26' : '1A'),
+                    backgroundColor: hexToRgba(color, datasetInfo.yAxisID === 'y' ? 0.15 : 0.1),
                     borderWidth: 2,
                     pointRadius: 0,
-                    fill: true,
+                    fill: datasetInfo.fill !== undefined ? datasetInfo.fill : (datasetInfo.yAxisID === 'y' || datasetInfo.yAxisID === 'y1'),
                     tension: 0.3,
                 };
-                if (graphId === 'evConsumption' && index === 0) {
+
+                // Add any other properties from config directly
+                Object.keys(datasetInfo).forEach(key => {
+                    if (!['label', 'dataKey', 'type', 'avgConfig', 'unity', 'yAxisID', 'lineColor', 'fill', 'avgInternalKey', 'followAxis', 'idleKey', 'idleUnity', 'tooltipColor'].includes(key)) {
+                        ds[key] = datasetInfo[key];
+                    }
+                });
+
+                // Conditional coloring based on positive/negative properties
+                if (datasetInfo.positiveColor || datasetInfo.negativeColor) {
+                    const posColor = datasetInfo.positiveColor || datasetInfo.lineColor || color;
+                    const negColor = datasetInfo.negativeColor || datasetInfo.lineColor || color;
+
                     ds.segment = {
-                        borderColor: ctx => ctx.p0.parsed.y < 0 ? '#00ff88' : color,
-                        backgroundColor: ctx => ctx.p0.parsed.y < 0 ? 'rgba(0, 255, 136, 0.15)' : color + '26'
+                        borderColor: ctx => ctx.p0.parsed.y < 0 ? negColor : posColor,
+                        backgroundColor: ctx => ctx.p0.parsed.y < 0 ? hexToRgba(negColor, 0.15) : hexToRgba(posColor, 0.15)
                     };
                 }
                 newDatasets.push(ds);
@@ -788,6 +909,7 @@ const graphController = {
         });
 
         this.chartInstance.data.datasets = newDatasets;
+        this.chartInstance.update();
 
         const tooltipEl = this.chartInstance.canvas.parentNode.querySelector('.dynamic-tooltip');
         if (tooltipEl) tooltipEl.style.opacity = 0;

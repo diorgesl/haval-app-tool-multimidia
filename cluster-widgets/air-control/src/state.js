@@ -130,6 +130,6 @@ const updateInstantConsumption = () => {
 };
 
 subscribe('evPowerKw', updateInstantConsumption);
-subscribe('carSpeed', updateInstantConsumption);
+//subscribe('carSpeed', updateInstantConsumption);
 
 export { stateManager, getState, setState, subscribe, state };

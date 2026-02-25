@@ -271,10 +271,11 @@ window.simulationInterval = setInterval(() => {
     const powerFactor = Math.round(lastValue * 2) - 100;
     setState('evPowerFactor', powerFactor * 2);
     // Simulate EV power in kW: ±120 kW range (for graph)
-    setState('evPowerKw', Math.round(powerFactor * 3));
+    if (powerFactor > 0) setState('evPowerKw', Math.round(powerFactor * 4 * Math.abs(currentSpeed) / 100));
+    else setState('evPowerKw', Math.round(powerFactor));
     setState('lastRegenValue', Math.round(lastValue));
 
-}, SIMULATION_INTERVAL * 2);
+}, SIMULATION_INTERVAL);
 
 setTimeout(() => {
     simulationPhase = 'accelerating';
