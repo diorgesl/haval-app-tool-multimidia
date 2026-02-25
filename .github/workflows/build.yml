@@ -3,6 +3,10 @@ name: Build and Release APK
 on:
   push:
     branches: [master, preview]
+    paths-ignore:
+      - "DOCS/**"
+      - "docs/**"
+      - "**/*.md"
   workflow_dispatch:
     inputs:
       version:
