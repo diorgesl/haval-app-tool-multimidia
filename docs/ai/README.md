@@ -157,3 +157,13 @@ cluster-widgets/air-control/               # Fonte do frontend JS (compilado →
 | [projetores.md](projetores.md) | ProjectorManager, displays, WebView, JS bridge, como criar novas telas |
 | [configuracoes.md](configuracoes.md) | SharedPreferences, PreferenceKeys, como adicionar novas configurações |
 | [features.md](features.md) | Lista de todas as features/opções da tela de configuração |
+
+## Compilação
+
+Para compilar o projeto, certifique-se de configurar a variável de ambiente `JAVA_HOME` corretamente para o JDK 21.
+
+Exemplo:
+```bash
+export JAVA_HOME=/Users/diorgera/.antigravity/extensions/redhat.java-1.52.0-darwin-arm64/jre/21.0.9-macosx-aarch64
+./gradlew assembleDebug
+```

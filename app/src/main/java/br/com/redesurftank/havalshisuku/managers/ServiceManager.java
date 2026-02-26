@@ -1107,10 +1107,7 @@ public class ServiceManager {
                         if (!isMaxAcActive)
                             enableMaxAcOn();
                     }
-                    if (sharedPreferences
-                            .getBoolean(SharedPreferencesKeys.ENABLE_OPEN_SUNROOF_CURTAIN_ON_START.getKey(), false)) {
-                        autoOpenSunroofCurtain();
-                    }
+                    // Sunroof curtain feature removed
                     // Feature 2: Auto seat heating on cold start
                     if (sharedPreferences.getBoolean(SharedPreferencesKeys.ENABLE_AUTO_SEAT_HEATING.getKey(), false)) {
                         try {
@@ -1294,54 +1291,6 @@ public class ServiceManager {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error opening shade screens", e);
-        }
-    }
-
-    private void autoOpenSunroofCurtain() {
-        Calendar now = Calendar.getInstance();
-        float outsideTemp = 99;
-        int currentHour = now.get(Calendar.HOUR_OF_DAY);
-        int currentMinute = now.get(Calendar.MINUTE);
-        int currentTime = currentHour * 60 + currentMinute;
-
-        int startHour = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_START_HOUR.getKey(), 18);
-        int startMinute = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_START_MINUTE.getKey(), 0);
-        int startTime = startHour * 60 + startMinute;
-
-        int endHour = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_END_HOUR.getKey(), 9);
-        int endMinute = sharedPreferences.getInt(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_END_MINUTE.getKey(), 0);
-        int endTime = endHour * 60 + endMinute;
-
-        boolean isTimeInRange = false;
-        if (startTime < endTime) {
-            isTimeInRange = currentTime >= startTime && currentTime < endTime;
-        } else {
-            // Wraps around midnight
-            isTimeInRange = currentTime >= startTime || currentTime < endTime;
-        }
-
-        float maxTemp = sharedPreferences.getFloat(SharedPreferencesKeys.OPEN_SUNROOF_CURTAIN_MAX_TEMP.getKey(), -1f);
-        if (maxTemp != -1f) {
-            String outsideTempStr = getUpdatedData(CarConstants.CAR_BASIC_OUTSIDE_TEMP.getValue());
-            if (outsideTempStr != null) {
-                try {
-                    outsideTemp = Float.parseFloat(outsideTempStr);
-                } catch (NumberFormatException e) {
-                    Log.e(TAG, "Error parsing outside temp for curtain check. Aborting curtain opening. ", e);
-                    return;
-                }
-            }
-        }
-
-        if ((isTimeInRange) || (outsideTemp <= maxTemp)) {
-            // Delay slightly to ensure services are fully ready or just triggering command
-            backgroundHandler.postDelayed(this::openSunRoofShade, 2000);
-        } else {
-            if (!isTimeInRange) {
-                Log.d(TAG, "Current time " + currentHour + ":" + currentMinute + " not in range for opening curtain");
-            } else if (outsideTemp > maxTemp) {
-                Log.w(TAG, "Outside temp " + outsideTemp + " > max configured " + maxTemp + ", not opening curtain");
-            }
         }
     }
 
